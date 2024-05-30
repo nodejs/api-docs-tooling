@@ -3,7 +3,7 @@
   <a href="https://nodejs.org">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://nodejs.org/static/logos/nodejsLight.svg">
-      <img src="https://nodejs.org/static/logos/nodejsDark.svg" width="200px">
+      <img src="https://nodejs.org/static/logos/nodejsDark.svg" width="200px" alt="Node.js Logo">
     </picture>
   </a>
 </p>
