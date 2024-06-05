@@ -16,4 +16,7 @@
   <a title="MIT License" href="LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
   </a>
+   <a title="scorecard" href="https://securityscorecards.dev/viewer/?uri=github.com/nodejs/api-docs-tooling">
+    <img src="https://api.securityscorecards.dev/projects/github.com/nodejs/api-docs-tooling/badge" alt="api-docs-tooling scorecard badge" />
+  </a>
 </p>
