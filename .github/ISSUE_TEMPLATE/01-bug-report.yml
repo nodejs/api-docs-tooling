@@ -1,4 +1,4 @@
-name: Report a Technical/Visual Issue on the Node.js API Docs 
+name: Report a Technical/Visual Issue on the Node.js API Docs
 description: 'Is something not working as expected? Did you encounter a glitch or a bug with the docs?'
 labels: [bug]
 body:
@@ -48,4 +48,3 @@ body:
         4. If possible, images or videos are welcome.
     validations:
       required: true
-
