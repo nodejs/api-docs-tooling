@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: meta
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: '/'
+    versioning-strategy: increase
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: meta
+    groups:
+      fromat:
+        patterns:
+          - 'prettier'
+      lint:
+        patterns:
+          - 'eslint'
+          - 'eslint-*'
+          - '@eslint/*'
+          - 'globals'
+          - 'stylelint-*'
+    open-pull-requests-limit: 10
