@@ -1,5 +1,10 @@
 import { VFile } from 'vfile';
 
+export interface StabilityIndexMetadataEntry {
+  index: number;
+  description: string;
+}
+
 export interface HeadingMetadataEntry {
   type:
     | 'event'
@@ -36,6 +41,7 @@ export interface ApiDocRawMetadataEntry {
   source_link?: string;
   updates?: ApiDocMetadataUpdate[];
   changes?: ApiDocMetadataChange[];
+  stability_index?: StabilityIndexMetadataEntry;
 }
 
 export interface ApiDocNavigationEntry {
@@ -51,6 +57,8 @@ export interface ApiDocNavigationEntry {
   changes: ApiDocMetadataChange[];
   // The parsed Markdown content of a Navigation Entry
   heading: HeadingMetadataEntry;
+  // The API Doc Metadata Entry Stability Index if exists
+  stability: StabilityIndexMetadataEntry | undefined;
 }
 
 export interface ApiDocMetadataEntry extends VFile {

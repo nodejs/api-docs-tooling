@@ -10,9 +10,6 @@ import { selectAll } from 'unist-util-select';
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
 
-import { transformNodesToRaw } from './utils/unist.mjs';
-import { parseHeadingIntoMetadata } from './utils/parser.mjs';
-
 // Creates a Remark Parser with all Plugins needed for our API Docs
 const getRemarkParser = () => remark().use(remarkGfm);
 
@@ -21,8 +18,6 @@ const getRemarkParser = () => remark().use(remarkGfm);
  * (this requires already parsed Node.js release data, the API doc file to be loaded, and etc)
  */
 const createParser = () => {
-  const { getReferenceLink, parseYAML } = createQueries();
-
   const { newMetadataEntry, getNavigationEntries: getNavigation } =
     createMetadata();
 
@@ -37,14 +32,11 @@ const createParser = () => {
       return tree => {
         const definitions = selectAll('definition', tree);
 
+        const { updateLinkReference } = createQueries(undefined, definitions);
+
         // Handles Link References
         visit(tree, createQueries.UNIST_TESTS.isLinkReference, node => {
-          const definition = definitions.find(
-            ({ identifier }) => identifier === node.identifier
-          );
-
-          node.type = 'link';
-          node.url = definition.url;
+          updateLinkReference(node);
         });
 
         // Removes the Definitions from the Tree
@@ -62,48 +54,45 @@ const createParser = () => {
     const parsedSections = markdownSections.map(async sectionSource => {
       const apiEntryMetadata = newMetadataEntry();
 
+      const {
+        addYAMLMetadata,
+        updateTypeToReferenceLink,
+        addHeadingMetadata,
+        updateMarkdownLink,
+        addStabilityIndexMeta,
+      } = createQueries(apiEntryMetadata);
+
       const apiDocSectionParser = getRemarkParser().use(() => {
-        return (tree, section) => {
+        return tree => {
           // Handles YAML Metadata
           visit(tree, createQueries.UNIST_TESTS.isYamlNode, node => {
-            const metadata = parseYAML(node.value);
-
-            apiEntryMetadata.setProperties(metadata);
+            addYAMLMetadata(node);
 
             remove(tree, node);
           });
 
           // Handles Markdown Headings
           visit(tree, createQueries.UNIST_TESTS.isHeadingNode, node => {
-            const heading = transformNodesToRaw(node.children, section);
+            addHeadingMetadata(node);
 
-            const parsedHeading = parseHeadingIntoMetadata(
-              heading,
-              node.depth + 1
-            );
+            remove(tree, node);
+          });
 
-            apiEntryMetadata.setHeading(parsedHeading);
+          // Handles Stability Indexes
+          visit(tree, createQueries.UNIST_TESTS.isStabilityIndex, node => {
+            addStabilityIndexMeta(node);
 
             remove(tree, node);
           });
 
           // Handles API Type References transformation into Links
           visit(tree, createQueries.UNIST_TESTS.isTextWithType, node => {
-            const parsedReference = node.value.replace(
-              createQueries.QUERIES.normalizeTypes,
-              getReferenceLink
-            );
-
-            node.type = 'html';
-            node.value = parsedReference;
+            updateTypeToReferenceLink(node);
           });
 
           // Handles Normalisation of Markdown URLs
           visit(tree, createQueries.UNIST_TESTS.isMarkdownUrl, node => {
-            node.url = node.url.replace(
-              createQueries.QUERIES.markdownUrl,
-              (_, filename, hash = '') => `${filename}.html${hash}`
-            );
+            updateMarkdownLink(node);
           });
         };
       });

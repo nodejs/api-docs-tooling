@@ -43,14 +43,13 @@ const createMetadata = () => {
         /**
          * Set the Metadata (from YAML if exists) properties to the current Metadata Entry
          *
-         * @param {import('./types.d.ts').ApiDocRawMetadataEntry} properties Extra Metadata Properties to be defined
+         * @param {Partial<import('./types.d.ts').ApiDocRawMetadataEntry>} properties Extra Metadata Properties to be defined
          */
-        setProperties: properties => {
-          internalMetadata.properties = properties;
-
-          if (properties.type) {
-            internalMetadata.type = properties.type;
-          }
+        updateProperties: properties => {
+          internalMetadata.properties = {
+            ...internalMetadata.properties,
+            ...properties,
+          };
         },
         /**
          * Generates Navigation Entries for the current Navigation Creator
@@ -68,20 +67,21 @@ const createMetadata = () => {
           const slugHash = `#${stringToSlug(internalMetadata.heading.text)}`;
 
           const {
-            type: yamlType,
-            name: yamlName,
+            type: yaml_type,
+            name: yaml_name,
             source_link,
+            stability_index,
             updates = [],
             changes = [],
           } = internalMetadata.properties;
 
           // We override the type of the heading if we have a YAML type
           internalMetadata.heading.type =
-            yamlType || internalMetadata.heading.type;
+            yaml_type || internalMetadata.heading.type;
 
           const navigationEntry = {
             // The API file Basename (without the Extension)
-            api: yamlName || apiDoc,
+            api: yaml_name || apiDoc,
             // The path/slug of the API Section
             slug: `${apiDoc}.html${slugHash}`,
             // The Source Link of said API Section
@@ -92,6 +92,8 @@ const createMetadata = () => {
             changes,
             // The Heading Metadata
             heading: internalMetadata.heading,
+            // The Stability Index of the API Section
+            stability: stability_index,
           };
 
           // If this metadata type matches certain predefined types

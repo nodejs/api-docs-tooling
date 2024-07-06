@@ -1,37 +1,120 @@
 'use strict';
 
 import * as parserUtils from './utils/parser.mjs';
+import * as unistUtils from './utils/unist.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
  * of metadata and content metadata manipulation within an API Doc
+ *
+ * @param {ReturnType<ReturnType<import('./metadata.mjs')['default']>['newMetadataEntry']>} apiEntryMetadata The API Entry Metadata
+ * @param {Array<import('unist').Node>} definitions The Definitions of the API Doc
  */
-const createQueries = () => {
-  /**
-   * Transforms plain reference to Web/JavaScript/Node.js types
-   * into Markdown links containing the proper reference to said types
-   *
-   * @param {string} source The type source
-   */
-  const getReferenceLink = source =>
-    parserUtils.transformTypeToReferenceLink(source);
-
+const createQueries = (apiEntryMetadata = undefined, definitions = []) => {
   /**
    * Sanitizes the YAML source by returning the inner YAML content
-   * and then parsing it into an API Metadata object
+   * and then parsing it into an API Metadata object and updating the current Metadata
    *
-   * @param {string} yamlString The YAML Code Block
+   * @param {import('unist').Node} node The YAML Node
    */
-  const parseYAML = yamlString => {
-    const sanitizedString = yamlString.replace(
+  const addYAMLMetadata = node => {
+    const sanitizedString = node.value.replace(
       createQueries.QUERIES.yamlInnerContent,
       (_, __, inner) => inner
     );
 
-    return parserUtils.parseYAMLIntoMetadata(sanitizedString);
+    const metadata = parserUtils.parseYAMLIntoMetadata(sanitizedString);
+
+    apiEntryMetadata.updateProperties(metadata);
   };
 
-  return { getReferenceLink, parseYAML };
+  /**
+   * Transforms plain reference to Web/JavaScript/Node.js types
+   * into Markdown links containing the proper reference to said types
+   *
+   * @param {import('unist').Node} node The Type Node
+   */
+  const updateTypeToReferenceLink = node => {
+    const parsedReference = node.value.replace(
+      createQueries.QUERIES.normalizeTypes,
+      parserUtils.transformTypeToReferenceLink
+    );
+
+    node.type = 'html';
+    node.value = parsedReference;
+  };
+
+  /**
+   * Parse a Heading Node into Metadata and updates the current Metadata
+   *
+   * @param {import('unist').Node} node The Heading Node
+   */
+  const addHeadingMetadata = node => {
+    const heading = unistUtils.transformNodesToString(node.children);
+
+    const parsedHeading = parserUtils.parseHeadingIntoMetadata(
+      heading,
+      node.depth + 1
+    );
+
+    apiEntryMetadata.setHeading(parsedHeading);
+  };
+
+  /**
+   * Updates a Markdown Link into a HTML Link for API Docs
+   *
+   * @param {import('unist').Node} node Thead Link Node
+   */
+  const updateMarkdownLink = node => {
+    node.url = node.url.replace(
+      createQueries.QUERIES.markdownUrl,
+      (_, filename, hash = '') => `${filename}.html${hash}`
+    );
+  };
+
+  /**
+   * Updates a Markdown Link Reference into an actual Link to the Definition
+   *
+   * @param {import('unist').Node} node Thead Link Reference Node
+   */
+  const updateLinkReference = node => {
+    const definition = definitions.find(
+      ({ identifier }) => identifier === node.identifier
+    );
+
+    node.type = 'link';
+    node.url = definition.url;
+  };
+
+  /**
+   * Parses a Stability Index Entry and updates the current Metadata
+   *
+   * @param {import('unist').Node} node Thead Link Reference Node
+   */
+  const addStabilityIndexMeta = node => {
+    const stabilityIndexString = unistUtils.transformNodesToString(
+      node.children[0].children
+    );
+
+    const stabilityIndex =
+      createQueries.QUERIES.stabilityIndex.exec(stabilityIndexString);
+
+    apiEntryMetadata.updateProperties({
+      stability_index: {
+        index: Number(stabilityIndex[1]),
+        description: stabilityIndex[2].replaceAll('\n', ' ').trim(),
+      },
+    });
+  };
+
+  return {
+    addYAMLMetadata,
+    updateTypeToReferenceLink,
+    addHeadingMetadata,
+    updateMarkdownLink,
+    updateLinkReference,
+    addStabilityIndexMeta,
+  };
 };
 
 // This defines the actual REGEX Queries
@@ -41,9 +124,8 @@ createQueries.QUERIES = {
   // ReGeX to match the {Type}<Type> (Structure Type metadatas)
   // eslint-disable-next-line no-useless-escape
   normalizeTypes: /(\{|<)(?! )[a-z0-9.| \n\[\]\\]+(?! )(\}|>)/gim,
-  // ReGeX for replacing the Stability Index with a MDX Component
-  // @TODO: Only used for the MDX Generator
-  stabilityIndex: /^> (.*:)\s*(\d)([\s\S]*)/,
+  // ReGeX for handling Stability Indexes Metadata
+  stabilityIndex: /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--(YAML| YAML)?([\s\S]*?)-->/,
 };
@@ -59,6 +141,11 @@ createQueries.UNIST_TESTS = {
     type === 'heading' && depth >= 1 && depth <= 6,
   isLinkReference: ({ type, identifier }) =>
     type === 'linkReference' && !!identifier,
+  isStabilityIndex: ({ type, children }) =>
+    type === 'blockquote' &&
+    createQueries.QUERIES.stabilityIndex.test(
+      unistUtils.transformNodesToString(children)
+    ),
 };
 
 export default createQueries;
