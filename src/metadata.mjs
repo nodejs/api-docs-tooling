@@ -1,10 +1,7 @@
 'use strict';
 
-import {
-  DOC_API_YAML_KEYS_NAVIGATION,
-  DOC_WEB_BASE_PATH,
-} from './constants.mjs';
-import { stripHeadingPrefix, transformTitleToSlug } from './utils/parser.mjs';
+import { DOC_API_YAML_KEYS_NAVIGATION } from './constants.mjs';
+import { stringToSlug } from './utils/parser.mjs';
 
 /**
  * This method allows us to handle creation of Navigation Entries
@@ -12,51 +9,41 @@ import { stripHeadingPrefix, transformTitleToSlug } from './utils/parser.mjs';
  *
  * This can be used disconnected with a specific file, and can be aggregated
  * to many files to create a full Navigation for a given version of the API
- *
- * @param {import('./types').ApiDocMetadata}
  */
-const createMetadata = ({ version, name }) => {
+const createMetadata = () => {
   const navigationMetadataEntries = [];
 
   return {
     /**
      * Retrieves all Navigation Entries generated in a said file
      *
-     * @returns {Array<import('./types').ApiDocMetadataEntry>}
+     * @returns {Array<import('./types').ApiDocNavigationEntry>}
      */
     getNavigationEntries: () => navigationMetadataEntries,
     newMetadataEntry: () => {
       const internalMetadata = {
-        type: undefined,
-        heading: undefined,
+        heading: {
+          text: undefined,
+          type: undefined,
+          name: undefined,
+          depth: -1,
+        },
         properties: {},
       };
 
       return {
         /**
-         * The way how this works is that once we're iterating over each Section within a file
-         * Section = a Paragraph (or in other words chunks of text separated by two line breaks)
-         * We use our utilities to identify the type of the Section if possible
-         * And attempts to find pieces of either the current section or previous sections that are Headings.
-         * Within the current Doc specification the Type Metadata could be at least two leves after the heading
-         *
-         * @param {string} type The API YAML Metadata Type to add to the iteration
-         */
-        setType: type => {
-          internalMetadata.type = type;
-        },
-        /**
          * Set the Heading Line of a given Metadata
          *
-         * @param {Array<string>} lines The current Heading Lines
+         * @param {import('./types.d.ts').HeadingMetadataEntry} heading The new Heading Metadata
          */
-        setHeading: lines => {
-          internalMetadata.heading = lines.split('\n', 1)[0];
+        setHeading: heading => {
+          internalMetadata.heading = heading;
         },
         /**
          * Set the Metadata (from YAML if exists) properties to the current Metadata Entry
          *
-         * @param {Record<string, string>} properties Extra Metadata Properties to be defined
+         * @param {import('./types.d.ts').ApiDocRawMetadataEntry} properties Extra Metadata Properties to be defined
          */
         setProperties: properties => {
           internalMetadata.properties = properties;
@@ -69,61 +56,56 @@ const createMetadata = ({ version, name }) => {
          * Generates Navigation Entries for the current Navigation Creator
          * and pushes them to the Navigation Entries for the current API file
          *
-         * @param {string} content The content of the current Metadata Entry
+         * @param {string} apiDoc The name of the API Doc
+         * @param {import('vfile').VFile} section The content of the current Metadata Entry
          * @returns {import('./types').ApiDocMetadataEntry} The locally created Metadata Entries
          */
-        create: content => {
-          // We want to replace any prefix the Heading might have
-          const title = stripHeadingPrefix(internalMetadata.heading);
-
+        create: (apiDoc, section) => {
           // This is the ID of a certain Navigation Entry, which allows us to anchor
           // a certain navigation section to a page ad the exact point of the page (scroll)
           // This is useful for classes, globals and other type of YAML entries, as they reside
           // within a module (page) and we want to link to them directly
-          // If the YAML entry is a "module" (aka an API doc file), we don't want to add a hash
-          // as the module starts within the page itself
-          const slugHash =
-            internalMetadata.type !== 'module'
-              ? `#${transformTitleToSlug(title)}`
-              : '';
+          const slugHash = `#${stringToSlug(internalMetadata.heading.text)}`;
 
           const {
             type: yamlType,
             name: yamlName,
             source_link,
-            update,
+            updates = [],
             changes = [],
           } = internalMetadata.properties;
 
-          const metadataEntry = {
-            // The unique key of the API Section
-            key: `${name}${slugHash}`,
-            // The metadata type of the API Section
-            type: yamlType || internalMetadata.type,
-            // The API file name
-            name: yamlName || name,
+          // We override the type of the heading if we have a YAML type
+          internalMetadata.heading.type =
+            yamlType || internalMetadata.heading.type;
+
+          const navigationEntry = {
+            // The API file Basename (without the Extension)
+            api: yamlName || apiDoc,
             // The path/slug of the API Section
-            slug: `${DOC_WEB_BASE_PATH}${version}/${name}.html${slugHash}`,
-            // Sanitizes the Heading by replacing certain characters
-            // and if the heading has parentheses, uses the portion before the parenthesis
-            title: title.split('(')[0].replace(/[^\w\- ]+/g, ''),
+            slug: `${apiDoc}.html${slugHash}`,
             // The Source Link of said API Section
-            source_link,
+            sourceLink: source_link,
             // The latest update to an API Section
-            update,
+            updates,
             // The full-changeset to an API Section
             changes,
-            // The Content of an API Section
-            content,
+            // The Heading Metadata
+            heading: internalMetadata.heading,
           };
 
           // If this metadata type matches certain predefined types
           // We include it as a Navigation Entry for this API file
-          if (DOC_API_YAML_KEYS_NAVIGATION.includes(metadataEntry.type)) {
-            navigationMetadataEntries.push(metadataEntry);
+          if (DOC_API_YAML_KEYS_NAVIGATION.includes(navigationEntry.type)) {
+            navigationMetadataEntries.push(navigationEntry);
           }
 
-          return metadataEntry;
+          // A metadata entry is all the metadata we have about a certain API Section
+          // with the content being a VFile (Virtual File) containing the Markdown content
+          section.data = navigationEntry;
+
+          // Returns the updated VFile with the extra Metadata
+          return section;
         },
       };
     },

@@ -5,10 +5,8 @@ import * as parserUtils from './utils/parser.mjs';
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
  * of metadata and content metadata manipulation within an API Doc
- *
- * @param {import('./types.d.ts').ApiDocMetadata} fileMetadata The current top-level API metadata
  */
-const createQueries = fileMetadata => {
+const createQueries = () => {
   /**
    * Transforms plain reference to Web/JavaScript/Node.js types
    * into Markdown links containing the proper reference to said types
@@ -16,35 +14,7 @@ const createQueries = fileMetadata => {
    * @param {string} source The type source
    */
   const getReferenceLink = source =>
-    parserUtils.transformTypeToReferenceLink(fileMetadata, source);
-
-  /**
-   * Retrieves the Heading Type of a Sub Heading
-   *
-   * @param {string} heading The Heading Inner Content
-   * @param {number} depth The Heading Depth
-   */
-  const getHeadingType = (heading, depth) => {
-    if (depth === 1) {
-      return 'module';
-    }
-
-    if (depth >= 2 && depth <= 4) {
-      if (heading.startsWith('Class:')) {
-        return 'class';
-      }
-
-      if (heading.startsWith('Event:')) {
-        return 'event';
-      }
-
-      if (heading.startsWith('Static method:')) {
-        return 'classMethod';
-      }
-
-      return heading.includes('(') ? 'method' : 'property';
-    }
-  };
+    parserUtils.transformTypeToReferenceLink(source);
 
   /**
    * Sanitizes the YAML source by returning the inner YAML content
@@ -61,13 +31,13 @@ const createQueries = fileMetadata => {
     return parserUtils.parseYAMLIntoMetadata(sanitizedString);
   };
 
-  return { getReferenceLink, getHeadingType, parseYAML };
+  return { getReferenceLink, parseYAML };
 };
 
 // This defines the actual REGEX Queries
 createQueries.QUERIES = {
   // Fixes the references to Markdown pages into the API documentation
-  markdownFootUrls: /^(?![+a-z]+:)([^#?]+)\.md(#.+)?$/i,
+  markdownUrl: /^(?![+a-z]+:)([^#?]+)\.md(#.+)?$/i,
   // ReGeX to match the {Type}<Type> (Structure Type metadatas)
   // eslint-disable-next-line no-useless-escape
   normalizeTypes: /(\{|<)(?! )[a-z0-9.| \n\[\]\\]+(?! )(\}|>)/gim,
@@ -78,15 +48,17 @@ createQueries.QUERIES = {
   yamlInnerContent: /^<!--(YAML| YAML)?([\s\S]*?)-->/,
 };
 
-createQueries.TESTS = {
+createQueries.UNIST_TESTS = {
   isYamlNode: ({ type, value }) =>
     type === 'html' && createQueries.QUERIES.yamlInnerContent.test(value),
   isTextWithType: ({ type, value }) =>
     type === 'text' && createQueries.QUERIES.normalizeTypes.test(value),
-  isMarkdownFootUrl: ({ type, value }) =>
-    type === 'link' && createQueries.QUERIES.markdownFootUrls.test(value),
+  isMarkdownUrl: ({ type, url }) =>
+    type === 'link' && createQueries.QUERIES.markdownUrl.test(url),
   isHeadingNode: ({ type, depth }) =>
     type === 'heading' && depth >= 1 && depth <= 6,
+  isLinkReference: ({ type, identifier }) =>
+    type === 'linkReference' && !!identifier,
 };
 
 export default createQueries;

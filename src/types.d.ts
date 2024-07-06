@@ -1,12 +1,17 @@
-export interface ApiDocMetadata {
-  // The name of the API Doc file without the file extenson (basename)
+import { VFile } from 'vfile';
+
+export interface HeadingMetadataEntry {
+  type:
+    | 'event'
+    | 'method'
+    | 'property'
+    | 'class'
+    | 'module'
+    | 'classMethod'
+    | 'ctor';
+  text: string;
   name: string;
-  // The Node.js release line (major) targeted for this API doc tooling
-  // this version includes the `v` prefix (i.e.: v18)
-  version: string;
-  // The Node.js version targeted for this API doc tooling
-  // this version includes the `v` prefix (i.e.: v18.0.0)
-  fullVersion: string;
+  depth: number;
 }
 
 export interface ApiDocMetadataChange {
@@ -29,21 +34,25 @@ export interface ApiDocRawMetadataEntry {
   type?: string;
   name?: string;
   source_link?: string;
-  update?: ApiDocMetadataUpdate;
+  updates?: ApiDocMetadataUpdate[];
   changes?: ApiDocMetadataChange[];
 }
 
-export interface ApiDocMetadataEntry extends ApiDocRawMetadataEntry {
-  // The unique key of a given metadata entry
-  key: string;
+export interface ApiDocNavigationEntry {
+  // The name of the API Doc fle without the file extension (basename)
+  api: string;
   // The unique slug of a Heading/Navigation Entry which is linkable through an anchor
   slug: string;
-  // Human Readable Title (Plain Text) for a Navigation Entry
-  title: string;
-  // The API YAML Metadata Type for said entry
-  type: string;
-  // The name of the API Doc fle without the file extension (basename)
-  name: string;
+  // The GitHub URL to the source of the API Entry
+  sourceLink: string | undefined;
+  // Any updates to the API Doc Metadata
+  updates: ApiDocMetadataUpdate[];
+  // Any changes to the API Doc Metadata
+  changes: ApiDocMetadataChange[];
   // The parsed Markdown content of a Navigation Entry
-  content: string;
+  heading: HeadingMetadataEntry;
+}
+
+export interface ApiDocMetadataEntry extends VFile {
+  data: ApiDocNavigationEntry;
 }

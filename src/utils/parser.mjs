@@ -12,7 +12,6 @@ import {
   DOC_TYPES_MAPPING_NODE_MODULES,
   DOC_TYPES_MAPPING_OTHER,
   DOC_TYPES_MAPPING_PRIMITIVES,
-  DOC_WEB_BASE_PATH,
 } from '../constants.mjs';
 
 /**
@@ -26,23 +25,13 @@ export const yamlValueToArray = value =>
   Array.isArray(value) ? value : [value];
 
 /**
- * Strips the Markdown Heading Prefix and the API Doc Section Heading Prefix
- * of a given Heading
- *
- * @param {string} heading An API doc section Heading
- * @returns {string} A heading without the heading prefix
- */
-export const stripHeadingPrefix = heading =>
-  heading.replace(/^#{1,5} /i, '').replace(/^(Modules|Class|Event): /, '');
-
-/**
  * Transforms a page title into an unique slug (that can be used as an ID, anchor, or URL)
  * that follows slug conventions defined by the Node.js project
  *
  * @param {string} title The title to be parsed into a slug
  * @returns {string} A title parsed into a page slug
  */
-export const transformTitleToSlug = title => {
+export const stringToSlug = title => {
   let slug = title.toLowerCase().trim();
 
   DOC_API_SLUGS_REPLACEMENTS.forEach(set => {
@@ -64,11 +53,10 @@ export const transformTitleToSlug = title => {
  * This method replaces plain text Types within the Markdown content into Markdown links
  * that link to the actual relevant reference for such type (either internal or external link)
  *
- * @param {import('../types.d.ts').ApiDocMetadata} apiMetadata API Doc Metadata
  * @param {string} type The plain type to be transformed into a Markdown Link
  * @returns {string} The Markdown Link as a string (formatted in Markdown)
  */
-export const transformTypeToReferenceLink = (apiMetadata, type) => {
+export const transformTypeToReferenceLink = type => {
   const typeInput = type.replace('{', '').replace('}', '');
 
   const typePieces = typeInput.split('|').map(piece => {
@@ -109,11 +97,9 @@ export const transformTypeToReferenceLink = (apiMetadata, type) => {
     // Transform Node.js Type/Module references into Markdown Links
     // that refer to other API Docs pages within the Node.js API docs
     if (lookupPiece in DOC_TYPES_MAPPING_NODE_MODULES) {
-      const typeValue = DOC_TYPES_MAPPING_NODE_MODULES[lookupPiece];
+      const typeValueAsLink = DOC_TYPES_MAPPING_NODE_MODULES[lookupPiece];
 
-      const typeLink = `${DOC_WEB_BASE_PATH}${apiMetadata.version}/${typeValue}`;
-
-      return formatToMarkdownLink(typeLink);
+      return formatToMarkdownLink(typeValueAsLink);
     }
 
     return undefined;
@@ -159,11 +145,84 @@ export const parseYAMLIntoMetadata = yamlString => {
 
     if (DOC_API_YAML_KEYS_UPDATE.includes(key)) {
       // We transform some entries in a standardized "updates" field
-      parsedYaml.update = { type: key, version: parsedYaml[key] };
+      parsedYaml.updates = [{ type: key, version: parsedYaml[key] }];
 
       delete parsedYaml[key];
     }
   });
 
   return parsedYaml;
+};
+
+/**
+ * Parses a raw Heading String into Heading Metadata
+ *
+ * @param {string} heading The raw Heading Text
+ * @param {number} depth The depth of the heading
+ * @returns {import('../types.d.ts').HeadingMetadataEntry} Parsed Heading Entry
+ */
+export const parseHeadingIntoMetadata = (heading, depth) => {
+  const r = String.raw;
+
+  const eventPrefix = '^Event: +';
+  const classPrefix = '^Class: +';
+  const ctorPrefix = '^(?:Constructor: +)?`?new +';
+  const classMethodPrefix = '^Static method: +';
+  const maybeClassPropertyPrefix = '(?:Class property: +)?';
+
+  const maybeQuote = '[\'"]?';
+  const notQuotes = '[^\'"]+';
+
+  const maybeBacktick = '`?';
+
+  // To include constructs like `readable\[Symbol.asyncIterator\]()`
+  // or `readable.\_read(size)` (with Markdown escapes).
+  const simpleId = r`(?:(?:\\?_)+|\b)\w+\b`;
+  const computedId = r`\\?\[[\w\.]+\\?\]`;
+  const id = `(?:${simpleId}|${computedId})`;
+  const classId = r`[A-Z]\w+`;
+
+  const ancestors = r`(?:${id}\.?)+`;
+  const maybeAncestors = r`(?:${id}\.?)*`;
+
+  const callWithParams = r`\([^)]*\)`;
+
+  const maybeExtends = `(?: +extends +${maybeAncestors}${classId})?`;
+
+  const headingTypes = [
+    {
+      type: 'event',
+      test: `${eventPrefix}${maybeBacktick}${maybeQuote}(${notQuotes})${maybeQuote}${maybeBacktick}$`,
+    },
+    {
+      type: 'class',
+      test: `${classPrefix}${maybeBacktick}(${maybeAncestors}${classId})${maybeExtends}${maybeBacktick}$`,
+    },
+    {
+      type: 'ctor',
+      test: `${ctorPrefix}(${maybeAncestors}${classId})${callWithParams}${maybeBacktick}$`,
+    },
+    {
+      type: 'classMethod',
+      test: `${classMethodPrefix}${maybeBacktick}${maybeAncestors}(${id})${callWithParams}${maybeBacktick}$`,
+    },
+    {
+      type: 'method',
+      test: `^${maybeBacktick}${maybeAncestors}(${id})${callWithParams}${maybeBacktick}$`,
+    },
+    {
+      type: 'property',
+      test: `^${maybeClassPropertyPrefix}${maybeBacktick}${ancestors}(${id})${maybeBacktick}$`,
+    },
+  ];
+
+  for (const headingType of headingTypes) {
+    const result = heading.match(new RegExp(headingType.test));
+
+    if (result && result.length >= 2) {
+      return { text: heading, type: headingType.type, name: result[1], depth };
+    }
+  }
+
+  return { text: heading, type: 'module', name: heading, depth };
 };
