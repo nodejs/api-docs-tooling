@@ -45,7 +45,7 @@ export interface ApiDocRawMetadataEntry {
 }
 
 export interface ApiDocNavigationEntry {
-  // The name of the API Doc fle without the file extension (basename)
+  // The name of the API Doc file without the file extension (basename)
   api: string;
   // The unique slug of a Heading/Navigation Entry which is linkable through an anchor
   slug: string;

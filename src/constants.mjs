@@ -1,6 +1,6 @@
 'use strict';
 
-// This is the base-path of API docs within the https://nodejs.org Wesite
+// This is the base-path of API docs within the https://nodejs.org Website
 export const DOC_WEB_BASE_PATH = '/docs/';
 
 // This is the base URL of the MDN Web documentation

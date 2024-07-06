@@ -66,7 +66,7 @@ export const transformTypeToReferenceLink = type => {
     // This is what we will compare against the API Types Mappings
     const lookupPiece = trimmedPiece.replace(/(?:\[])+$/, '');
 
-    // This is what we return on the Array map uppon a hit, this function
+    // This is what we return on the Array map upon a hit, this function
     // is just for making this formatting reusable
     const formatToMarkdownLink = result => `[\`${trimmedPiece}\`](${result})`;
 
