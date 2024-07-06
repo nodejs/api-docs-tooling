@@ -4,7 +4,7 @@ import {
   DOC_API_YAML_KEYS_NAVIGATION,
   DOC_WEB_BASE_PATH,
 } from './constants.mjs';
-import { stripHeadingPrefix, titleToSlug } from './utils/parser.mjs';
+import { stripHeadingPrefix, transformTitleToSlug } from './utils/parser.mjs';
 
 /**
  * This method allows us to handle creation of Navigation Entries
@@ -60,6 +60,10 @@ const createMetadata = ({ version, name }) => {
          */
         setProperties: properties => {
           internalMetadata.properties = properties;
+
+          if (properties.type) {
+            internalMetadata.type = properties.type;
+          }
         },
         /**
          * Generates Navigation Entries for the current Navigation Creator
@@ -79,24 +83,38 @@ const createMetadata = ({ version, name }) => {
           // If the YAML entry is a "module" (aka an API doc file), we don't want to add a hash
           // as the module starts within the page itself
           const slugHash =
-            internalMetadata.type !== 'module' ? `#${titleToSlug(title)}` : '';
+            internalMetadata.type !== 'module'
+              ? `#${transformTitleToSlug(title)}`
+              : '';
+
+          const {
+            type: yamlType,
+            name: yamlName,
+            source_link,
+            update,
+            changes = [],
+          } = internalMetadata.properties;
 
           const metadataEntry = {
-            // Prepends all imported Properties
-            ...internalMetadata.properties,
-            // The API file name
-            name,
-            // The Content of an API Section
-            content,
             // The unique key of the API Section
-            key: `${name}/${slugHash}`,
+            key: `${name}${slugHash}`,
             // The metadata type of the API Section
-            type: internalMetadata.type,
+            type: yamlType || internalMetadata.type,
+            // The API file name
+            name: yamlName || name,
             // The path/slug of the API Section
-            slug: `${DOC_WEB_BASE_PATH}${version}/${name}/${slugHash}`,
+            slug: `${DOC_WEB_BASE_PATH}${version}/${name}.html${slugHash}`,
             // Sanitizes the Heading by replacing certain characters
             // and if the heading has parentheses, uses the portion before the parenthesis
             title: title.split('(')[0].replace(/[^\w\- ]+/g, ''),
+            // The Source Link of said API Section
+            source_link,
+            // The latest update to an API Section
+            update,
+            // The full-changeset to an API Section
+            changes,
+            // The Content of an API Section
+            content,
           };
 
           // If this metadata type matches certain predefined types

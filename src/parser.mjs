@@ -1,8 +1,16 @@
 'use strict';
 
+import { remark } from 'remark';
+import remarkGfm from 'remark-gfm';
+
+import { visit } from 'unist-util-visit';
+import { remove } from 'unist-util-remove';
+import { selectAll } from 'unist-util-select';
+
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
-import { calculateCodeBlockIntersection } from './utils/parser.mjs';
+
+const getRemarkParser = () => remark().use(remarkGfm);
 
 /**
  * Creates an API Doc Parser for a given Markdown API Doc
@@ -11,56 +19,70 @@ import { calculateCodeBlockIntersection } from './utils/parser.mjs';
  * @param {import('./types.d.ts').ApiDocMetadata} fileMetadata API Doc Metadata
  * @param {string} markdownContent
  */
-const getParser = (fileMetadata, markdownContent) => {
+const createParser = (fileMetadata, markdownContent) => {
   const { newMetadataEntry, getNavigationEntries: getNavigation } =
     createMetadata(fileMetadata);
 
   const parseMetadata = () => {
     const markdownSections = markdownContent.split('\n\n#');
 
-    const isCurrentLinesCodeBlock = calculateCodeBlockIntersection();
-
     const parsedSections = markdownSections.map(section => {
       const apiEntryMetadata = newMetadataEntry();
 
-      const {
-        markdownFootUrls,
-        addHeadingLevel,
-        normalizeLinks,
-        normalizeTypes,
-        normalizeHeading,
-        parseYAML,
-      } = createQueries(apiEntryMetadata, fileMetadata);
+      const { getReferenceLink, getHeadingType, parseYAML } = createQueries(
+        apiEntryMetadata,
+        fileMetadata
+      );
 
-      const parsedLines = section.split('\n\n').map(lines => {
-        // This verifies if the current lines are part of a multi-line code block
-        // This allows us to simply ignore any modification during this time
-        if (isCurrentLinesCodeBlock(lines)) {
-          return lines;
-        }
+      const markdownParser = getRemarkParser().use(() => {
+        return tree => {
+          // Handles YAML Metadata
+          visit(tree, createQueries.TESTS.isYamlNode, node => {
+            const metadata = parseYAML(node.value);
 
-        // Line Block starts is a Heading
-        if (lines.startsWith('#')) {
-          apiEntryMetadata.setHeading(lines);
+            apiEntryMetadata.setProperties(metadata);
 
-          return lines
-            .replace(createQueries.QUERIES.addHeadingLevel, addHeadingLevel)
-            .replace(createQueries.QUERIES.normalizeHeading, normalizeHeading);
-        }
+            remove(tree, node);
+          });
 
-        // Line Block is a YAML Metadata
-        if (lines.startsWith('<!--')) {
-          return lines.replace(createQueries.QUERIES.parseYAML, parseYAML);
-        }
+          // Handles Markdown Headings
+          visit(tree, createQueries.TESTS.isHeadingNode, node => {
+            const heading = node.children.map(({ value }) => value).join('');
 
-        // Line Block is remaining content, such as description, types, params, etc
-        return lines
-          .replace(createQueries.QUERIES.normalizeLinks, normalizeLinks)
-          .replace(createQueries.QUERIES.normalizeTypes, normalizeTypes)
-          .replace(createQueries.QUERIES.markdownFootUrls, markdownFootUrls);
+            apiEntryMetadata.setHeading(heading);
+            apiEntryMetadata.setType(getHeadingType(heading, node.depth + 1));
+
+            remove(tree, node);
+          });
+
+          // Handles API Type References transformation into Links
+          visit(tree, createQueries.TESTS.isTextWithType, node => {
+            node.value = node.value.replace(
+              createQueries.QUERIES.normalizeTypes,
+              getReferenceLink
+            );
+          });
+
+          // Handles Normalisation of Markdown URLs
+          visit(tree, createQueries.TESTS.isMarkdownFootUrl, node => {
+            node.url = node.url.replace(
+              createQueries.QUERIES.markdownFootUrls,
+              (_, filename, hash = '') => `${filename}.html${hash}`
+            );
+          });
+
+          // Moves Definitions to the Root
+          visit(tree, 'root', node => {
+            const definitions = selectAll('definition', tree);
+
+            node.children.concat(definitions);
+
+            remove(tree, definitions);
+          });
+        };
       });
 
-      return apiEntryMetadata.create(parsedLines.filter(Boolean).join('\n\n'));
+      return apiEntryMetadata.create(markdownParser.processSync(section));
     });
 
     return parsedSections;
@@ -69,4 +91,4 @@ const getParser = (fileMetadata, markdownContent) => {
   return { getNavigation, parseMetadata };
 };
 
-export default getParser;
+export default createParser;

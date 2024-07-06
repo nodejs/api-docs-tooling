@@ -134,14 +134,11 @@ export const transformTypeToReferenceLink = (apiMetadata, type) => {
  * Parses Markdown YAML source into a JavaScript object containing all the metadata
  * (this is forwarded to the parser so it knows what to do with said metadata)
  *
- * @param {ReturnType<ReturnType<import('../metadata.mjs')['default']>['newMetadataEntry']>} apiEntryMetadata The current Navigation instance
  * @param {string} yamlString The YAML string to be parsed
- * @returns {import('../types.d.ts').ApiDocRawMetadataEntry}
+ * @returns {import('../types.d.ts').ApiDocRawMetadataEntry} The parsed YAML Metadata
  */
-export const parseYAMLIntoMetadata = (apiEntryMetadata, yamlString) => {
-  const cleanContent = yamlString.replace(/YAML| YAML/, '');
-
-  const replacedContent = cleanContent
+export const parseYAMLIntoMetadata = yamlString => {
+  const replacedContent = yamlString
     // special validations for some non-cool formatted properties
     // of the docs schema
     .replace('introduced_in=', 'introduced_in: ')
@@ -168,45 +165,5 @@ export const parseYAMLIntoMetadata = (apiEntryMetadata, yamlString) => {
     }
   });
 
-  // If there is a `type` key we set the current metadata type to this type
-  if (parsedYaml.type && parsedYaml.type.length) {
-    apiEntryMetadata.setType(parsedYaml.type);
-  }
-
-  apiEntryMetadata.setProperties(parsedYaml);
-
-  const stringifiedYaml = JSON.stringify(parsedYaml);
-
-  return `<!-- ${stringifiedYaml} -->`;
-};
-
-/**
- * This method allows us to keep track if we are intersecting code blocks
- * and allows us to skip API Doc Parsing whilst we are inside a code block
- * and prevents other issues from happening
- */
-export const calculateCodeBlockIntersection = () => {
-  let isIntersecting = false;
-
-  return lines => {
-    const linesStartWithCodeBlock = lines.startsWith('```');
-    const linesEndsWithCodeBlock = lines.endsWith('```');
-
-    if (linesStartWithCodeBlock) {
-      isIntersecting = true;
-    }
-
-    if (isIntersecting === true) {
-      // This means we're currently iterating inside a code block
-      // We should ignore parsing all lines until we reach the
-      // end of the code block
-      if (linesEndsWithCodeBlock) {
-        // If we have a ending code block, stop ignoring the code loop
-        // and go back to normal business starting the next block
-        isIntersecting = false;
-      }
-    }
-
-    return isIntersecting;
-  };
+  return parsedYaml;
 };
