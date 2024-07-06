@@ -26,7 +26,7 @@ const createParser = () => {
    *
    * @param {import('vfile').VFile} apiDoc
    */
-  const parseMetadata = async apiDoc => {
+  const parseApiDoc = async apiDoc => {
     // Does extra modification at the root level of the API Doc File
     const apiDocRootParser = getRemarkParser().use(() => {
       return tree => {
@@ -51,7 +51,7 @@ const createParser = () => {
     const markdownSections = parsedRoot.toString().split('\n\n#');
 
     // Parses each Markdown Section into a Metadata Entry
-    const parsedSections = markdownSections.map(async sectionSource => {
+    const parsedSections = markdownSections.map(sectionSource => {
       const apiEntryMetadata = newMetadataEntry();
 
       const {
@@ -98,7 +98,7 @@ const createParser = () => {
       });
 
       // Process the Markdown Section into a VFile with the processed data
-      const parsedSection = await apiDocSectionParser.process(sectionSource);
+      const parsedSection = apiDocSectionParser.processSync(sectionSource);
 
       // Creates a Metadata Entry (VFile) and returns it
       return apiEntryMetadata.create(apiDoc.stem, parsedSection);
@@ -107,7 +107,25 @@ const createParser = () => {
     return parsedSections;
   };
 
-  return { getNavigation, parseMetadata };
+  /**
+   * This method allows to parse multiple API Doc Files at once
+   * and it simply wraps parseApiDoc with the given API Docs
+   *
+   * @param {Array<import('vfile').VFile>} apiDocs
+   */
+  const parseApiDocs = async apiDocs => {
+    const apiMetadataEntries = [];
+
+    for (const apiDoc of apiDocs) {
+      const parsedEntries = await parseApiDoc(apiDoc);
+
+      apiMetadataEntries.push(...parsedEntries);
+    }
+
+    return apiMetadataEntries;
+  };
+
+  return { getNavigation, parseApiDocs };
 };
 
 export default createParser;
