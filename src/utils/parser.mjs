@@ -189,38 +189,20 @@ export const parseHeadingIntoMetadata = (heading, depth) => {
 
   const maybeExtends = `(?: +extends +${maybeAncestors}${classId})?`;
 
-  const headingTypes = [
-    {
-      type: 'event',
-      test: `${eventPrefix}${maybeBacktick}${maybeQuote}(${notQuotes})${maybeQuote}${maybeBacktick}$`,
-    },
-    {
-      type: 'class',
-      test: `${classPrefix}${maybeBacktick}(${maybeAncestors}${classId})${maybeExtends}${maybeBacktick}$`,
-    },
-    {
-      type: 'ctor',
-      test: `${ctorPrefix}(${maybeAncestors}${classId})${callWithParams}${maybeBacktick}$`,
-    },
-    {
-      type: 'classMethod',
-      test: `${classMethodPrefix}${maybeBacktick}${maybeAncestors}(${id})${callWithParams}${maybeBacktick}$`,
-    },
-    {
-      type: 'method',
-      test: `^${maybeBacktick}${maybeAncestors}(${id})${callWithParams}${maybeBacktick}$`,
-    },
-    {
-      type: 'property',
-      test: `^${maybeClassPropertyPrefix}${maybeBacktick}${ancestors}(${id})${maybeBacktick}$`,
-    },
-  ];
+  const headingTypes = {
+    event: `${eventPrefix}${maybeBacktick}${maybeQuote}(${notQuotes})${maybeQuote}${maybeBacktick}$`,
+    class: `${classPrefix}${maybeBacktick}(${maybeAncestors}${classId})${maybeExtends}${maybeBacktick}$`,
+    ctor: `${ctorPrefix}(${maybeAncestors}${classId})${callWithParams}${maybeBacktick}$`,
+    classMethod: `${classMethodPrefix}${maybeBacktick}${maybeAncestors}(${id})${callWithParams}${maybeBacktick}$`,
+    method: `^${maybeBacktick}${maybeAncestors}(${id})${callWithParams}${maybeBacktick}$`,
+    property: `^${maybeClassPropertyPrefix}${maybeBacktick}${ancestors}(${id})${maybeBacktick}$`,
+  };
 
-  for (const headingType of headingTypes) {
-    const result = heading.match(new RegExp(headingType.test));
+  for (const headingType in headingTypes) {
+    const result = heading.match(new RegExp(headingTypes[headingType]));
 
     if (result && result.length >= 2) {
-      return { text: heading, type: headingType.type, name: result[1], depth };
+      return { text: heading, type: headingType, name: result[1], depth };
     }
   }
 
