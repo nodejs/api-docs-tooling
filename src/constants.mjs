@@ -16,7 +16,7 @@ export const DOC_MDN_BASE_URL_JS_PRIMITIVES = `${DOC_MDN_BASE_URL_JS}Data_struct
 export const DOC_MDN_BASE_URL_JS_GLOBALS = `${DOC_MDN_BASE_URL_JS}Reference/Global_Objects/`;
 
 // Characters used to split each section within an API Doc file
-export const DOC_API_SECTION_SEPARATOR = '\n\n#';
+export const DOC_API_SECTION_SEPARATOR = /^#{1,4} .*/gm;
 
 // These are YAML keys from the Markdown YAML Metadata that should always be arrays
 export const DOC_API_YAML_KEYS_ARRAYS = [

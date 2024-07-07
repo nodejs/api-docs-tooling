@@ -1,23 +1,21 @@
 'use strict';
 
 import * as parserUtils from './utils/parser.mjs';
-import * as unistUtils from './utils/unist.mjs';
+import { transformNodesToString } from './utils/unist.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
  * of metadata and content metadata manipulation within an API Doc
- *
- * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API Entry Metadata
- * @param {Array<import('unist').Node>} definitions The Definitions of the API Doc
  */
-const createQueries = (apiEntryMetadata = undefined, definitions = []) => {
+const createQueries = () => {
   /**
    * Sanitizes the YAML source by returning the inner YAML content
    * and then parsing it into an API Metadata object and updating the current Metadata
    *
    * @param {import('unist').Node} node The YAML Node
+   * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API entry Metadata
    */
-  const addYAMLMetadata = node => {
+  const addYAMLMetadata = (node, apiEntryMetadata) => {
     const sanitizedString = node.value.replace(
       createQueries.QUERIES.yamlInnerContent,
       (_, __, inner) => inner
@@ -48,9 +46,10 @@ const createQueries = (apiEntryMetadata = undefined, definitions = []) => {
    * Parse a Heading Node into Metadata and updates the current Metadata
    *
    * @param {import('unist').Node} node The Heading Node
+   * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API entry Metadata
    */
-  const addHeadingMetadata = node => {
-    const heading = unistUtils.transformNodesToString(node.children);
+  const addHeadingMetadata = (node, apiEntryMetadata) => {
+    const heading = transformNodesToString(node.children);
 
     const parsedHeading = parserUtils.parseHeadingIntoMetadata(
       heading,
@@ -76,8 +75,9 @@ const createQueries = (apiEntryMetadata = undefined, definitions = []) => {
    * Updates a Markdown Link Reference into an actual Link to the Definition
    *
    * @param {import('unist').Node} node Thead Link Reference Node
+   * @param {Array<import('unist').Node>} definitions The Definitions of the API Doc
    */
-  const updateLinkReference = node => {
+  const updateLinkReference = (node, definitions) => {
     const definition = definitions.find(
       ({ identifier }) => identifier === node.identifier
     );
@@ -90,9 +90,10 @@ const createQueries = (apiEntryMetadata = undefined, definitions = []) => {
    * Parses a Stability Index Entry and updates the current Metadata
    *
    * @param {import('unist').Node} node Thead Link Reference Node
+   * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API entry Metadata
    */
-  const addStabilityIndexMeta = node => {
-    const stabilityIndexString = unistUtils.transformNodesToString(
+  const addStabilityIndexMeta = (node, apiEntryMetadata) => {
+    const stabilityIndexString = transformNodesToString(
       node.children[0].children
     );
 
@@ -131,6 +132,9 @@ createQueries.QUERIES = {
 };
 
 createQueries.UNIST_TESTS = {
+  isStabilityIndex: ({ type, children }) =>
+    type === 'blockquote' &&
+    createQueries.QUERIES.stabilityIndex.test(transformNodesToString(children)),
   isYamlNode: ({ type, value }) =>
     type === 'html' && createQueries.QUERIES.yamlInnerContent.test(value),
   isTextWithType: ({ type, value }) =>
@@ -138,14 +142,9 @@ createQueries.UNIST_TESTS = {
   isMarkdownUrl: ({ type, url }) =>
     type === 'link' && createQueries.QUERIES.markdownUrl.test(url),
   isHeadingNode: ({ type, depth }) =>
-    type === 'heading' && depth >= 1 && depth <= 6,
+    type === 'heading' && depth >= 1 && depth <= 4,
   isLinkReference: ({ type, identifier }) =>
     type === 'linkReference' && !!identifier,
-  isStabilityIndex: ({ type, children }) =>
-    type === 'blockquote' &&
-    createQueries.QUERIES.stabilityIndex.test(
-      unistUtils.transformNodesToString(children)
-    ),
 };
 
 export default createQueries;
