@@ -15,6 +15,7 @@
     "prettier": "3.2.5"
   },
   "dependencies": {
+    "github-slugger": "^2.0.0",
     "glob": "^10.4.3",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",

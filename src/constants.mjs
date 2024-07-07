@@ -37,12 +37,44 @@ export const DOC_API_YAML_KEYS_UPDATE = [
 // These are the YAML Types that should be considered as Navigation Entries
 export const DOC_API_YAML_KEYS_NAVIGATION = ['class', 'module', 'global'];
 
+// These are string replacements specific to Node.js API Docs for Anchor IDs
 export const DOC_API_SLUGS_REPLACEMENTS = [
-  { to: 'nodejs', from: /node.js/ }, // Replace node.js
-  { to: '-and-', from: /&/ }, // Replace &
-  { to: '-', from: /[/_,:;\\ ]/g }, // Replace /_,:;\. and whitespace
+  { from: /node.js/i, to: 'nodejs' }, // Replace Node.js
+  { from: /&/, to: '-and-' }, // Replace &
+  { from: /[/_,:;\\ ]/g, to: '-' }, // Replace /_,:;\. and whitespace
+  { from: /--+/g, to: '-' }, // Replace multiple hyphens with single
+  { from: /^-/, to: '' }, // Remove any leading hyphen
+  { from: /-$/, to: '' }, // Remove any trailing hyphen
 ];
 
+// These are regular expressions used to determine if a given Markdown heading
+// is a specific type of API Doc entry (e.g., Event, Class, Method, etc)
+// and to extract the inner content of said Heading to be used as the API Doc Entry Name
+export const DOC_API_HEADING_TYPES = [
+  { type: 'method', regex: /^`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)\([^)]*\)`?$/i },
+  { type: 'event', regex: /^Event: +`?['"]?([^'"]+)['"]?`?$/i },
+  {
+    type: 'class',
+    regex:
+      /^Class: +`?([A-Z]\w+(?:\.[A-Z]\w+)*(?: +extends +[A-Z]\w+(?:\.[A-Z]\w+)*)?)`?$/i,
+  },
+  {
+    type: 'ctor',
+    regex: /^(?:Constructor: +)?`?new +([A-Z]\w+(?:\.[A-Z]\w+)*)\([^)]*\)`?$/i,
+  },
+  {
+    type: 'classMethod',
+    regex: /^Static method: +`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)\([^)]*\)`?$/i,
+  },
+  {
+    type: 'property',
+    regex: /^(?:Class property: +)?`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)`?$/i,
+  },
+];
+
+// This is a mapping for types within the Markdown content and their respective
+// JavaScript primitive types within the MDN JavaScript Docs
+// @see DOC_MDN_BASE_URL_JS_PRIMITIVES
 export const DOC_TYPES_MAPPING_PRIMITIVES = {
   boolean: 'Boolean',
   integer: 'Number', // Not a primitive, used for clarification.
@@ -53,6 +85,9 @@ export const DOC_TYPES_MAPPING_PRIMITIVES = {
   undefined: 'Undefined',
 };
 
+// This is a mapping for types within the Markdown content and their respective
+// JavaScript globals types within the MDN JavaScript Docs
+// @see DOC_MDN_BASE_URL_JS_GLOBALS
 export const DOC_TYPES_MAPPING_GLOBALS = {
   AggregateError: 'AggregateError',
   Array: 'Array',
@@ -79,6 +114,9 @@ export const DOC_TYPES_MAPPING_GLOBALS = {
   'WebAssembly.Instance': 'WebAssembly/Instance',
 };
 
+// This is a mapping for types within the Markdown content and their respective
+// Node.js types within the Node.js API Docs (refers to a different API Doc Page)
+// @note These hashes are generated with the GitHub Slugger
 export const DOC_TYPES_MAPPING_NODE_MODULES = {
   AbortController: 'globals.html#abortcontroller',
   AbortSignal: 'globals.html#abortsignal',
@@ -266,6 +304,8 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   TextDecoderStream: 'webstreams.html#textdecoderstream',
 };
 
+// This is a mapping for miscellaneous types within the Markdown content and their respective
+// external reference on appropriate 3rd-party vendors/documentation sites.
 export const DOC_TYPES_MAPPING_OTHER = {
   any: `${DOC_MDN_BASE_URL_JS_PRIMITIVES}#Data_types`,
   this: `${DOC_MDN_BASE_URL_JS}Reference/Operators/this`,

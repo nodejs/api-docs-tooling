@@ -10,6 +10,8 @@ import { selectAll } from 'unist-util-select';
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
 
+import { createNodeSlugger } from './utils/slugger.mjs';
+
 // Creates a Remark Parser with all Plugins needed for our API Docs
 const getRemarkParser = () => remark().use(remarkGfm);
 
@@ -18,8 +20,10 @@ const getRemarkParser = () => remark().use(remarkGfm);
  * (this requires already parsed Node.js release data, the API doc file to be loaded, and etc)
  */
 const createParser = () => {
+  const slugger = createNodeSlugger();
+
   const { newMetadataEntry, getNavigationEntries: getNavigation } =
-    createMetadata();
+    createMetadata(slugger);
 
   /**
    * Parses a given API Doc Metadata file into a list of Metadata Entries
@@ -27,6 +31,9 @@ const createParser = () => {
    * @param {import('vfile').VFile} apiDoc
    */
   const parseApiDoc = async apiDoc => {
+    // Resets the Slugger as we are parsing a new API Doc file
+    slugger.reset();
+
     // Does extra modification at the root level of the API Doc File
     const apiDocRootParser = getRemarkParser().use(() => {
       return tree => {

@@ -1,16 +1,17 @@
 'use strict';
 
 import { DOC_API_YAML_KEYS_NAVIGATION } from './constants.mjs';
-import { stringToSlug } from './utils/parser.mjs';
 
 /**
- * This method allows us to handle creation of Navigation Entries
- * for a given file within the API documentation
+ * This method allows us to handle creation of Metadata Entries
+ * çwithin the current scope of API Docs being parsed
  *
  * This can be used disconnected with a specific file, and can be aggregated
  * to many files to create a full Navigation for a given version of the API
+ *
+ * @param {InstanceType<typeof import('github-slugger').default>} slugger A GitHub Slugger
  */
-const createMetadata = () => {
+const createMetadata = slugger => {
   const navigationMetadataEntries = [];
 
   return {
@@ -21,6 +22,8 @@ const createMetadata = () => {
      */
     getNavigationEntries: () => navigationMetadataEntries,
     newMetadataEntry: () => {
+      // This holds a temporary buffer of raw metadata before being
+      // transformed into NavigationEntries and Metadata Entries
       const internalMetadata = {
         heading: {
           text: undefined,
@@ -33,7 +36,7 @@ const createMetadata = () => {
 
       return {
         /**
-         * Set the Heading Line of a given Metadata
+         * Set the Heading of a given Metadata
          *
          * @param {import('./types.d.ts').HeadingMetadataEntry} heading The new Heading Metadata
          */
@@ -42,6 +45,8 @@ const createMetadata = () => {
         },
         /**
          * Set the Metadata (from YAML if exists) properties to the current Metadata Entry
+         * itI also allows for extra data (such as Stability Index) and miscellaneous data to be set
+         * although it'd be best to only set ones from {ApiDocRawMetadataEntry}
          *
          * @param {Partial<import('./types.d.ts').ApiDocRawMetadataEntry>} properties Extra Metadata Properties to be defined
          */
@@ -52,8 +57,12 @@ const createMetadata = () => {
           };
         },
         /**
-         * Generates Navigation Entries for the current Navigation Creator
-         * and pushes them to the Navigation Entries for the current API file
+         * Generates a new Navigation Entry and pushes them to the internal collection
+         * of Navigation Entries, and returns a MetadataEntry which is then used by the Parser
+         * and forwarded to any relevant generator.
+         *
+         * The Navigation Entries has a dedicated separate method as it can be manipulated
+         * outside of the scope of the generation of the content
          *
          * @param {string} apiDoc The name of the API Doc
          * @param {import('vfile').VFile} section The content of the current Metadata Entry
@@ -64,7 +73,7 @@ const createMetadata = () => {
           // a certain navigation section to a page ad the exact point of the page (scroll)
           // This is useful for classes, globals and other type of YAML entries, as they reside
           // within a module (page) and we want to link to them directly
-          const slugHash = `#${stringToSlug(internalMetadata.heading.text)}`;
+          const slugHash = `#${slugger.slug(internalMetadata.heading.text)}`;
 
           const {
             type: yaml_type,
