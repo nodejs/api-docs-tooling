@@ -7,7 +7,7 @@ import * as unistUtils from './utils/unist.mjs';
  * Creates an instance of the Query Manager, which allows to do multiple sort
  * of metadata and content metadata manipulation within an API Doc
  *
- * @param {ReturnType<ReturnType<import('./metadata.mjs')['default']>['newMetadataEntry']>} apiEntryMetadata The API Entry Metadata
+ * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API Entry Metadata
  * @param {Array<import('unist').Node>} definitions The Definitions of the API Doc
  */
 const createQueries = (apiEntryMetadata = undefined, definitions = []) => {
