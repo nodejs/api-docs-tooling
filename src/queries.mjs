@@ -54,7 +54,7 @@ const createQueries = (apiEntryMetadata = undefined, definitions = []) => {
 
     const parsedHeading = parserUtils.parseHeadingIntoMetadata(
       heading,
-      node.depth + 1
+      node.depth
     );
 
     apiEntryMetadata.setHeading(parsedHeading);

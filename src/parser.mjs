@@ -11,13 +11,13 @@ import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
 
 import { createNodeSlugger } from './utils/slugger.mjs';
+import { DOC_API_SECTION_SEPARATOR } from './constants.mjs';
 
-// Creates a Remark Parser with all Plugins needed for our API Docs
+// Creates a Remark parser with all Plugins needed for our API docs
 const getRemarkParser = () => remark().use(remarkGfm);
 
 /**
- * Creates an API Doc Parser for a given Markdown API Doc
- * (this requires already parsed Node.js release data, the API doc file to be loaded, and etc)
+ * Creates an API doc parser for a given Markdown API doc file
  */
 const createParser = () => {
   const slugger = createNodeSlugger();
@@ -26,15 +26,15 @@ const createParser = () => {
     createMetadata(slugger);
 
   /**
-   * Parses a given API Doc Metadata file into a list of Metadata Entries
+   * Parses a given API doc metadata file into a list of Metadata entries
    *
    * @param {import('vfile').VFile} apiDoc
    */
   const parseApiDoc = async apiDoc => {
-    // Resets the Slugger as we are parsing a new API Doc file
+    // Resets the Slugger as we are parsing a new API doc file
     slugger.reset();
 
-    // Does extra modification at the root level of the API Doc File
+    // Does extra modification at the root level of the API doc File
     const apiDocRootParser = getRemarkParser().use(() => {
       return tree => {
         const definitions = selectAll('definition', tree);
@@ -46,19 +46,22 @@ const createParser = () => {
           updateLinkReference(node);
         });
 
-        // Removes the Definitions from the Tree
         remove(tree, definitions);
       };
     });
 
     const parsedRoot = await apiDocRootParser.process(apiDoc);
 
-    // Gathers each Markdown Section within the API Doc
+    // Gathers each Markdown Section within the API doc
     // by separating chunks of the source (root) by heading separators
-    const markdownSections = parsedRoot.toString().split('\n\n#');
+    // @TODO: Remove the splitting of the doc file, do a single traversal via `unified`
+    // and determine beginning/end of sections based on encounter of a Heading Node
+    const markdownSections = String(parsedRoot).split(
+      DOC_API_SECTION_SEPARATOR
+    );
 
-    // Parses each Markdown Section into a Metadata Entry
-    const parsedSections = markdownSections.map(sectionSource => {
+    // Parses each Markdown section into a Metadata entry
+    const parsedSections = markdownSections.map((section, index) => {
       const apiEntryMetadata = newMetadataEntry();
 
       const {
@@ -71,7 +74,7 @@ const createParser = () => {
 
       const apiDocSectionParser = getRemarkParser().use(() => {
         return tree => {
-          // Handles YAML Metadata
+          // Handles YAML metadata
           visit(tree, createQueries.UNIST_TESTS.isYamlNode, node => {
             addYAMLMetadata(node);
 
@@ -92,22 +95,28 @@ const createParser = () => {
             remove(tree, node);
           });
 
-          // Handles API Type References transformation into Links
+          // Handles API type references transformation into links
           visit(tree, createQueries.UNIST_TESTS.isTextWithType, node => {
             updateTypeToReferenceLink(node);
           });
 
-          // Handles Normalisation of Markdown URLs
+          // Handles normalisation of Markdown URLs
           visit(tree, createQueries.UNIST_TESTS.isMarkdownUrl, node => {
             updateMarkdownLink(node);
           });
         };
       });
 
-      // Process the Markdown Section into a VFile with the processed data
-      const parsedSection = apiDocSectionParser.processSync(sectionSource);
+      // Process the Markdown section into a VFile with the processed data
+      const parsedSection = apiDocSectionParser.processSync(
+        // We add the `#` back to the beginning of the section source
+        // since we split the document by the `DOC_API_SECTION_SEPARATOR`.
+        // The only exception is the first entry, as it is not preceded by two blank lines
+        // as shown on `DOC_API_SECTION_SEPARATOR`
+        index > 0 ? `#${section}` : section
+      );
 
-      // Creates a Metadata Entry (VFile) and returns it
+      // Creates a Metadata entry (VFile) and returns it
       return apiEntryMetadata.create(apiDoc.stem, parsedSection);
     });
 
@@ -115,10 +124,10 @@ const createParser = () => {
   };
 
   /**
-   * This method allows to parse multiple API Doc Files at once
-   * and it simply wraps parseApiDoc with the given API Docs
+   * This method allows to parse multiple API doc files at once
+   * and it simply wraps parseApiDoc with the given API docs
    *
-   * @param {Array<import('vfile').VFile>} apiDocs
+   * @param {Array<import('vfile').VFile>} apiDocs List of API doc files to be parsed
    */
   const parseApiDocs = async apiDocs => {
     const apiMetadataEntries = [];

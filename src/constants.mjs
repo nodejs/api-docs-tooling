@@ -9,13 +9,16 @@ export const DOC_MDN_BASE_URL = 'https://developer.mozilla.org/en-US/docs/Web/';
 // This is the base URL for the MDN JavaScript documentation
 export const DOC_MDN_BASE_URL_JS = `${DOC_MDN_BASE_URL}JavaScript/`;
 
-// This is the base URL for the MDN JavaScript Primitives documentation
+// This is the base URL for the MDN JavaScript primitives documentation
 export const DOC_MDN_BASE_URL_JS_PRIMITIVES = `${DOC_MDN_BASE_URL_JS}Data_structures`;
 
-// This is the base URL for the MDN JavaScript Global Objects documentation
+// This is the base URL for the MDN JavaScript global objects documentation
 export const DOC_MDN_BASE_URL_JS_GLOBALS = `${DOC_MDN_BASE_URL_JS}Reference/Global_Objects/`;
 
-// These are YAML keys from the Markdown YAML Metadata that should always be Arrays
+// Characters used to split each section within an API Doc file
+export const DOC_API_SECTION_SEPARATOR = '\n\n#';
+
+// These are YAML keys from the Markdown YAML Metadata that should always be arrays
 export const DOC_API_YAML_KEYS_ARRAYS = [
   'added',
   'napiVersion',
@@ -24,7 +27,7 @@ export const DOC_API_YAML_KEYS_ARRAYS = [
   'introduced_in',
 ];
 
-// These are YAML keys from the Markdown YAML Metadata that should be
+// These are YAML keys from the Markdown YAML metadata that should be
 // removed and appended to the `update` key
 export const DOC_API_YAML_KEYS_UPDATE = [
   'added',
@@ -34,10 +37,10 @@ export const DOC_API_YAML_KEYS_UPDATE = [
   'napiVersion',
 ];
 
-// These are the YAML Types that should be considered as Navigation Entries
+// These are the YAML types that should be considered as navigation entries
 export const DOC_API_YAML_KEYS_NAVIGATION = ['class', 'module', 'global'];
 
-// These are string replacements specific to Node.js API Docs for Anchor IDs
+// These are string replacements specific to Node.js API docs for anchor IDs
 export const DOC_API_SLUGS_REPLACEMENTS = [
   { from: /node.js/i, to: 'nodejs' }, // Replace Node.js
   { from: /&/, to: '-and-' }, // Replace &
@@ -49,7 +52,7 @@ export const DOC_API_SLUGS_REPLACEMENTS = [
 
 // These are regular expressions used to determine if a given Markdown heading
 // is a specific type of API Doc entry (e.g., Event, Class, Method, etc)
-// and to extract the inner content of said Heading to be used as the API Doc Entry Name
+// and to extract the inner content of said Heading to be used as the API doc entry name
 export const DOC_API_HEADING_TYPES = [
   { type: 'method', regex: /^`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)\([^)]*\)`?$/i },
   { type: 'event', regex: /^Event: +`?['"]?([^'"]+)['"]?`?$/i },
@@ -73,7 +76,7 @@ export const DOC_API_HEADING_TYPES = [
 ];
 
 // This is a mapping for types within the Markdown content and their respective
-// JavaScript primitive types within the MDN JavaScript Docs
+// JavaScript primitive types within the MDN JavaScript docs
 // @see DOC_MDN_BASE_URL_JS_PRIMITIVES
 export const DOC_TYPES_MAPPING_PRIMITIVES = {
   boolean: 'Boolean',
@@ -86,7 +89,7 @@ export const DOC_TYPES_MAPPING_PRIMITIVES = {
 };
 
 // This is a mapping for types within the Markdown content and their respective
-// JavaScript globals types within the MDN JavaScript Docs
+// JavaScript globals types within the MDN JavaScript docs
 // @see DOC_MDN_BASE_URL_JS_GLOBALS
 export const DOC_TYPES_MAPPING_GLOBALS = {
   AggregateError: 'AggregateError',
@@ -115,7 +118,7 @@ export const DOC_TYPES_MAPPING_GLOBALS = {
 };
 
 // This is a mapping for types within the Markdown content and their respective
-// Node.js types within the Node.js API Docs (refers to a different API Doc Page)
+// Node.js types within the Node.js API docs (refers to a different API doc page)
 // @note These hashes are generated with the GitHub Slugger
 export const DOC_TYPES_MAPPING_NODE_MODULES = {
   AbortController: 'globals.html#abortcontroller',
