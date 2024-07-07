@@ -29,7 +29,7 @@ const createParser = () => {
     updateMarkdownLink,
     addYAMLMetadata,
     addHeadingMetadata,
-    addStabilityIndexMeta,
+    addStabilityIndexMetadata,
   } = createQueries();
 
   /**
@@ -49,19 +49,6 @@ const createParser = () => {
      * @type {Array<ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>}
      */
     const metadataCollection = [];
-
-    // This allows us to get the reference to the current Metadata entry
-    const getCurrentMetadataEntry = () =>
-      metadataCollection[metadataCollection.length - 1];
-
-    // This allows us to create an retrieve a new Metadata entry
-    const createMetadataEntry = () => {
-      const metadataEntry = newMetadataEntry();
-
-      metadataCollection.push(metadataEntry);
-
-      return metadataEntry;
-    };
 
     // Resets the Slugger as we are parsing a new API doc file
     nodeSlugger.reset();
@@ -115,25 +102,31 @@ const createParser = () => {
       return tree => {
         // Handles Markdown Headings
         visit(tree, createQueries.UNIST_TESTS.isHeadingNode, node => {
-          addHeadingMetadata(node, createMetadataEntry());
+          // Creates a new Metadata entry for the API doc file
+          const apiEntryMetadata = newMetadataEntry();
 
-          return SKIP;
-        });
+          addHeadingMetadata(node, apiEntryMetadata);
 
-        // Handles Stability Indexes
-        visit(tree, createQueries.UNIST_TESTS.isStabilityIndex, node => {
-          addStabilityIndexMeta(node, getCurrentMetadataEntry());
+          // Handles Stability Indexes
+          visit(tree, createQueries.UNIST_TESTS.isStabilityIndex, node => {
+            addStabilityIndexMetadata(node, apiEntryMetadata);
 
-          remove(tree, node);
+            remove(tree, node);
 
-          return SKIP;
-        });
+            return SKIP;
+          });
 
-        // Handles YAML metadata
-        visit(tree, createQueries.UNIST_TESTS.isYamlNode, node => {
-          addYAMLMetadata(node, getCurrentMetadataEntry());
+          // Handles YAML metadata
+          visit(tree, createQueries.UNIST_TESTS.isYamlNode, node => {
+            addYAMLMetadata(node, apiEntryMetadata);
 
-          remove(tree, node);
+            remove(tree, node);
+
+            return SKIP;
+          });
+
+          // Pushes them to the Metadata collection
+          metadataCollection.push(apiEntryMetadata);
 
           return SKIP;
         });

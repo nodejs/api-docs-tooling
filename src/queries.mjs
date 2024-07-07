@@ -92,7 +92,7 @@ const createQueries = () => {
    * @param {import('unist').Node} node Thead Link Reference Node
    * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API entry Metadata
    */
-  const addStabilityIndexMeta = (node, apiEntryMetadata) => {
+  const addStabilityIndexMetadata = (node, apiEntryMetadata) => {
     const stabilityIndexString = transformNodesToString(
       node.children[0].children
     );
@@ -114,7 +114,7 @@ const createQueries = () => {
     addHeadingMetadata,
     updateMarkdownLink,
     updateLinkReference,
-    addStabilityIndexMeta,
+    addStabilityIndexMetadata,
   };
 };
 
