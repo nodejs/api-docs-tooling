@@ -2,6 +2,8 @@
 
 import yaml from 'yaml';
 
+import { pointEnd, pointStart } from 'unist-util-position';
+
 import {
   DOC_API_HEADING_TYPES,
   DOC_API_YAML_KEYS_ARRAYS,
@@ -137,4 +139,23 @@ export const parseHeadingIntoMetadata = (heading, depth) => {
   }
 
   return { text: heading, type: 'module', name: heading, depth };
+};
+
+/**
+ * This method is an utility that allows us to conditionally invoke/call a callback
+ * based on test conditions related to a Node's position relative to another one
+ * being before or not the other Node
+ *
+ * @param {import('unist').Node | undefined} nodeA The Node to be used as a position reference to check against
+ *  the other Node. If the other Node is before this one, the callback will be called.
+ * @param {import('unist').Node | undefined} nodeB The Node to be checked against the position of the first Node
+ * @param {(nodeA: import('unist').Node, nodeB: import('unist').Node) => void} callback The callback to be called
+ */
+export const callIfBefore = (nodeA, nodeB, callback) => {
+  const positionA = pointEnd(nodeA);
+  const positionB = pointStart(nodeB);
+
+  if (positionA && positionB && positionA.line > positionB.line) {
+    callback(nodeA, nodeB);
+  }
 };

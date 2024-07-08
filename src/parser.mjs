@@ -1,28 +1,29 @@
 'use strict';
 
+import { VFile } from 'vfile';
+
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 
 import { SKIP, visit } from 'unist-util-visit';
 import { remove } from 'unist-util-remove';
 import { selectAll } from 'unist-util-select';
+import { findAfter } from 'unist-util-find-after';
+import { findAllAfter } from 'unist-util-find-all-after';
 
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
 
 import { createNodeSlugger } from './utils/slugger.mjs';
-import { DOC_API_SECTION_SEPARATOR as DOC_API_ENTRY_SEPARATOR } from './constants.mjs';
-import { VFile } from 'vfile';
+import { callIfBefore } from './utils/parser.mjs';
+
+// Characters used to split each section within an API Doc file
+const DOC_API_ENTRY_SEPARATOR = /^#{1,4} .*/gm;
 
 /**
  * Creates an API doc parser for a given Markdown API doc file
  */
 const createParser = () => {
-  const nodeSlugger = createNodeSlugger();
-
-  const { newMetadataEntry, getNavigationEntries: getNavigation } =
-    createMetadata(nodeSlugger);
-
   const {
     updateLinkReference,
     updateTypeToReferenceLink,
@@ -46,12 +47,12 @@ const createParser = () => {
      * Then once we have the whole file parsed, we can split the resulting string into sections
      * and seal the Metadata Entries (`.create()`) and return the result to the caller of parae.
      *
-     * @type {Array<ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>}
+     * @type {Array<ReturnType<import('./metadata.mjs').default>}
      */
     const metadataCollection = [];
 
-    // Resets the Slugger as we are parsing a new API doc file
-    nodeSlugger.reset();
+    // Creates an instance of the Node slugger per API doc file
+    const nodeSlugger = createNodeSlugger();
 
     // Creates a new Remark processor with GFM (GitHub Flavoured Markdown) support
     const apiDocProcessor = remark().use(remarkGfm);
@@ -60,18 +61,18 @@ const createParser = () => {
     apiDocProcessor.use(() => {
       return tree => {
         // Get all Markdown Footnote definitions from the tree
-        const definitions = selectAll('definition', tree);
+        const markdownDefinitions = selectAll('definition', tree);
 
         // Handles Link References
-        visit(tree, createQueries.UNIST_TESTS.isLinkReference, node => {
-          updateLinkReference(node, definitions);
+        visit(tree, createQueries.UNIST.isLinkReference, node => {
+          updateLinkReference(node, markdownDefinitions);
 
           return SKIP;
         });
 
         // Removes all the original definitions from the tree as they are not needed
         // anymore, since all link references got updated to be plain links
-        remove(tree, definitions);
+        remove(tree, markdownDefinitions);
       };
     });
 
@@ -80,14 +81,14 @@ const createParser = () => {
     apiDocProcessor.use(() => {
       return tree => {
         // Handles API type references transformation into links
-        visit(tree, createQueries.UNIST_TESTS.isTextWithType, node => {
+        visit(tree, createQueries.UNIST.isTextWithType, node => {
           updateTypeToReferenceLink(node);
 
           return SKIP;
         });
 
         // Handles normalisation of Markdown URLs
-        visit(tree, createQueries.UNIST_TESTS.isMarkdownUrl, node => {
+        visit(tree, createQueries.UNIST.isMarkdownUrl, node => {
           updateMarkdownLink(node);
 
           return SKIP;
@@ -100,32 +101,58 @@ const createParser = () => {
     // A new metadata entry is created once a new Heading is found (from level 1 to 6)
     apiDocProcessor.use(() => {
       return tree => {
-        // Handles Markdown Headings
-        visit(tree, createQueries.UNIST_TESTS.isHeadingNode, node => {
-          // Creates a new Metadata entry for the API doc file
-          const apiEntryMetadata = newMetadataEntry();
+        visit(tree, createQueries.UNIST.isHeadingNode, node => {
+          // Creates a new Metadata entry for the current API doc file
+          const apiEntryMetadata = createMetadata(nodeSlugger);
 
+          // Adds the Metadata of the current Heading Node to the Metadata entry
           addHeadingMetadata(node, apiEntryMetadata);
 
-          // Handles Stability Indexes
-          visit(tree, createQueries.UNIST_TESTS.isStabilityIndex, node => {
-            addStabilityIndexMetadata(node, apiEntryMetadata);
+          // We retrieve the immediate next Heading if it exists
+          // This is used for ensuring that we don't include items that would
+          // belong only to the next heading to the current Heading metadata
+          callIfBefore(findAfter(tree, node, 'heading'), node, next => {
+            // Gets the next available Stability Index Node (if any)
+            // from the current Heading Node, and then adds it to the current Metadata
+            // if the found Stability Index Node is before the next Heading Node
+            // we then add it to the current Metadata
+            const stabilityIndexNodes = findAllAfter(
+              tree,
+              node,
+              createQueries.UNIST.isStabilityIndex
+            );
 
-            remove(tree, node);
+            // Gets the next available YAML Node (if any)
+            // from the current Heading Node, and then adds it to the current Metadata
+            // if the found YAML Node is before the next Heading Node
+            // we then add it to the current Metadata
+            const yamlMetadataNodes = findAllAfter(
+              tree,
+              node,
+              createQueries.UNIST.isYamlNode
+            );
 
-            return SKIP;
+            stabilityIndexNodes.forEach(stabilityIndexNode => {
+              callIfBefore(next, stabilityIndexNode, () => {
+                // Adds the Stability Index Metadata to the current Metadata entry
+                addStabilityIndexMetadata(stabilityIndexNode, apiEntryMetadata);
+
+                remove(tree, stabilityIndexNode);
+              });
+            });
+
+            yamlMetadataNodes.forEach(yamlMetadataNode => {
+              callIfBefore(next, yamlMetadataNode, () => {
+                // Adds the YAML Metadata to the current Metadata entry
+                addYAMLMetadata(yamlMetadataNode, apiEntryMetadata);
+
+                remove(tree, yamlMetadataNode);
+              });
+            });
           });
 
-          // Handles YAML metadata
-          visit(tree, createQueries.UNIST_TESTS.isYamlNode, node => {
-            addYAMLMetadata(node, apiEntryMetadata);
-
-            remove(tree, node);
-
-            return SKIP;
-          });
-
-          // Pushes them to the Metadata collection
+          // After all is processed for the current Heading we proceed to push it
+          // to the Metadata collection, so that it can be sealed later on
           metadataCollection.push(apiEntryMetadata);
 
           return SKIP;
@@ -133,6 +160,7 @@ const createParser = () => {
       };
     });
 
+    // Processes the API doc file and returns the parsed API doc
     const parsedApiDoc = await apiDocProcessor.process(apiDoc);
 
     /**
@@ -164,7 +192,7 @@ const createParser = () => {
   const parseApiDocs = apiDocs =>
     Promise.all(apiDocs.map(parseApiDoc)).then(entries => entries.flat());
 
-  return { getNavigation, parseApiDocs };
+  return { parseApiDocs };
 };
 
 export default createParser;

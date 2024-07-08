@@ -1,8 +1,9 @@
 'use strict';
 
-import { glob } from 'glob';
 import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
+
+import { glob } from 'glob';
 import { VFile } from 'vfile';
 
 /**

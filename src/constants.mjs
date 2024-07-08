@@ -15,9 +15,6 @@ export const DOC_MDN_BASE_URL_JS_PRIMITIVES = `${DOC_MDN_BASE_URL_JS}Data_struct
 // This is the base URL for the MDN JavaScript global objects documentation
 export const DOC_MDN_BASE_URL_JS_GLOBALS = `${DOC_MDN_BASE_URL_JS}Reference/Global_Objects/`;
 
-// Characters used to split each section within an API Doc file
-export const DOC_API_SECTION_SEPARATOR = /^#{1,4} .*/gm;
-
 // These are YAML keys from the Markdown YAML Metadata that should always be arrays
 export const DOC_API_YAML_KEYS_ARRAYS = [
   'added',
@@ -36,9 +33,6 @@ export const DOC_API_YAML_KEYS_UPDATE = [
   'introduced_in',
   'napiVersion',
 ];
-
-// These are the YAML types that should be considered as navigation entries
-export const DOC_API_YAML_KEYS_NAVIGATION = ['class', 'module', 'global'];
 
 // These are string replacements specific to Node.js API docs for anchor IDs
 export const DOC_API_SLUGS_REPLACEMENTS = [

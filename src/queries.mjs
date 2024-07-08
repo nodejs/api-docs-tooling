@@ -13,7 +13,7 @@ const createQueries = () => {
    * and then parsing it into an API Metadata object and updating the current Metadata
    *
    * @param {import('unist').Node} node The YAML Node
-   * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API entry Metadata
+   * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addYAMLMetadata = (node, apiEntryMetadata) => {
     const sanitizedString = node.value.replace(
@@ -46,7 +46,7 @@ const createQueries = () => {
    * Parse a Heading Node into Metadata and updates the current Metadata
    *
    * @param {import('unist').Node} node The Heading Node
-   * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API entry Metadata
+   * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addHeadingMetadata = (node, apiEntryMetadata) => {
     const heading = transformNodesToString(node.children);
@@ -90,7 +90,7 @@ const createQueries = () => {
    * Parses a Stability Index Entry and updates the current Metadata
    *
    * @param {import('unist').Node} node Thead Link Reference Node
-   * @param {ReturnType<ReturnType<import('./metadata.mjs').default>['newMetadataEntry']>} apiEntryMetadata The API entry Metadata
+   * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addStabilityIndexMetadata = (node, apiEntryMetadata) => {
     const stabilityIndexString = transformNodesToString(
@@ -131,7 +131,7 @@ createQueries.QUERIES = {
   yamlInnerContent: /^<!--(YAML| YAML)?([\s\S]*?)-->/,
 };
 
-createQueries.UNIST_TESTS = {
+createQueries.UNIST = {
   isStabilityIndex: ({ type, children }) =>
     type === 'blockquote' &&
     createQueries.QUERIES.stabilityIndex.test(transformNodesToString(children)),
