@@ -216,8 +216,6 @@ const createParser = () => {
       };
     });
 
-    console.log(`[parser] parsing: ${apiDoc.stem}`);
-
     // Parses the API doc into an AST tree using `unified` and `remark`
     const apiDocTree = apiDocProcessor.parse(apiDoc);
 
