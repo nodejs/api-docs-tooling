@@ -41,7 +41,7 @@ const createParser = () => {
    * with numerous transformations into API doc Metadata entries.
    *
    * This transformer iterates on several sort of AST Nodes and applies transformations
-   * and then grabs a subtree of Nodes (groupped by a Heading Node) and then stringifies them into a VFile
+   * and then grabs a subtree of Nodes (grouped by a Heading Node) and then stringifies them into a VFile
    * and finally creates a Metadata entry for the given section.
    *
    * @type {import('unified').Plugin<[{

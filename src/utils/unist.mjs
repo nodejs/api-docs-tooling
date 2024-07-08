@@ -38,6 +38,8 @@ export const transformNodesToString = nodes => {
  * based on test conditions related to a Node's position relative to another one
  * being before or not the other Node
  *
+ * NOTE: Not yet used, but probably going to be used by the JSON generator.
+ *
  * @param {import('unist').Node | undefined} nodeA The Node to be used as a position reference to check against
  *  the other Node. If the other Node is before this one, the callback will be called.
  * @param {import('unist').Node | undefined} nodeB The Node to be checked against the position of the first Node
