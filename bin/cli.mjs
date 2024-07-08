@@ -37,46 +37,44 @@ const processFile = async (filePath, outputDir, target) => {
   }
 };
 
-(async () => {
-  const program = new Command();
+const program = new Command();
 
-  program
-    .requiredOption(
-      '-i, --input <patterns...>',
-      'Specify input file patterns using glob syntax'
-    )
-    .option(
-      '-e, --exclude <patterns...>',
-      'Specify patterns to exclude files from being processed'
-    )
-    .requiredOption('-o, --output <path>', 'Specify the output directory path')
-    .option('-t, --target <mode>', 'Set the processing mode', 'mdx')
-    .parse(argv);
+program
+  .requiredOption(
+    '-i, --input <patterns...>',
+    'Specify input file patterns using glob syntax'
+  )
+  .option(
+    '-e, --exclude <patterns...>',
+    'Specify patterns to exclude files from being processed'
+  )
+  .requiredOption('-o, --output <path>', 'Specify the output directory path')
+  .option('-t, --target <mode>', 'Set the processing mode', 'mdx')
+  .parse(argv);
 
-  /**
-   * Defines the structure for command line options after parsing.
-   *
-   * @typedef {Object} Options
-   * @property {Array<string>|string} input - Specifies the glob/path for input files.
-   * @property {string} output - Specifies the directory where output files will be saved.
-   * @property {Array<string>|string} exclude - Specifies the glob patterns for files to exclude from processing.
-   * @property {'mdx'} target - Specifies the execution target mode. Currently, only 'mdx' mode is supported.
-   */
+/**
+ * Defines the structure for command line options after parsing.
+ *
+ * @typedef {Object} Options
+ * @property {Array<string>|string} input - Specifies the glob/path for input files.
+ * @property {string} output - Specifies the directory where output files will be saved.
+ * @property {Array<string>|string} exclude - Specifies the glob patterns for files to exclude from processing.
+ * @property {'mdx'} target - Specifies the execution target mode. Currently, only 'mdx' mode is supported.
+ */
 
-  /** @type {Options} */
-  const { input, output, exclude, target } = program.opts();
+/** @type {Options} */
+const { input, output, exclude, target } = program.opts();
 
-  try {
-    // Get all files based on the input glob pattern
-    const files = await glob(input, exclude ? { ignore: exclude } : {});
+try {
+  // Get all files based on the input glob pattern
+  const files = await glob(input, exclude ? { ignore: exclude } : {});
 
-    console.info(`${files.length} files found.`);
+  console.info(`${files.length} files found.`);
 
-    await Promise.all(
-      files.map(filePath => processFile(filePath, output, target))
-    );
-  } catch (error) {
-    console.error(error);
-    exit(1);
-  }
-})();
+  await Promise.all(
+    files.map(filePath => processFile(filePath, output, target))
+  );
+} catch (error) {
+  console.error(error);
+  exit(1);
+}
