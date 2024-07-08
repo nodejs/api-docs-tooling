@@ -28,9 +28,9 @@ const createLoader = () => {
       const fileExtension = extname(filePath);
 
       if (fileExtension === '.md') {
-        const fileContent = await readFile(filePath, 'utf-8');
+        const fileBuffer = await readFile(filePath);
 
-        return new VFile({ path: filePath, value: fileContent });
+        return new VFile({ path: filePath, value: fileBuffer });
       }
 
       throw new Error(`File ${filePath} is not a Markdown file`);

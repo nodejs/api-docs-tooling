@@ -76,7 +76,9 @@ const createMetadata = slugger => {
       internalMetadata.heading.type =
         yaml_type || internalMetadata.heading.type;
 
-      const navigationEntry = {
+      // A metadata entry is all the metadata we have about a certain API section
+      // with the content being a VFile (Virtual File) containing the Markdown content
+      section.data = {
         // The API file basename (without the extension)
         api: yaml_name || apiDoc,
         // The path/slug of the API section
@@ -92,10 +94,6 @@ const createMetadata = slugger => {
         // The Stability Index of the API section
         stability: stability_index,
       };
-
-      // A metadata entry is all the metadata we have about a certain API section
-      // with the content being a VFile (Virtual File) containing the Markdown content
-      section.data = navigationEntry;
 
       // Returns the updated VFile with the extra metadata
       return section;
