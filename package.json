@@ -19,6 +19,7 @@
     "glob": "^10.4.3",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",
+    "unist-builder": "^4.0.0",
     "unist-util-find-after": "^5.0.0",
     "unist-util-find-all-after": "^5.0.0",
     "unist-util-position": "^5.0.0",
