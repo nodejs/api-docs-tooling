@@ -1,9 +1,9 @@
 'use strict';
 
-import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
+import { readFile } from 'node:fs/promises';
 
-import { glob } from 'glob';
+import { globSync } from 'glob';
 import { VFile } from 'vfile';
 
 /**
@@ -21,14 +21,14 @@ const createLoader = () => {
    *
    * @see https://code.visualstudio.com/docs/editor/glob-patterns
    */
-  const loadFiles = async path => {
-    const resolvedFiles = await glob(path);
+  const loadFiles = path => {
+    const resolvedFiles = globSync(path);
 
-    return resolvedFiles.map(filePath => {
+    return resolvedFiles.map(async filePath => {
       const fileExtension = extname(filePath);
 
       if (fileExtension === '.md') {
-        const fileContent = readFileSync(filePath, 'utf-8');
+        const fileContent = await readFile(filePath, 'utf-8');
 
         return new VFile({ path: filePath, value: fileContent });
       }

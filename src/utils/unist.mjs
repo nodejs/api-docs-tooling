@@ -47,7 +47,7 @@ export const callIfBefore = (nodeA, nodeB, callback) => {
   const positionA = pointEnd(nodeA);
   const positionB = pointStart(nodeB);
 
-  if (positionA && positionB && positionA.line >= positionB.line) {
+  if (positionA && positionB && positionA.line > positionB.line) {
     callback(nodeA, nodeB);
   }
 };
