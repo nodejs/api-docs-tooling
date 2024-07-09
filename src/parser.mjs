@@ -90,7 +90,8 @@ const createParser = () => {
     });
 
     // Handles iterating the tree and creating subtrees for each API doc entry
-    // where an API doc entry is defined by a Heading Node (so all elements after a Heading until the next Heading)
+    // where an API doc entry is defined by a Heading Node
+    // (so all elements after a Heading until the next Heading)
     // and then it creates and updates a Metadata entry for each API doc entry
     // and then generates the final content for each API doc entry and pushes it to the collection
     visit(apiDocTree, createQueries.UNIST.isHeading, (headingNode, index) => {
@@ -112,9 +113,7 @@ const createParser = () => {
       // of all the Nodes within the AST tree that belong to this section
       // If `next` is equals the current heading, it means ther's no next heading
       // and we are reaching the end of the document, hence the cutover should be the end of
-      // the document itself,
-      // Note.: This index needs to be retrieved after any modification to the tree occurs,
-      // otherwise the index will be off (out of sync with the tree)
+      // the document itself.
       const stop =
         headingNode === nextHeadingNode
           ? apiDocTree.children.length - 1
