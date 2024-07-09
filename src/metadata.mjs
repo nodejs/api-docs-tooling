@@ -53,7 +53,7 @@ const createMetadata = (slugger, remarkProcessor) => {
      * The Navigation entries has a dedicated separate method for retrieval
      * as it can be manipulated outside of the scope of the generation of the content
      *
-     * @param {string} apiDoc The name of the API doc
+     * @param {import('vfile').VFile} apiDoc The API doc file being parsed
      * @param {import('unist').Parent} section An AST tree containing the Nodes of the API doc entry section
      * @returns {import('./types').ApiDocMetadataEntry} The locally created Metadata entries
      */
@@ -79,9 +79,9 @@ const createMetadata = (slugger, remarkProcessor) => {
 
       const apiEntryMetadata = {
         // The API file basename (without the extension)
-        api: yaml_name || apiDoc,
+        api: yaml_name || apiDoc.stem,
         // The path/slug of the API section
-        slug: `${apiDoc}.html${slugHash}`,
+        slug: `${apiDoc.stem}.html${slugHash}`,
         // The source link of said API section
         sourceLink: source_link,
         // The latest updates to an API section

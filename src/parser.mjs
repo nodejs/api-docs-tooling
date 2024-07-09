@@ -20,7 +20,7 @@ import { createNodeSlugger } from './utils/slugger.mjs';
 const createParser = () => {
   // Creates an instance of the Remark processor with GFM support
   // which is used for stringifying the AST tree back to Markdown
-  const remarkGfmProcessor = remark().use(remarkGfm);
+  const remarkProcessor = remark().use(remarkGfm);
 
   const {
     updateLinkReference,
@@ -57,7 +57,7 @@ const createParser = () => {
     const nodeSlugger = createNodeSlugger();
 
     // Parses the API doc into an AST tree using `unified` and `remark`
-    const apiDocTree = remarkGfmProcessor.parse(resolvedApiDoc);
+    const apiDocTree = remarkProcessor.parse(resolvedApiDoc);
 
     // Get all Markdown Footnote definitions from the tree
     const markdownDefinitions = selectAll('definition', apiDocTree);
@@ -89,7 +89,7 @@ const createParser = () => {
 
     visit(apiDocTree, createQueries.UNIST.isHeading, (headingNode, index) => {
       // Creates a new Metadata entry for the current API doc file
-      const apiEntryMetadata = createMetadata(nodeSlugger, remarkGfmProcessor);
+      const apiEntryMetadata = createMetadata(nodeSlugger, remarkProcessor);
 
       // Adds the Metadata of the current Heading Node to the Metadata entry
       addHeadingMetadata(headingNode, apiEntryMetadata);
@@ -148,11 +148,11 @@ const createParser = () => {
       // We seal and create the API doc entry Metadata and push them to the collection
       // Creates the API doc entry Metadata and pushes it to the collection
       const parsedApiEntryMetadata = apiEntryMetadata.create(
-        resolvedApiDoc.stem,
+        resolvedApiDoc,
         // Applies the AST transformations to the subtree based on the API doc entry Metadata
         // Note that running the transformation on the subtree isn't costly as it is a reduced tree
         // and the GFM transformations aren't that heavy
-        remarkGfmProcessor.runSync(apiSectionTree)
+        remarkProcessor.runSync(apiSectionTree)
       );
 
       // We push the parsed API doc entry Metadata to the collection
