@@ -73,20 +73,26 @@ const createParser = () => {
     // anymore, since all link references got updated to be plain links
     remove(apiDocTree, markdownDefinitions);
 
-    // Handles API type references transformation into links
+    // Handles API type references transformation into links that point
+    // to the reference to a said API type
     visit(apiDocTree, createQueries.UNIST.isTextWithType, node => {
       updateTypeToReferenceLink(node);
 
       return SKIP;
     });
 
-    // Handles normalisation of Markdown URLs
+    // Handles normalisation URLs that reference to API doc files with .md extension
+    // to replace the .md into .html, since the API doc files get eventually compiled as HTML
     visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, node => {
       updateMarkdownLink(node);
 
       return SKIP;
     });
 
+    // Handles iterating the tree and creating subtrees for each API doc entry
+    // where an API doc entry is defined by a Heading Node (so all elements after a Heading until the next Heading)
+    // and then it creates and updates a Metadata entry for each API doc entry
+    // and then generates the final content for each API doc entry and pushes it to the collection
     visit(apiDocTree, createQueries.UNIST.isHeading, (headingNode, index) => {
       // Creates a new Metadata entry for the current API doc file
       const apiEntryMetadata = createMetadata(nodeSlugger, remarkProcessor);
@@ -146,7 +152,6 @@ const createParser = () => {
       ]);
 
       // We seal and create the API doc entry Metadata and push them to the collection
-      // Creates the API doc entry Metadata and pushes it to the collection
       const parsedApiEntryMetadata = apiEntryMetadata.create(
         resolvedApiDoc,
         // Applies the AST transformations to the subtree based on the API doc entry Metadata
