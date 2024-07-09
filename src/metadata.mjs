@@ -8,8 +8,9 @@
  * to many files to create a full Navigation for a given version of the API
  *
  * @param {InstanceType<typeof import('github-slugger').default>} slugger A GitHub Slugger
+ * @param {ReturnType<typeof remark>} remarkProcessor A Remark processor
  */
-const createMetadata = slugger => {
+const createMetadata = (slugger, remarkProcessor) => {
   // This holds a temporary buffer of raw metadata before being
   // transformed into NavigationEntries and MetadataEntries
   const internalMetadata = {
@@ -53,7 +54,7 @@ const createMetadata = slugger => {
      * as it can be manipulated outside of the scope of the generation of the content
      *
      * @param {string} apiDoc The name of the API doc
-     * @param {import('vfile').VFile} section The content of the current Metadata entry
+     * @param {import('unist').Parent} section An AST tree containing the Nodes of the API doc entry section
      * @returns {import('./types').ApiDocMetadataEntry} The locally created Metadata entries
      */
     create: (apiDoc, section) => {
@@ -76,16 +77,14 @@ const createMetadata = slugger => {
       internalMetadata.heading.type =
         yaml_type || internalMetadata.heading.type;
 
-      // A metadata entry is all the metadata we have about a certain API section
-      // with the content being a VFile (Virtual File) containing the Markdown content
-      section.data = {
+      const apiEntryMetadata = {
         // The API file basename (without the extension)
         api: yaml_name || apiDoc,
         // The path/slug of the API section
         slug: `${apiDoc}.html${slugHash}`,
         // The source link of said API section
         sourceLink: source_link,
-        // The latest update to an API section
+        // The latest updates to an API section
         updates,
         // The full-changeset to an API section
         changes,
@@ -93,10 +92,24 @@ const createMetadata = slugger => {
         heading: internalMetadata.heading,
         // The Stability Index of the API section
         stability: stability_index,
+        // The AST tree of the API section
+        content: section,
       };
 
-      // Returns the updated VFile with the extra metadata
-      return section;
+      // Returns the Metadata entry for the API doc
+      return {
+        // Appends the base Metadata entry
+        ...apiEntryMetadata,
+
+        // Overrides the toJSON method to allow for custom serialization
+        toJSON: () => ({
+          ...apiEntryMetadata,
+
+          // We stringify the AST tree to a string
+          // since this is what we wanbt to render within a JSON object
+          content: remarkProcessor.stringify(section),
+        }),
+      };
     },
   };
 };

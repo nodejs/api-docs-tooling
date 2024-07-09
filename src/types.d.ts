@@ -1,4 +1,4 @@
-import { VFile } from 'vfile';
+import { Parent } from 'unist';
 
 export interface StabilityIndexMetadataEntry {
   index: number;
@@ -29,7 +29,7 @@ export interface ApiDocMetadataChange {
 }
 
 export interface ApiDocMetadataUpdate {
-  // The type of the API Doc Metadata update
+  // The type of the API doc Metadata update
   type: 'added' | 'removed' | 'deprecated' | 'introduced_in' | 'napiVersion';
   // The Node.js version or versions where said metadata stability index changed
   version: string[];
@@ -44,23 +44,24 @@ export interface ApiDocRawMetadataEntry {
   stability_index?: StabilityIndexMetadataEntry;
 }
 
-export interface ApiDocNavigationEntry {
-  // The name of the API Doc file without the file extension (basename)
+export interface ApiDocMetadataEntry {
+  // The name of the API doc file without the file extension (basename)
   api: string;
-  // The unique slug of a Heading/Navigation Entry which is linkable through an anchor
+  // The unique slug of a Heading/Navigation entry which is linkable through an anchor
   slug: string;
-  // The GitHub URL to the source of the API Entry
+  // The GitHub URL to the source of the API entry
   sourceLink: string | undefined;
-  // Any updates to the API Doc Metadata
+  // Any updates to the API doc Metadata
   updates: ApiDocMetadataUpdate[];
-  // Any changes to the API Doc Metadata
+  // Any changes to the API doc Metadata
   changes: ApiDocMetadataChange[];
   // The parsed Markdown content of a Navigation Entry
   heading: HeadingMetadataEntry;
-  // The API Doc Metadata Entry Stability Index if exists
+  // The API doc metadata Entry Stability Index if exists
   stability: StabilityIndexMetadataEntry | undefined;
-}
-
-export interface ApiDocMetadataEntry extends VFile {
-  data: ApiDocNavigationEntry;
+  // The subtree containing all Nodes of the API doc entry
+  content: Parent;
+  // String serialization of the AST tree
+  // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
+  toJSON: () => string;
 }
