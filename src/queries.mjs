@@ -141,7 +141,7 @@ createQueries.UNIST = {
     type === 'text' && createQueries.QUERIES.normalizeTypes.test(value),
   isMarkdownUrl: ({ type, url }) =>
     type === 'link' && createQueries.QUERIES.markdownUrl.test(url),
-  isHeadingNode: ({ type, depth }) =>
+  isHeading: ({ type, depth }) =>
     type === 'heading' && depth >= 1 && depth <= 4,
   isLinkReference: ({ type, identifier }) =>
     type === 'linkReference' && !!identifier,

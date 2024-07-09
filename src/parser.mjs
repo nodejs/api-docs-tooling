@@ -3,7 +3,7 @@
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 
-import { u } from 'unist-builder';
+import { u as createTree } from 'unist-builder';
 import { remove } from 'unist-util-remove';
 import { selectAll } from 'unist-util-select';
 import { SKIP, visit } from 'unist-util-visit';
@@ -57,13 +57,13 @@ const createParser = () => {
     const nodeSlugger = createNodeSlugger();
 
     // Parses the API doc into an AST tree using `unified` and `remark`
-    const tree = remarkGfmProcessor.parse(resolvedApiDoc);
+    const apiDocTree = remarkGfmProcessor.parse(resolvedApiDoc);
 
     // Get all Markdown Footnote definitions from the tree
-    const markdownDefinitions = selectAll('definition', tree);
+    const markdownDefinitions = selectAll('definition', apiDocTree);
 
     // Handles Link References
-    visit(tree, createQueries.UNIST.isLinkReference, node => {
+    visit(apiDocTree, createQueries.UNIST.isLinkReference, node => {
       updateLinkReference(node, markdownDefinitions);
 
       return SKIP;
@@ -71,23 +71,23 @@ const createParser = () => {
 
     // Removes all the original definitions from the tree as they are not needed
     // anymore, since all link references got updated to be plain links
-    remove(tree, markdownDefinitions);
+    remove(apiDocTree, markdownDefinitions);
 
     // Handles API type references transformation into links
-    visit(tree, createQueries.UNIST.isTextWithType, node => {
+    visit(apiDocTree, createQueries.UNIST.isTextWithType, node => {
       updateTypeToReferenceLink(node);
 
       return SKIP;
     });
 
     // Handles normalisation of Markdown URLs
-    visit(tree, createQueries.UNIST.isMarkdownUrl, node => {
+    visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, node => {
       updateMarkdownLink(node);
 
       return SKIP;
     });
 
-    visit(tree, createQueries.UNIST.isHeadingNode, (headingNode, index) => {
+    visit(apiDocTree, createQueries.UNIST.isHeading, (headingNode, index) => {
       // Creates a new Metadata entry for the current API doc file
       const apiEntryMetadata = createMetadata(nodeSlugger, remarkGfmProcessor);
 
@@ -99,7 +99,7 @@ const createParser = () => {
       // belong only to the next heading to the current Heading metadata
       // Note that if there is no next heading, we use the current node as the next one
       const nextHeadingNode =
-        findAfter(tree, index, createQueries.UNIST.isHeadingNode) ??
+        findAfter(apiDocTree, index, createQueries.UNIST.isHeading) ??
         headingNode;
 
       // This is the cutover index of the subtree that we should get
@@ -111,16 +111,19 @@ const createParser = () => {
       // otherwise the index will be off (out of sync with the tree)
       const stop =
         headingNode === nextHeadingNode
-          ? tree.children.length - 1
-          : tree.children.indexOf(nextHeadingNode);
+          ? apiDocTree.children.length - 1
+          : apiDocTree.children.indexOf(nextHeadingNode);
 
       // Retrieves all the Nodes that should belong to the current API doc section
       // `index + 1` is used to skip the current Heading Node
-      const subtree = u('root', tree.children.slice(index + 1, stop));
+      const apiSectionTree = createTree(
+        'root',
+        apiDocTree.children.slice(index + 1, stop)
+      );
 
       // Visits all Stability Index Nodes from the current subtree if there's any
       // and then apply the Stability Index Metadata to the current Metadata entry
-      visit(subtree, createQueries.UNIST.isStabilityIndex, node => {
+      visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node => {
         // Adds the Stability Index Metadata to the current Metadata entry
         addStabilityIndexMetadata(node, apiEntryMetadata);
 
@@ -129,7 +132,7 @@ const createParser = () => {
 
       // Visits all YAML Nodes from the current subtree if there's any
       // and then apply the YAML Metadata to the current Metadata entry
-      visit(subtree, createQueries.UNIST.isYamlNode, node => {
+      visit(apiSectionTree, createQueries.UNIST.isYamlNode, node => {
         // Adds the YAML Metadata to the current Metadata entry
         addYAMLMetadata(node, apiEntryMetadata);
 
@@ -137,7 +140,7 @@ const createParser = () => {
       });
 
       // Removes already parsed items from the subtree so that they aren't included in the final content
-      remove(subtree, [
+      remove(apiSectionTree, [
         createQueries.UNIST.isStabilityIndex,
         createQueries.UNIST.isYamlNode,
       ]);
@@ -149,7 +152,7 @@ const createParser = () => {
         // Applies the AST transformations to the subtree based on the API doc entry Metadata
         // Note that running the transformation on the subtree isn't costly as it is a reduced tree
         // and the GFM transformations aren't that heavy
-        remarkGfmProcessor.runSync(subtree)
+        remarkGfmProcessor.runSync(apiSectionTree)
       );
 
       // We push the parsed API doc entry Metadata to the collection
