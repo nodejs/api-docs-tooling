@@ -33,7 +33,7 @@ const createMetadata = slugger => {
     },
     /**
      * Set the Metadata (from YAML if exists) properties to the current Metadata entry
-     * itI also allows for extra data (such as Stability Index) and miscellaneous data to be set
+     * it also allows for extra data (such as Stability Index) and miscellaneous data to be set
      * although it'd be best to only set ones from {ApiDocRawMetadataEntry}
      *
      * @param {Partial<import('./types.d.ts').ApiDocRawMetadataEntry>} properties Extra Metadata properties to be defined
