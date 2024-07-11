@@ -29,6 +29,7 @@ export const transformTypeToReferenceLink = type => {
    * into the reference type from the API docs
    *
    * @param {string} lookupPiece
+   * @returns {string | undefined} The reference URL or undefined if no match was found
    */
   const transformType = lookupPiece => {
     // Transform JS primitive type references into Markdown links (MDN)

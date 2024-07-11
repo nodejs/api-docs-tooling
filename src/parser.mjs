@@ -96,7 +96,7 @@ const createParser = () => {
     // and then generates the final content for each API doc entry and pushes it to the collection
     visit(apiDocTree, createQueries.UNIST.isHeading, (headingNode, index) => {
       // Creates a new Metadata entry for the current API doc file
-      const apiEntryMetadata = createMetadata(nodeSlugger, remarkProcessor);
+      const apiEntryMetadata = createMetadata(nodeSlugger);
 
       // Adds the Metadata of the current Heading Node to the Metadata entry
       addHeadingMetadata(headingNode, apiEntryMetadata);
@@ -129,8 +129,11 @@ const createParser = () => {
       // Visits all Stability Index Nodes from the current subtree if there's any
       // and then apply the Stability Index Metadata to the current Metadata entry
       visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node => {
+        // Retrieves the subtree of the Stability Index Node
+        const stabilityNodes = createTree('root', node.children[0].children);
+
         // Adds the Stability Index Metadata to the current Metadata entry
-        addStabilityIndexMetadata(node, apiEntryMetadata);
+        addStabilityIndexMetadata(stabilityNodes, apiEntryMetadata);
 
         return SKIP;
       });
@@ -150,13 +153,20 @@ const createParser = () => {
         createQueries.UNIST.isYamlNode,
       ]);
 
+      // Applies the AST transformations to the subtree based on the API doc entry Metadata
+      // Note that running the transformation on the subtree isn't costly as it is a reduced tree
+      // and the GFM transformations aren't that heavy
+      const transformedApiSectionTree = remarkProcessor.runSync(apiSectionTree);
+
+      // Adds the `toJSON` method to stringify the tree back to Markdown
+      // So that it gets serialized correctly by JSON.stringify
+      transformedApiSectionTree.toJSON = () =>
+        remarkProcessor.stringify(transformedApiSectionTree);
+
       // We seal and create the API doc entry Metadata and push them to the collection
       const parsedApiEntryMetadata = apiEntryMetadata.create(
         resolvedApiDoc,
-        // Applies the AST transformations to the subtree based on the API doc entry Metadata
-        // Note that running the transformation on the subtree isn't costly as it is a reduced tree
-        // and the GFM transformations aren't that heavy
-        remarkProcessor.runSync(apiSectionTree)
+        transformedApiSectionTree
       );
 
       // We push the parsed API doc entry Metadata to the collection

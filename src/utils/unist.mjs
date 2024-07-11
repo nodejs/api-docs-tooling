@@ -11,23 +11,18 @@ import { pointEnd, pointStart } from 'unist-util-position';
  */
 export const transformNodesToString = nodes => {
   const mappedChildren = nodes.map(node => {
-    if (node.type === 'inlineCode') {
-      return `\`${node.value}\``;
+    switch (node.type) {
+      case 'inlineCode':
+        return `\`${node.value}\``;
+      case 'strong':
+        return `**${transformNodesToString(node.children)}**`;
+      case 'emphasis':
+        return `_${transformNodesToString(node.children)}_`;
+      default:
+        return node.children
+          ? transformNodesToString(node.children)
+          : node.value;
     }
-
-    if (node.type === 'strong') {
-      return `**${transformNodesToString(node.children)}**`;
-    }
-
-    if (node.type === 'emphasis') {
-      return `_${transformNodesToString(node.children)}_`;
-    }
-
-    if (node.children) {
-      return transformNodesToString(node.children);
-    }
-
-    return node.value;
   });
 
   return mappedChildren.join('');

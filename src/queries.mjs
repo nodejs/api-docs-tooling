@@ -21,9 +21,9 @@ const createQueries = () => {
       (_, __, inner) => inner
     );
 
-    const metadata = parserUtils.parseYAMLIntoMetadata(sanitizedString);
-
-    apiEntryMetadata.updateProperties(metadata);
+    apiEntryMetadata.setProperties(
+      parserUtils.parseYAMLIntoMetadata(sanitizedString)
+    );
   };
 
   /**
@@ -89,23 +89,29 @@ const createQueries = () => {
   /**
    * Parses a Stability Index Entry and updates the current Metadata
    *
-   * @param {import('unist').Node} node Thead Link Reference Node
+   * @param {import('unist').Parent} node Thead Link Reference Node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addStabilityIndexMetadata = (node, apiEntryMetadata) => {
-    const stabilityIndexString = transformNodesToString(
-      node.children[0].children
-    );
+    /**
+     * Handles transforming the Stability Index Node into a JSON object
+     * including the index and a concatenated description of the index
+     *
+     * @returns {import('./types.d.ts').StabilityIndexMetadataEntry}
+     */
+    node.toJSON = () => {
+      const stabilityIndexString = transformNodesToString(node.children);
 
-    const stabilityIndex =
-      createQueries.QUERIES.stabilityIndex.exec(stabilityIndexString);
+      const [, index, description] =
+        createQueries.QUERIES.stabilityIndex.exec(stabilityIndexString);
 
-    apiEntryMetadata.updateProperties({
-      stability_index: {
-        index: Number(stabilityIndex[1]),
-        description: stabilityIndex[2].replaceAll('\n', ' ').trim(),
-      },
-    });
+      return {
+        index: Number(index),
+        description: description.replaceAll('\n', ' ').trim(),
+      };
+    };
+
+    apiEntryMetadata.setStability(node);
   };
 
   return {

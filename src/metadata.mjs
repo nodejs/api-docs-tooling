@@ -8,11 +8,18 @@
  * to many files to create a full Navigation for a given version of the API
  *
  * @param {InstanceType<typeof import('github-slugger').default>} slugger A GitHub Slugger
- * @param {ReturnType<typeof remark>} remarkProcessor A Remark processor
  */
-const createMetadata = (slugger, remarkProcessor) => {
-  // This holds a temporary buffer of raw metadata before being
-  // transformed into NavigationEntries and MetadataEntries
+const createMetadata = slugger => {
+  /**
+   * This holds a temporary buffer of raw metadata before being
+   * transformed into NavigationEntries and MetadataEntries
+   *
+   * @type {{
+   *  heading: import('./types.d.ts').HeadingMetadataEntry,
+   *  stability: import('./types.d.ts').ApiDocMetadataEntry['stability'],
+   *  properties: import('./types.d.ts').ApiDocRawMetadataEntry,
+   * }}
+   */
   const internalMetadata = {
     heading: {
       text: undefined,
@@ -20,6 +27,7 @@ const createMetadata = (slugger, remarkProcessor) => {
       name: undefined,
       depth: -1,
     },
+    stability: undefined,
     properties: {},
   };
 
@@ -33,17 +41,22 @@ const createMetadata = (slugger, remarkProcessor) => {
       internalMetadata.heading = heading;
     },
     /**
+     * Set the Stability Index of a given Metadata
+     *
+     * @param {import('./types.d.ts').ApiDocMetadataEntry['stability']} stability The new stability metadata
+     */
+    setStability: stability => {
+      internalMetadata.stability = stability;
+    },
+    /**
      * Set the Metadata (from YAML if exists) properties to the current Metadata entry
      * it also allows for extra data (such as Stability Index) and miscellaneous data to be set
      * although it'd be best to only set ones from {ApiDocRawMetadataEntry}
      *
-     * @param {Partial<import('./types.d.ts').ApiDocRawMetadataEntry>} properties Extra Metadata properties to be defined
+     * @param {import('./types.d.ts').ApiDocRawMetadataEntry} properties Extra Metadata properties to be defined
      */
-    updateProperties: properties => {
-      internalMetadata.properties = {
-        ...internalMetadata.properties,
-        ...properties,
-      };
+    setProperties: properties => {
+      internalMetadata.properties = properties;
     },
     /**
      * Generates a new Navigation entry and pushes them to the internal collection
@@ -54,8 +67,8 @@ const createMetadata = (slugger, remarkProcessor) => {
      * as it can be manipulated outside of the scope of the generation of the content
      *
      * @param {import('vfile').VFile} apiDoc The API doc file being parsed
-     * @param {import('unist').Parent} section An AST tree containing the Nodes of the API doc entry section
-     * @returns {import('./types').ApiDocMetadataEntry} The locally created Metadata entries
+     * @param {import('./types.d.ts').ApiDocMetadataEntry['content']} section An AST tree containing the Nodes of the API doc entry section
+     * @returns {import('./types.d.ts').ApiDocMetadataEntry} The locally created Metadata entries
      */
     create: (apiDoc, section) => {
       // This is the ID of a certain Navigation entry, which allows us to anchor
@@ -65,25 +78,24 @@ const createMetadata = (slugger, remarkProcessor) => {
       const slugHash = `#${slugger.slug(internalMetadata.heading.text)}`;
 
       const {
-        type: yaml_type,
-        name: yaml_name,
-        source_link,
-        stability_index,
+        type: yamlType,
+        name: yamlName,
+        source_link: sourceLink,
         updates = [],
         changes = [],
       } = internalMetadata.properties;
 
       // We override the type of the heading if we have a YAML type
-      internalMetadata.heading.type =
-        yaml_type || internalMetadata.heading.type;
+      internalMetadata.heading.type = yamlType || internalMetadata.heading.type;
 
-      const apiEntryMetadata = {
+      // Returns the Metadata entry for the API doc
+      return {
         // The API file basename (without the extension)
-        api: yaml_name || apiDoc.stem,
+        api: yamlName || apiDoc.stem,
         // The path/slug of the API section
         slug: `${apiDoc.stem}.html${slugHash}`,
         // The source link of said API section
-        sourceLink: source_link,
+        sourceLink: sourceLink,
         // The latest updates to an API section
         updates,
         // The full-changeset to an API section
@@ -91,24 +103,9 @@ const createMetadata = (slugger, remarkProcessor) => {
         // The Heading metadata
         heading: internalMetadata.heading,
         // The Stability Index of the API section
-        stability: stability_index,
+        stability: internalMetadata.stability,
         // The AST tree of the API section
         content: section,
-      };
-
-      // Returns the Metadata entry for the API doc
-      return {
-        // Appends the base Metadata entry
-        ...apiEntryMetadata,
-
-        // Overrides the toJSON method to allow for custom serialization
-        toJSON: () => ({
-          ...apiEntryMetadata,
-
-          // We stringify the AST tree to a string
-          // since this is what we wanbt to render within a JSON object
-          content: remarkProcessor.stringify(section),
-        }),
       };
     },
   };

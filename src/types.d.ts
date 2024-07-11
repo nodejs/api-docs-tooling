@@ -1,4 +1,10 @@
-import { Parent } from 'unist';
+import { Parent, Node } from 'unist';
+
+// String serialization of the AST tree
+// @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
+export interface WithJSON<T extends Node, J = any> extends T {
+  toJSON: () => J;
+}
 
 export interface StabilityIndexMetadataEntry {
   index: number;
@@ -41,7 +47,6 @@ export interface ApiDocRawMetadataEntry {
   source_link?: string;
   updates?: ApiDocMetadataUpdate[];
   changes?: ApiDocMetadataChange[];
-  stability_index?: StabilityIndexMetadataEntry;
 }
 
 export interface ApiDocMetadataEntry {
@@ -58,10 +63,7 @@ export interface ApiDocMetadataEntry {
   // The parsed Markdown content of a Navigation Entry
   heading: HeadingMetadataEntry;
   // The API doc metadata Entry Stability Index if exists
-  stability: StabilityIndexMetadataEntry | undefined;
+  stability: WithJSON<Parent, StabilityIndexMetadataEntry> | undefined;
   // The subtree containing all Nodes of the API doc entry
-  content: Parent;
-  // String serialization of the AST tree
-  // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
-  toJSON: () => string;
+  content: WithJSON<Parent, string>;
 }
