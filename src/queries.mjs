@@ -21,7 +21,7 @@ const createQueries = () => {
       (_, __, inner) => inner
     );
 
-    apiEntryMetadata.setProperties(
+    apiEntryMetadata.updateProperties(
       parserUtils.parseYAMLIntoMetadata(sanitizedString)
     );
   };

@@ -53,10 +53,17 @@ const createMetadata = slugger => {
      * it also allows for extra data (such as Stability Index) and miscellaneous data to be set
      * although it'd be best to only set ones from {ApiDocRawMetadataEntry}
      *
-     * @param {import('./types.d.ts').ApiDocRawMetadataEntry} properties Extra Metadata properties to be defined
+     * Note: A single API doc entry might have multiple YAML metadata blocks,
+     * meaning that this method can be called multiple times to update the properties
+     * and complement each set of data.
+     *
+     * @param {Partial<import('./types.d.ts').ApiDocRawMetadataEntry>} properties Extra Metadata properties to be defined
      */
-    setProperties: properties => {
-      internalMetadata.properties = properties;
+    updateProperties: properties => {
+      internalMetadata.properties = {
+        ...internalMetadata.properties,
+        ...properties,
+      };
     },
     /**
      * Generates a new Navigation entry and pushes them to the internal collection
