@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "github-slugger": "^2.0.0",
-    "glob": "^10.4.3",
+    "glob": "^11.0.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",
     "unist-builder": "^4.0.0",
