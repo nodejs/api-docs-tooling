@@ -28,7 +28,7 @@ export interface GeneratorMetadata<I extends any = any, O extends any = any> {
    * If a given generator has no "before" generator, it will be considered a top-level
    * generator, and run in parallel.
    *
-   * Assume you pass to the `createGenerator`: ['json', 'html'] as ther generators,
+   * Assume you pass to the `createGenerator`: ['json', 'html'] as the generators,
    * this means both the 'json' and the 'html' generators will be executed and generate their
    * own outputs in parallel. If the 'html' generator depends on the 'react' generator, then
    * the 'react' generator will be executed first, then the 'html' generator.

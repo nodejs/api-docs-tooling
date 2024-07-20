@@ -111,7 +111,7 @@ const createParser = () => {
 
       // This is the cutover index of the subtree that we should get
       // of all the Nodes within the AST tree that belong to this section
-      // If `next` is equals the current heading, it means ther's no next heading
+      // If `next` is equals the current heading, it means there's no next heading
       // and we are reaching the end of the document, hence the cutover should be the end of
       // the document itself.
       const stop =

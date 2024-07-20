@@ -42,7 +42,7 @@ const createGenerator = input => {
     for (const generatorName of options.generators) {
       const { dependsOn, generate } = availableGenerators[generatorName];
 
-      // If the generator dependency has not yet been reslved, we resolve
+      // If the generator dependency has not yet been resolved, we resolve
       // the dependency first before running the current generator
       if (dependsOn && !cachedGenerators.has(dependsOn)) {
         await runGenerators({ ...options, generators: [dependsOn] });
