@@ -52,5 +52,5 @@ export interface GeneratorMetadata<I extends any = any, O extends any = any> {
    *
    * Hence you can combine different generators to achieve different outputs.
    */
-  generate: (input: I | Array<I>, options: GeneratorOptions) => Promise<O>;
+  generate: (input: I, options: GeneratorOptions) => Promise<O>;
 }
