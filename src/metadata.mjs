@@ -1,6 +1,10 @@
 'use strict';
 
 /**
+ * @typedef {import('./types.d.ts').ApiDocMetadataEntry} ApiDocMetadataEntry Local type alias for the API doc metadata entry
+ * @typedef {import('./types.d.ts').ApiDocRawMetadataEntry} ApiDocRawMetadataEntry Local type alias for the API doc raw metadata entry
+ * @typedef {import('./types.d.ts').HeadingMetadataEntry} HeadingMetadataEntry Local type alias for the heading metadata entry
+ *
  * This method allows us to handle creation of Metadata entries
  * within the current scope of API docs being parsed
  *
@@ -15,9 +19,9 @@ const createMetadata = slugger => {
    * transformed into NavigationEntries and MetadataEntries
    *
    * @type {{
-   *  heading: import('./types.d.ts').HeadingMetadataEntry,
-   *  stability: import('./types.d.ts').ApiDocMetadataEntry['stability'],
-   *  properties: import('./types.d.ts').ApiDocRawMetadataEntry,
+   *  heading: HeadingMetadataEntry,
+   *  properties: ApiDocRawMetadataEntry,
+   *  stability: ApiDocMetadataEntry['stability'],
    * }}
    */
   const internalMetadata = {
@@ -27,15 +31,15 @@ const createMetadata = slugger => {
       name: undefined,
       depth: -1,
     },
-    stability: undefined,
     properties: {},
+    stability: undefined,
   };
 
   return {
     /**
      * Set the Heading of a given Metadata
      *
-     * @param {import('./types.d.ts').HeadingMetadataEntry} heading The new heading metadata
+     * @param {HeadingMetadataEntry} heading The new heading metadata
      */
     setHeading: heading => {
       internalMetadata.heading = heading;
@@ -43,7 +47,7 @@ const createMetadata = slugger => {
     /**
      * Set the Stability Index of a given Metadata
      *
-     * @param {import('./types.d.ts').ApiDocMetadataEntry['stability']} stability The new stability metadata
+     * @param {ApiDocMetadataEntry['stability']} stability The new stability metadata
      */
     setStability: stability => {
       internalMetadata.stability = stability;
@@ -57,7 +61,7 @@ const createMetadata = slugger => {
      * meaning that this method can be called multiple times to update the properties
      * and complement each set of data.
      *
-     * @param {Partial<import('./types.d.ts').ApiDocRawMetadataEntry>} properties Extra Metadata properties to be defined
+     * @param {Partial<ApiDocRawMetadataEntry>} properties Extra Metadata properties to be defined
      */
     updateProperties: properties => {
       internalMetadata.properties = {
@@ -74,8 +78,8 @@ const createMetadata = slugger => {
      * as it can be manipulated outside of the scope of the generation of the content
      *
      * @param {import('vfile').VFile} apiDoc The API doc file being parsed
-     * @param {import('./types.d.ts').ApiDocMetadataEntry['content']} section An AST tree containing the Nodes of the API doc entry section
-     * @returns {import('./types.d.ts').ApiDocMetadataEntry} The locally created Metadata entries
+     * @param {ApiDocMetadataEntry['content']} section An AST tree containing the Nodes of the API doc entry section
+     * @returns {ApiDocMetadataEntry} The locally created Metadata entries
      */
     create: (apiDoc, section) => {
       // This is the ID of a certain Navigation entry, which allows us to anchor
