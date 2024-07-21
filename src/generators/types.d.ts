@@ -1,4 +1,4 @@
-import availableGenerators from './index.mjs';
+import type availableGenerators from './index.mjs';
 
 // This is the runtime config passed to the API doc genberators
 export interface GeneratorOptions {
