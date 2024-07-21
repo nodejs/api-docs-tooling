@@ -33,7 +33,7 @@ const createGenerator = input => {
   /**
    * Runs the Generator engine with the provided top-level input and the given generator options
    *
-   * @param {import('./generators/types.d.ts').GeneratorOptions} options THe options for the generator runtime
+   * @param {import('./generators/types.d.ts').GeneratorOptions} options The options for the generator runtime
    */
   const runGenerators = async options => {
     // Note that this method is blocking, and will only execute one generator per-time
