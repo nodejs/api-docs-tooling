@@ -24,10 +24,10 @@ import availableGenerators from './generators/index.mjs';
 const createGenerator = input => {
   /**
    * We store all the registered generators to be processed
-   * within a Map, so we can access their results at any time whenever needed
+   * within a Record, so we can access their results at any time whenever needed
    * (we store the Promises of the generator outputs)
    *
-   * @type {import('./generators/types.d.ts').ResolvedGenerators<AllGenerators>}
+   * @type {{ [K in keyof AllGenerators]: ReturnType<AllGenerators[K]['generate']> }}
    */
   const cachedGenerators = { ast: Promise.resolve(input) };
 

@@ -59,7 +59,3 @@ export interface GeneratorMetadata<I extends any, O extends any> {
    */
   generate: (input: I, options: Partial<GeneratorOptions>) => Promise<O>;
 }
-
-export type ResolvedGenerators<T extends AvailableGenerators> = {
-  [K in keyof T]: ReturnType<T[K]['generate']>;
-};
