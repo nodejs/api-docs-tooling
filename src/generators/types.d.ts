@@ -1,6 +1,6 @@
 import type availableGenerators from './index.mjs';
 
-// All available generators as an inferrable type, to allow Generator interfaces
+// All available generators as an inferable type, to allow Generator interfaces
 // to be type complete and runtime friendly within `runGenerators`
 export type AvailableGenerators = typeof availableGenerators;
 
