@@ -1,6 +1,6 @@
 'use strict';
 
-import { writeFile } from 'fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /**
