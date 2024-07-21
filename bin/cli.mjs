@@ -17,9 +17,10 @@ program
   )
   .requiredOption('-o, --output <path>', 'Specify the output directory path')
   .addOption(
-    new Option('-t, --target <mode>', 'Set the processing target mode').choices(
-      Object.keys(CLI_TARGET_MAPPING)
-    )
+    new Option(
+      '-t, --target [mode...]',
+      'Set the processing target mode'
+    ).choices(Object.keys(CLI_TARGET_MAPPING))
   )
   .parse(argv);
 
@@ -45,6 +46,6 @@ const parsedApiDocs = await parseApiDocs(apiDocFiles);
 const { runGenerators } = createGenerator(parsedApiDocs);
 
 await runGenerators({
-  generators: CLI_TARGET_MAPPING[target],
+  generators: target.map(mode => CLI_TARGET_MAPPING[mode]),
   output: resolve(output),
 });

@@ -331,7 +331,7 @@ export const DOC_TYPES_MAPPING_OTHER = {
 
 // Mapping that determines which generators are run on the target modes used in the CLI
 export const CLI_TARGET_MAPPING = {
-  mdx: [],
-  json: ['jsonSimple'],
-  html: ['legacyHtml'],
+  mdx: 'mdx',
+  json: 'jsonSimple',
+  html: 'legacyHtml',
 };
