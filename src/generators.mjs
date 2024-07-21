@@ -27,9 +27,9 @@ const createGenerator = input => {
    * within a Map, so we can access their results at any time whenever needed
    * (we store the Promises of the generator outputs)
    *
-   * @type {Map<keyof AllGenerators, ReturnType<AllGenerators[keyof AllGenerators]['generate']>>>}
+   * @type {import('./generators/types.d.ts').ResolvedGenerators<AllGenerators>}
    */
-  const cachedGenerators = new Map([['ast', Promise.resolve(input)]]);
+  const cachedGenerators = { ast: Promise.resolve(input) };
 
   /**
    * Runs the Generator engine with the provided top-level input and the given generator options
@@ -45,24 +45,21 @@ const createGenerator = input => {
 
       // If the generator dependency has not yet been resolved, we resolve
       // the dependency first before running the current generator
-      if (dependsOn && !cachedGenerators.has(dependsOn)) {
+      if (dependsOn && dependsOn in cachedGenerators === false) {
         await runGenerators({ output, generators: [dependsOn] });
       }
 
       // Ensures that the dependency output gets resolved before we run the current
       // generator with its dependency output as the input
-      const dependencyOutput = await cachedGenerators.get(dependsOn);
+      const dependencyOutput = await cachedGenerators[dependsOn];
 
       // Adds the current generator execution Promise to the cache
-      cachedGenerators.set(
-        generatorName,
-        generate(dependencyOutput, { output })
-      );
+      cachedGenerators[generatorName] = generate(dependencyOutput, { output });
     }
 
     // Returns the value of the last generator of the current pipeline
     // Note that dependencies will be awaited (as shown on line 48)
-    return cachedGenerators.get(generators[generators.length - 1]);
+    return cachedGenerators[generators[generators.length - 1]];
   };
 
   return { runGenerators };

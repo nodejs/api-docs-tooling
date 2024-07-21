@@ -18,7 +18,7 @@ export interface GeneratorOptions {
   generators: (keyof AvailableGenerators)[];
 }
 
-export interface GeneratorMetadata<I extends any = any, O extends any = any> {
+export interface GeneratorMetadata<I extends any, O extends any> {
   // The name of the Generator. Must match the Key in the AvailableGenerators
   name: keyof AvailableGenerators;
 
@@ -59,3 +59,7 @@ export interface GeneratorMetadata<I extends any = any, O extends any = any> {
    */
   generate: (input: I, options: Partial<GeneratorOptions>) => Promise<O>;
 }
+
+export type ResolvedGenerators<T extends AvailableGenerators> = {
+  [K in keyof T]: ReturnType<T[K]['generate']>;
+};
