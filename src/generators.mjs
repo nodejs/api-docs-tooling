@@ -27,7 +27,7 @@ const createGenerator = input => {
    * within a Map, so we can access their results at any time whenever needed
    * (we store the Promises of the generator outputs)
    *
-   * @type {Map<keyof AllGenerators,ReturnType<AllGenerators[keyof AllGenerators]['generate']>>>}
+   * @type {Map<keyof AllGenerators, ReturnType<AllGenerators[keyof AllGenerators]['generate']>>>}
    */
   const cachedGenerators = new Map([['ast', Promise.resolve(input)]]);
 
