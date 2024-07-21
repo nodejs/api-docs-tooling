@@ -2,7 +2,7 @@ import { Parent, Node } from 'unist';
 
 // String serialization of the AST tree
 // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
-export interface WithJSON<T extends Node, J = any> extends T {
+export interface WithJSON<T extends Node, J extends any = any> extends T {
   toJSON: () => J;
 }
 
