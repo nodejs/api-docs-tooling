@@ -1,5 +1,9 @@
 import type availableGenerators from './index.mjs';
 
+// All available generators as an inferrable type, to allow Generator interfaces
+// to be type complete and runtime friendly within `runGenerators`
+export type AvailableGenerators = typeof availableGenerators;
+
 // This is the runtime config passed to the API doc genberators
 export interface GeneratorOptions {
   // The path used to output generated files, this is to be considered
@@ -11,11 +15,12 @@ export interface GeneratorOptions {
   // This is considered a "sorted" list of generators, in the sense that
   // if the last entry of this list contains a generated value, we will return
   // the value of the last generator in the list, if any.
-  generators: (keyof typeof availableGenerators)[];
+  generators: (keyof AvailableGenerators)[];
 }
 
 export interface GeneratorMetadata<I extends any = any, O extends any = any> {
-  name: string;
+  // The name of the Generator. Must match the Key in the AvailableGenerators
+  name: keyof AvailableGenerators;
 
   version: string;
 
@@ -41,7 +46,7 @@ export interface GeneratorMetadata<I extends any = any, O extends any = any> {
    * The 'ast' generator is the top-level parser, and if 'ast' is passed to `dependsOn`, then the generator
    * will be marked as a top-level generator.
    */
-  dependsOn: GeneratorMetadata['name'] | 'ast';
+  dependsOn: keyof AvailableGenerators | 'ast';
 
   /**
    * Generators are abstract and the different generators have different sort of inputs and outputs.
@@ -52,5 +57,5 @@ export interface GeneratorMetadata<I extends any = any, O extends any = any> {
    *
    * Hence you can combine different generators to achieve different outputs.
    */
-  generate: (input: I, options: GeneratorOptions) => Promise<O>;
+  generate: (input: I, options: Partial<GeneratorOptions>) => Promise<O>;
 }
