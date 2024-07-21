@@ -4,7 +4,7 @@ import type availableGenerators from './index.mjs';
 // to be type complete and runtime friendly within `runGenerators`
 export type AvailableGenerators = typeof availableGenerators;
 
-// This is the runtime config passed to the API doc genberators
+// This is the runtime config passed to the API doc generators
 export interface GeneratorOptions {
   // The path used to output generated files, this is to be considered
   // the base path that any generator will use for generating files
@@ -38,7 +38,7 @@ export interface GeneratorMetadata<I extends any, O extends any> {
    * own outputs in parallel. If the 'html' generator depends on the 'react' generator, then
    * the 'react' generator will be executed first, then the 'html' generator.
    *
-   * But both 'json' and 'htnl' generators will be executed in parallel.
+   * But both 'json' and 'html' generators will be executed in parallel.
    *
    * If you pass `createGenerator` with ['react', 'html'], the 'react' generator will be executed first,
    * as it is a top level generator and then the 'html' generator would be executed after the 'react' generator.
