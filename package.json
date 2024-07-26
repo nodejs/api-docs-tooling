@@ -1,10 +1,13 @@
 {
+  "name": "@node-core/api-docs-tooling",
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "husky"
   },
-  "bin": "./bin/cli.mjs",
+  "bin": {
+    "api-docs-tooling": "./bin/cli.mjs"
+  },
   "devDependencies": {
     "@eslint/js": "^9.7.0",
     "@types/node": "^20.14.10",
