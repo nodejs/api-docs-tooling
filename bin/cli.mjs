@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
-import { Command, Option } from 'commander';
 import { argv } from 'node:process';
 import { resolve } from 'node:path';
+
+import { Command, Option } from 'commander';
+
 import createGenerator from '../src/generators.mjs';
 import createLoader from '../src/loader.mjs';
 import createParser from '../src/parser.mjs';
