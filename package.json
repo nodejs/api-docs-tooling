@@ -26,6 +26,6 @@
     "unist-util-select": "^5.1.0",
     "unist-util-visit": "^5.0.0",
     "vfile": "^6.0.2",
-    "yaml": "^2.4.5"
+    "yaml": "^2.5.0"
   }
 }
