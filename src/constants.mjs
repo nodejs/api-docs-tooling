@@ -328,10 +328,3 @@ export const DOC_TYPES_MAPPING_OTHER = {
   Response: `${DOC_MDN_BASE_URL}/API/Response`,
   Request: `${DOC_MDN_BASE_URL}/API/Request`,
 };
-
-// Mapping that determines which generators are run on the target modes used in the CLI
-export const CLI_TARGET_MAPPING = {
-  mdx: 'mdx',
-  json: 'jsonSimple',
-  html: 'legacyHtml',
-};

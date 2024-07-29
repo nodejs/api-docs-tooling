@@ -15,7 +15,7 @@ import { join } from 'node:path';
  * @type {import('../types.d.ts').GeneratorMetadata<Input, string>}
  */
 export default {
-  name: 'jsonSimple',
+  name: 'json-simple',
 
   version: '1.0.0',
 

@@ -8,11 +8,13 @@ import { Command, Option } from 'commander';
 import createGenerator from '../src/generators.mjs';
 import createLoader from '../src/loader.mjs';
 import createParser from '../src/parser.mjs';
-import { CLI_TARGET_MAPPING } from '../src/constants.mjs';
+import generators from '../src/generators/index.mjs';
 
 const program = new Command();
 
 program
+  .name('api-docs-tooling')
+  .description('CLI tool to generate API documentation of a Node.js project.')
   .requiredOption(
     '-i, --input <patterns...>',
     'Specify input file patterns using glob syntax'
@@ -22,20 +24,22 @@ program
     new Option(
       '-t, --target [mode...]',
       'Set the processing target mode'
-    ).choices(Object.keys(CLI_TARGET_MAPPING))
+    ).choices(Object.keys(generators))
   )
   .parse(argv);
 
 /**
- * Defines the structure for command line options after parsing.
+ * @typedef {keyof generators} Target A list of the available generator names.
  *
  * @typedef {Object} Options
  * @property {Array<string>|string} input Specifies the glob/path for input files.
  * @property {string} output Specifies the directory where output files will be saved.
- * @property {keyof CLI_TARGET_MAPPING} target Specifies the execution target mode.
+ * @property {Target} target Specifies the generator target mode.
+ *
+ * @name ProgramOptions
+ * @type {Options}
+ * @description The return type for values sent to the program from the CLI.
  */
-
-/** @type {Options} */
 const { input, output, target } = program.opts();
 
 const { loadFiles } = createLoader();
@@ -48,6 +52,6 @@ const parsedApiDocs = await parseApiDocs(apiDocFiles);
 const { runGenerators } = createGenerator(parsedApiDocs);
 
 await runGenerators({
-  generators: target.map(mode => CLI_TARGET_MAPPING[mode]),
+  generators: target,
   output: resolve(output),
 });
