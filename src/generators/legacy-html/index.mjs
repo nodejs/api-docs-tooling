@@ -12,7 +12,7 @@
  * @type {import('../types.d.ts').GeneratorMetadata<Input, void>}
  */
 export default {
-  name: 'legacyHtml',
+  name: 'legacy-html',
 
   version: '1.0.0',
 

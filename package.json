@@ -1,8 +1,12 @@
 {
+  "name": "@node-core/api-docs-tooling",
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "husky"
+  },
+  "bin": {
+    "api-docs-tooling": "./bin/cli.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
@@ -16,6 +20,7 @@
   },
   "dependencies": {
     "github-slugger": "^2.0.0",
+    "commander": "^12.1.0",
     "glob": "^11.0.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",
