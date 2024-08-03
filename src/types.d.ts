@@ -1,4 +1,5 @@
-import { Parent, Node } from 'unist';
+import type { SemVer } from 'semver';
+import type { Parent, Node } from 'unist';
 
 // String serialization of the AST tree
 // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
@@ -66,4 +67,9 @@ export interface ApiDocMetadataEntry {
   stability: WithJSON<Parent, StabilityIndexMetadataEntry> | undefined;
   // The subtree containing all Nodes of the API doc entry
   content: WithJSON<Parent, string>;
+}
+
+export interface ApiDocReleaseEntry {
+  version: SemVer;
+  isLts: boolean;
 }

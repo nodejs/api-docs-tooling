@@ -1,4 +1,6 @@
+import type { SemVer } from 'semver';
 import type availableGenerators from './index.mjs';
+import { ApiDocReleaseEntry } from '../types';
 
 // All available generators as an inferable type, to allow Generator interfaces
 // to be type complete and runtime friendly within `runGenerators`
@@ -11,11 +13,18 @@ export interface GeneratorOptions {
   // This parameter accepts globs but when passed to generators will contain
   // the already resolved absolute path to the output folder
   output: string;
+
   // A list of generators to be used in the API doc generation process;
   // This is considered a "sorted" list of generators, in the sense that
   // if the last entry of this list contains a generated value, we will return
   // the value of the last generator in the list, if any.
-  generators: (keyof AvailableGenerators)[];
+  generators: Array<keyof AvailableGenerators>;
+
+  // Target Node.js version for the generation of the API docs
+  version: SemVer;
+
+  // A list of all Node.js major versions and their respective release information
+  releases: Array<ApiDocReleaseEntry>;
 }
 
 export interface GeneratorMetadata<I extends any, O extends any> {

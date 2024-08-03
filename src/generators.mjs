@@ -36,7 +36,7 @@ const createGenerator = input => {
    *
    * @param {import('./generators/types.d.ts').GeneratorOptions} options The options for the generator runtime
    */
-  const runGenerators = async ({ output, generators }) => {
+  const runGenerators = async ({ generators, ...extra }) => {
     // Note that this method is blocking, and will only execute one generator per-time
     // but it ensures all dependencies are resolved, and that multiple bottom-level generators
     // can reuse the already parsed content from the top-level/dependency generators
@@ -46,7 +46,7 @@ const createGenerator = input => {
       // If the generator dependency has not yet been resolved, we resolve
       // the dependency first before running the current generator
       if (dependsOn && dependsOn in cachedGenerators === false) {
-        await runGenerators({ output, generators: [dependsOn] });
+        await runGenerators({ ...extra, generators: [dependsOn] });
       }
 
       // Ensures that the dependency output gets resolved before we run the current
@@ -54,7 +54,7 @@ const createGenerator = input => {
       const dependencyOutput = await cachedGenerators[dependsOn];
 
       // Adds the current generator execution Promise to the cache
-      cachedGenerators[generatorName] = generate(dependencyOutput, { output });
+      cachedGenerators[generatorName] = generate(dependencyOutput, extra);
     }
 
     // Returns the value of the last generator of the current pipeline
