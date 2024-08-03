@@ -31,7 +31,7 @@ const getChangelogFromFileSystem = async changelogUrl =>
  * This creates an utility to retrieve the Node.js major release metadata
  * purely out from the Node.js CHANGELOG.md file
  *
- * @param {string} changelogPath The gien URL to the Node.js CHANGELOG.md file
+ * @param {string} changelogPath The given URL to the Node.js CHANGELOG.md file
  */
 const createNodeReleases = changelogPath => {
   const changelogUrl = new URL(changelogPath);
