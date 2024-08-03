@@ -1,7 +1,11 @@
 'use strict';
 
-// This is the base-path of API docs within the https://nodejs.org Website
-export const DOC_WEB_BASE_PATH = '/docs/';
+// The current running version of Node.js (Environment)
+export const DOC_NODE_VERSION = process.version;
+
+// This is the Node.js CHANGELOG to be consumed to generate a list of all major Node.js versions
+export const DOC_NODE_CHANGELOG_URL =
+  'https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md';
 
 // This is the base URL of the MDN Web documentation
 export const DOC_MDN_BASE_URL = 'https://developer.mozilla.org/en-US/docs/Web/';

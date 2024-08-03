@@ -25,6 +25,8 @@ export default {
   dependsOn: 'ast',
 
   async generate(input, options) {
+    console.log(options);
+
     // This simply grabs all the different files and stringifies them
     const stringifiedContent = JSON.stringify(input, null, 2);
 
