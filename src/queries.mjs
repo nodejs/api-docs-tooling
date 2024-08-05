@@ -156,6 +156,35 @@ const createQueries = () => {
     );
   };
 
+  /**
+   * Updates type links `{types}` into Markdown links referencing to the correct
+   * API docs (either MDN or other sources) for the types
+   *
+   * @param {import('vfile').VFile} vfile The source Markdown file before any modifications
+   */
+  const updateTypesToMarkdownLinks = vfile => {
+    // The `vfile` value is a String (check `loaders.mjs`)
+    vfile.value = vfile.value.replaceAll(
+      createQueries.QUERIES.normalizeTypes,
+      parserUtils.transformTypeToReferenceLink
+    );
+  };
+
+  /**
+   * Updates the Stability Index Prefixes to be Markdown Links
+   * to the API documentation
+   *
+   * @param {import('vfile').VFile} vfile The source Markdown file before any modifications
+   */
+  const updateStailityPrefixToMarkdownLinks = vfile => {
+    if (vfile.basename !== 'documentation.md') {
+      vfile.value = vfile.value.replaceAll(
+        createQueries.QUERIES.stabilityIndexPrefix,
+        match => `[${match}](${DOC_API_STABILITY_SECTION_REF_URL})`
+      );
+    }
+  };
+
   return {
     addYAMLMetadata,
     setHeadingMetadata,
