@@ -76,7 +76,7 @@ export const transformTypeToReferenceLink = type => {
   // Note that if some failed to get replaced, only the valid ones will be returned
   // NOTE: Based on the original code, we don't seem to care when we fail specific entries to be replaced
   // although I believe this should be revisited and either show the original type content or show a warning
-  return markdownLinks || typeInput;
+  return markdownLinks || type;
 };
 
 /**
