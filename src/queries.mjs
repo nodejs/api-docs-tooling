@@ -27,22 +27,6 @@ const createQueries = () => {
   };
 
   /**
-   * Transforms plain reference to Web/JavaScript/Node.js types
-   * into Markdown links containing the proper reference to said types
-   *
-   * @param {import('unist').Node} node The Type Node
-   */
-  const updateTypeToReferenceLink = node => {
-    const parsedReference = node.value.replace(
-      createQueries.QUERIES.normalizeTypes,
-      parserUtils.transformTypeToReferenceLink
-    );
-
-    node.type = 'html';
-    node.value = parsedReference;
-  };
-
-  /**
    * Parse a Heading Node into Metadata and updates the current Metadata
    *
    * @param {import('unist').Node} node The Heading Node
@@ -93,30 +77,35 @@ const createQueries = () => {
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addStabilityIndexMetadata = (node, apiEntryMetadata) => {
-    /**
-     * Handles transforming the Stability Index Node into a JSON object
-     * including the index and a concatenated description of the index
-     *
-     * @returns {import('./types.d.ts').StabilityIndexMetadataEntry}
-     */
-    node.toJSON = () => {
-      const stabilityIndexString = transformNodesToString(node.children);
+    const stabilityPrefix = transformNodesToString(
+      // `node` is a `blockquote` node, and the first child will always be
+      // a `paragraph` node, so we can safely access the children of the first child
+      // which we use as the prefix and description of the Stability Index
+      node.children[0].children
+    );
 
-      const [, index, description] =
-        createQueries.QUERIES.stabilityIndex.exec(stabilityIndexString);
+    // Attempts to grab the Stability Index and Description from the prefix
+    const matches = createQueries.QUERIES.stabilityIndex.exec(stabilityPrefix);
 
-      return {
-        index: Number(index),
-        description: description.replaceAll('\n', ' ').trim(),
-      };
-    };
+    // Ensures that the matches are valid and that we have at least 3 entries
+    if (matches && matches.length >= 3) {
+      // The 2nd match should be the group that matches the Stability Index
+      const index = Number(matches[1]);
+      // The 3rd match should be the group containing all the remaining text
+      // which is used as a description (we trim it to an one liner)
+      const description = matches[2].replaceAll('\n', ' ').trim();
 
-    apiEntryMetadata.setStability(node);
+      // Append the stability index to the node's `data` property and add it to
+      // the current metadata as a yet another stability index entry
+      apiEntryMetadata.addStability({
+        ...node,
+        data: { index, description },
+      });
+    }
   };
 
   return {
     addYAMLMetadata,
-    updateTypeToReferenceLink,
     addHeadingMetadata,
     updateMarkdownLink,
     updateLinkReference,

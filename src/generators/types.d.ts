@@ -1,6 +1,6 @@
 import type { SemVer } from 'semver';
 import type availableGenerators from './index.mjs';
-import { ApiDocReleaseEntry } from '../types';
+import type { ApiDocReleaseEntry } from '../types';
 
 // All available generators as an inferable type, to allow Generator interfaces
 // to be type complete and runtime friendly within `runGenerators`

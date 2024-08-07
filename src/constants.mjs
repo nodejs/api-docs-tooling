@@ -19,15 +19,6 @@ export const DOC_MDN_BASE_URL_JS_PRIMITIVES = `${DOC_MDN_BASE_URL_JS}Data_struct
 // This is the base URL for the MDN JavaScript global objects documentation
 export const DOC_MDN_BASE_URL_JS_GLOBALS = `${DOC_MDN_BASE_URL_JS}Reference/Global_Objects/`;
 
-// These are YAML keys from the Markdown YAML Metadata that should always be arrays
-export const DOC_API_YAML_KEYS_ARRAYS = [
-  'added',
-  'napiVersion',
-  'deprecated',
-  'removed',
-  'introduced_in',
-];
-
 // These are YAML keys from the Markdown YAML metadata that should be
 // removed and appended to the `update` key
 export const DOC_API_YAML_KEYS_UPDATE = [
@@ -72,6 +63,16 @@ export const DOC_API_HEADING_TYPES = [
     regex: /^(?:Class property: +)?`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)`?$/i,
   },
 ];
+
+// This is a mapping for the `API` updates within the Markdown content and their respective
+// content that should be mapping into `changes` property for better mapping on HTML
+export const DOC_API_UPDATE_MAPPING = {
+  added: 'Added in',
+  removed: 'Removed in',
+  deprecated: 'Deprecated since',
+  introduced_in: 'Introduced in',
+  napiVersion: 'N-API Version',
+};
 
 // This is a mapping for types within the Markdown content and their respective
 // JavaScript primitive types within the MDN JavaScript docs

@@ -4,7 +4,6 @@ import yaml from 'yaml';
 
 import {
   DOC_API_HEADING_TYPES,
-  DOC_API_YAML_KEYS_ARRAYS,
   DOC_API_YAML_KEYS_UPDATE,
   DOC_MDN_BASE_URL_JS_GLOBALS,
   DOC_MDN_BASE_URL_JS_PRIMITIVES,
@@ -47,7 +46,7 @@ export const transformTypeToReferenceLink = type => {
     // Transform other external Web/JavaScript type references into Markdown links
     // to diverse different external websites. These already are formatted as links
     if (lookupPiece in DOC_TYPES_MAPPING_OTHER) {
-      return DOC_TYPES_MAPPING_NODE_MODULES[lookupPiece];
+      return DOC_TYPES_MAPPING_OTHER[lookupPiece];
     }
 
     // Transform Node.js type/module references into Markdown links
@@ -66,7 +65,7 @@ export const transformTypeToReferenceLink = type => {
     // This is what we will compare against the API types mappings
     const result = transformType(trimmedPiece.replace(/(?:\[])+$/, ''));
 
-    return result ? `[\`${trimmedPiece}\`](${result})` : undefined;
+    return result && `[\`<${trimmedPiece}>\`](${result})`;
   });
 
   // Filter out pieces that we failed to map and then join the valid ones
@@ -85,7 +84,7 @@ export const transformTypeToReferenceLink = type => {
  * (this is forwarded to the parser so it knows what to do with said metadata)
  *
  * @param {string} yamlString The YAML string to be parsed
- * @returns {import('../types.d.ts').ApiDocRawMetadataEntry} The parsed YAML metadata
+ * @returns {ApiDocRawMetadataEntry} The parsed YAML metadata
  */
 export const parseYAMLIntoMetadata = yamlString => {
   const replacedContent = yamlString
@@ -97,20 +96,39 @@ export const parseYAMLIntoMetadata = yamlString => {
 
   // Ensures that the parsed YAML is an object, because even if it is not
   // i.e. a plain string or an array, it will simply not result into anything
-  const parsedYaml = Object(yaml.parse(replacedContent));
+  /** @type {ApiDocRawMetadataEntry} */
+  const parsedYaml = yaml.parse(replacedContent);
 
-  // This cleans up the YAML metadata into something more standardized
+  // Ensure that only Objects get parsed on Object.keys(), since some `<!--`
+  // comments, might be just plain strings and not even a valid YAML metadata
+  if (typeof parsedYaml !== 'object') {
+    return {};
+  }
+
+  // This cleans up the YAML metadata into something more standardized and that
+  // can be consumed by our metadata parser
   Object.keys(parsedYaml).forEach(key => {
-    // Some entries should always be Array for the sake of consistency
-    if (DOC_API_YAML_KEYS_ARRAYS.includes(key)) {
-      parsedYaml[key] = [parsedYaml[key]].flat();
+    // We normalise entries from the `changes` object, ensuring that
+    // the versions property is always an array
+    if (key === 'changes' && Array.isArray(parsedYaml[key])) {
+      // The `changes` entry must always be an array of objects
+      // if that's not the case, we should report a warning in the future
+      parsedYaml[key] = parsedYaml[key].map(change => ({
+        ...change,
+        version: [change.version].flat(),
+      }));
     }
 
     // We transform some entries in a standardized "updates" field
     // and then remove them from the parsedYaml
     if (DOC_API_YAML_KEYS_UPDATE.includes(key)) {
-      parsedYaml.updates = [{ type: key, version: parsedYaml[key] }];
+      // We ensure that the `updates` is an array of objects; Within `metadata.mjs`
+      // we actually merge these different arrays, into one single array,
+      // differently from `changes` the `updates` are scattered through the API section
+      // and need to be merged together into one big `updates` array
+      parsedYaml.updates = [{ type: key, version: [parsedYaml[key]].flat() }];
 
+      // We remove the original entry, as it is becoming a `updates` entry
       delete parsedYaml[key];
     }
   });
@@ -123,7 +141,7 @@ export const parseYAMLIntoMetadata = yamlString => {
  *
  * @param {string} heading The raw Heading text
  * @param {number} depth The depth of the heading
- * @returns {import('../types.d.ts').HeadingMetadataEntry} Parsed Heading entry
+ * @returns {HeadingMetadataEntry} Parsed Heading entry
  */
 export const parseHeadingIntoMetadata = (heading, depth) => {
   for (const { type, regex } of DOC_API_HEADING_TYPES) {

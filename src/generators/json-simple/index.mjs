@@ -10,7 +10,7 @@ import { join } from 'node:path';
  * This generator is a top-level generator, and it takes the raw AST tree of the API doc files
  * and returns a stringified JSON version of the API docs.
  *
- * @typedef {import('../../types.d.ts').ApiDocMetadataEntry[]} Input
+ * @typedef {Array<ApiDocMetadataEntry>} Input
  *
  * @type {import('../types.d.ts').GeneratorMetadata<Input, string>}
  */
@@ -25,7 +25,6 @@ export default {
   dependsOn: 'ast',
 
   async generate(input, options) {
-
     // This simply grabs all the different files and stringifies them
     const stringifiedContent = JSON.stringify(input, null, 2);
 

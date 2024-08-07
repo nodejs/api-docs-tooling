@@ -1,17 +1,16 @@
 'use strict';
 
-import { remark } from 'remark';
-import remarkGfm from 'remark-gfm';
-
 import { u as createTree } from 'unist-builder';
+import { findAfter } from 'unist-util-find-after';
 import { remove } from 'unist-util-remove';
 import { selectAll } from 'unist-util-select';
 import { SKIP, visit } from 'unist-util-visit';
-import { findAfter } from 'unist-util-find-after';
 
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
 
+import { transformTypeToReferenceLink } from './utils/parser.mjs';
+import { getRemark } from './utils/remark.mjs';
 import { createNodeSlugger } from './utils/slugger.mjs';
 
 /**
@@ -20,11 +19,10 @@ import { createNodeSlugger } from './utils/slugger.mjs';
 const createParser = () => {
   // Creates an instance of the Remark processor with GFM support
   // which is used for stringifying the AST tree back to Markdown
-  const remarkProcessor = remark().use(remarkGfm);
+  const remarkProcessor = getRemark();
 
   const {
     updateLinkReference,
-    updateTypeToReferenceLink,
     updateMarkdownLink,
     addYAMLMetadata,
     addHeadingMetadata,
@@ -45,13 +43,23 @@ const createParser = () => {
      * Then once we have the whole file parsed, we can split the resulting string into sections
      * and seal the Metadata Entries (`.create()`) and return the result to the caller of parae.
      *
-     * @type {Array<import('./types.d.ts').ApiDocMetadataEntry>}
+     * @type {Array<ApiDocMetadataEntry>}
      */
     const metadataCollection = [];
 
     // We allow the API doc VFile to be a Promise of a VFile also,
     // hence we want to ensure that it first resolves before we pass it to the parser
     const resolvedApiDoc = await Promise.resolve(apiDoc);
+
+    // Normalizes all the types in the API doc file to be reference links
+    // which needs to be done before the actual processing is done
+    // since we're replacing raw text within the Markdown
+    // @TODO: This could be moved to another place responsible for handling
+    // text substitutions at the beginning of the parsing process (as dependencies)
+    resolvedApiDoc.value = String(resolvedApiDoc.value).replaceAll(
+      createQueries.QUERIES.normalizeTypes,
+      transformTypeToReferenceLink
+    );
 
     // Creates a new Slugger instance for the current API doc file
     const nodeSlugger = createNodeSlugger();
@@ -72,14 +80,6 @@ const createParser = () => {
     // Removes all the original definitions from the tree as they are not needed
     // anymore, since all link references got updated to be plain links
     remove(apiDocTree, markdownDefinitions);
-
-    // Handles API type references transformation into links that point
-    // to the reference to a said API type
-    visit(apiDocTree, createQueries.UNIST.isTextWithType, node => {
-      updateTypeToReferenceLink(node);
-
-      return SKIP;
-    });
 
     // Handles normalisation URLs that reference to API doc files with .md extension
     // to replace the .md into .html, since the API doc files get eventually compiled as HTML
@@ -116,7 +116,7 @@ const createParser = () => {
       // the document itself.
       const stop =
         headingNode === nextHeadingNode
-          ? apiDocTree.children.length - 1
+          ? apiDocTree.children.length
           : apiDocTree.children.indexOf(nextHeadingNode);
 
       // Retrieves all the Nodes that should belong to the current API doc section
@@ -130,10 +130,10 @@ const createParser = () => {
       // and then apply the Stability Index Metadata to the current Metadata entry
       visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node => {
         // Retrieves the subtree of the Stability Index Node
-        const stabilityNodes = createTree('root', node.children[0].children);
+        const stabilityNode = createTree('root', node.children);
 
         // Adds the Stability Index Metadata to the current Metadata entry
-        addStabilityIndexMetadata(stabilityNodes, apiEntryMetadata);
+        addStabilityIndexMetadata(stabilityNode, apiEntryMetadata);
 
         return SKIP;
       });

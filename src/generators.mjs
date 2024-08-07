@@ -3,7 +3,6 @@
 import availableGenerators from './generators/index.mjs';
 
 /**
- * @typedef {import('./types.d.ts').ApiDocMetadataEntry} ApiDocMetadataEntry Local type alias for the API doc metadata entry
  * @typedef {{ ast: import('./generators/types.d.ts').GeneratorMetadata<ApiDocMetadataEntry, ApiDocMetadataEntry>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
  * @typedef {import('./generators/types.d.ts').AvailableGenerators & AstGenerator} AllGenerators A complete set of the available generators, including the AST one
  *
