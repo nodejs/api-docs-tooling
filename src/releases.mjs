@@ -1,6 +1,7 @@
 'use strict';
 
 import { readFile } from 'node:fs/promises';
+
 import { coerce } from 'semver';
 
 // A ReGeX for retrieving Node.js version headers from the CHANGELOG.md
@@ -45,7 +46,7 @@ const createNodeReleases = changelogPath => {
    * Retrieves all Node.js major versions from the provided CHANGELOG.md file
    * and returns an array of objects containing the version and LTS status.
    *
-   * @returns {Promise<Array<import('./types.d.ts').ApiDocReleaseEntry>>}
+   * @returns {Promise<Array<ApiDocReleaseEntry>>}
    */
   const getAllMajors = async () => {
     const changelog = await changelogStrategy;

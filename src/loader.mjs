@@ -1,7 +1,7 @@
 'use strict';
 
-import { extname } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { extname } from 'node:path';
 
 import { globSync } from 'glob';
 import { VFile } from 'vfile';
