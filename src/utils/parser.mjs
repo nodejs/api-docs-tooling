@@ -21,6 +21,7 @@ import {
  * @returns {string} The Markdown link as a string (formatted in Markdown)
  */
 export const transformTypeToReferenceLink = type => {
+  // Removes the wrapping tags that wrap the type references such as `<>` and `{}`
   const typeInput = type.replace(/[{}<>]/g, '');
 
   /**
