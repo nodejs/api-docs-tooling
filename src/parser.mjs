@@ -64,7 +64,7 @@ const createParser = () => {
     // Get all Markdown Footnote definitions from the tree
     const markdownDefinitions = selectAll('definition', apiDocTree);
 
-    // Handles Markdown link refences and updates them to be plain links
+    // Handles Markdown link references and updates them to be plain links
     visit(apiDocTree, createQueries.UNIST.isLinkReference, node =>
       updateLinkReference(node, markdownDefinitions)
     );
