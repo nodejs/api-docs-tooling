@@ -121,7 +121,7 @@ const createParser = () => {
       );
 
       // Visits all HTML nodes from the current subtree and if there's any that matches
-      // our YAML metadata structure, it transforsm into YAML metadata
+      // our YAML metadata structure, it transforms into YAML metadata
       // and then apply the YAML Metadata to the current Metadata entry
       visit(apiSectionTree, createQueries.UNIST.isYamlNode, node =>
         addYAMLMetadata(node, apiEntryMetadata)

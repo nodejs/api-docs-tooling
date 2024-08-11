@@ -110,7 +110,7 @@ const createQueries = () => {
     // `node` is a `blockquote` node, and the first child will always be
     // a `paragraph` node, so we can safely access the children of the first child
     // which we use as the prefix and description of the Stability Index
-    const stabilityPrefix = transformNodesToString(children);
+    const stabilityPrefix = transformNodesToString(children[0].children);
 
     // Attempts to grab the Stability index and description from the prefix
     const matches = createQueries.QUERIES.stabilityIndex.exec(stabilityPrefix);
@@ -190,7 +190,7 @@ createQueries.UNIST = {
   isMarkdownUrl: ({ type, url }) =>
     type === 'link' && createQueries.QUERIES.markdownUrl.test(url),
   isHeading: ({ type, depth }) =>
-    type === 'heading' && depth >= 1 && depth <= 4,
+    type === 'heading' && depth >= 1 && depth <= 5,
   isLinkReference: ({ type, identifier }) =>
     type === 'linkReference' && !!identifier,
 };
