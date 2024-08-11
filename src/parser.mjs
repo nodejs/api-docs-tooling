@@ -56,6 +56,10 @@ const createParser = () => {
     const resolvedApiDoc = await Promise.resolve(apiDoc);
 
     // Normalizes all the types in the API doc file to be reference links
+    // Note: It also matches contents within codeblocks and inline code
+    // hence it is a bit more costly than the other transformations
+    // @TODO: Is it more efficient to parse the tree twice, and going over
+    // the Text nodes and updating them? It is supposed to also be safer.
     updateTypesToMarkdownLinks(resolvedApiDoc);
 
     // Normalizes all the Stability Index prefixes with Markdown links
@@ -67,24 +71,18 @@ const createParser = () => {
     // Get all Markdown Footnote definitions from the tree
     const markdownDefinitions = selectAll('definition', apiDocTree);
 
-    // Handles Link References
-    visit(apiDocTree, createQueries.UNIST.isLinkReference, node => {
-      updateLinkReference(node, markdownDefinitions);
-
-      return SKIP;
-    });
+    // Handles Markdown link refences and updates them to be plain links
+    visit(apiDocTree, createQueries.UNIST.isLinkReference, node =>
+      updateLinkReference(node, markdownDefinitions)
+    );
 
     // Removes all the original definitions from the tree as they are not needed
     // anymore, since all link references got updated to be plain links
     remove(apiDocTree, markdownDefinitions);
 
-    // Handles normalisation URLs that reference to API doc files with .md extension
+    // Handles the normalisation URLs that reference to API doc files with .md extension
     // to replace the .md into .html, since the API doc files get eventually compiled as HTML
-    visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, node => {
-      updateMarkdownLink(node);
-
-      return SKIP;
-    });
+    visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, updateMarkdownLink);
 
     // Handles iterating the tree and creating subtrees for each API doc entry
     // where an API doc entry is defined by a Heading Node
@@ -125,24 +123,18 @@ const createParser = () => {
 
       // Visits all Stability Index Nodes from the current subtree if there's any
       // and then apply the Stability Index Metadata to the current Metadata entry
-      visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node => {
-        // Retrieves the subtree of the Stability Index Node
-        const stabilityNode = createTree('root', node.children);
-
-        // Adds the Stability Index Metadata to the current Metadata entry
-        addStabilityIndexMetadata(stabilityNode, apiEntryMetadata);
-
-        return SKIP;
-      });
+      visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node =>
+        addStabilityIndexMetadata(
+          createTree('root', node.children),
+          apiEntryMetadata
+        )
+      );
 
       // Visits all YAML Nodes from the current subtree if there's any
       // and then apply the YAML Metadata to the current Metadata entry
-      visit(apiSectionTree, createQueries.UNIST.isYamlNode, node => {
-        // Adds the YAML Metadata to the current Metadata entry
-        addYAMLMetadata(node, apiEntryMetadata);
-
-        return SKIP;
-      });
+      visit(apiSectionTree, createQueries.UNIST.isYamlNode, node =>
+        addYAMLMetadata(node, apiEntryMetadata)
+      );
 
       // Removes already parsed items from the subtree so that they aren't included in the final content
       remove(apiSectionTree, [

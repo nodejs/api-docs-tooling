@@ -1,5 +1,7 @@
 'use strict';
 
+import { SKIP } from 'unist-util-visit';
+
 import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
 
 import * as parserUtils from './utils/parser.mjs';
@@ -14,7 +16,7 @@ const createQueries = () => {
    * Sanitizes the YAML source by returning the inner YAML content
    * and then parsing it into an API Metadata object and updating the current Metadata
    *
-   * @param {import('unist').Node} node The YAML Node
+   * @param {import('mdast').Html} node A HTML node containing the YAML content
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addYAMLMetadata = (node, apiEntryMetadata) => {
@@ -26,12 +28,14 @@ const createQueries = () => {
     apiEntryMetadata.updateProperties(
       parserUtils.parseYAMLIntoMetadata(sanitizedString)
     );
+
+    return [SKIP];
   };
 
   /**
-   * Parse a Heading Node into Metadata and updates the current Metadata
+   * Parse a Heading node into metadata and updates the current metadata
    *
-   * @param {import('unist').Node} node The Heading Node
+   * @param {import('mdast').Heading} node A Markdown heading node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addHeadingMetadata = (node, apiEntryMetadata) => {
@@ -44,22 +48,24 @@ const createQueries = () => {
   };
 
   /**
-   * Updates a Markdown Link into a HTML Link for API Docs
+   * Updates a Markdown link into a HTML link for API docs
    *
-   * @param {import('unist').Node} node Thead Link Node
+   * @param {import('mdast').Link} node A Markdown link node
    */
   const updateMarkdownLink = node => {
     node.url = node.url.replace(
       createQueries.QUERIES.markdownUrl,
       (_, filename, hash = '') => `${filename}.html${hash}`
     );
+
+    return [SKIP];
   };
 
   /**
    * Updates a Markdown Link Reference into an actual Link to the Definition
    *
-   * @param {import('unist').Node} node Thead Link Reference Node
-   * @param {Array<import('unist').Node>} definitions The Definitions of the API Doc
+   * @param {import('mdast').LinkReference} node A link reference node
+   * @param {Array<import('mdast').Definition>} definitions The Definitions of the API Doc
    */
   const updateLinkReference = (node, definitions) => {
     const definition = definitions.find(
@@ -68,12 +74,14 @@ const createQueries = () => {
 
     node.type = 'link';
     node.url = definition.url;
+
+    return [SKIP];
   };
 
   /**
    * Parses a Stability Index Entry and updates the current Metadata
    *
-   * @param {import('unist').Parent} node Thead Link Reference Node
+   * @param {import('mdast').Blockquote} node Thead Link Reference Node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addStabilityIndexMetadata = (node, apiEntryMetadata) => {
@@ -93,13 +101,15 @@ const createQueries = () => {
       const index = Number(matches[1]);
       // The 3rd match should be the group containing all the remaining text
       // which is used as a description (we trim it to an one liner)
-      const description = matches[2].replaceAll('\n', ' ').trim();
+      const description = matches[2].replace(/\n/g, ' ').trim();
 
       // Append the stability index to the node's `data` property
       node.data = { index, description };
 
       apiEntryMetadata.addStability(node);
     }
+
+    return [SKIP];
   };
 
   /**
@@ -110,7 +120,7 @@ const createQueries = () => {
    */
   const updateTypesToMarkdownLinks = vfile => {
     // The `vfile` value is a String (check `loaders.mjs`)
-    vfile.value = vfile.value.replaceAll(
+    vfile.value = String(vfile.value).replace(
       createQueries.QUERIES.normalizeTypes,
       parserUtils.transformTypeToReferenceLink
     );
@@ -124,7 +134,7 @@ const createQueries = () => {
    */
   const updateStailityPrefixToMarkdownLinks = vfile => {
     // The `vfile` value is a String (check `loaders.mjs`)
-    vfile.value = vfile.value.replaceAll(
+    vfile.value = String(vfile.value).replace(
       createQueries.QUERIES.stabilityIndexPrefix,
       match => `[${match}](${DOC_API_STABILITY_SECTION_REF_URL})`
     );
@@ -147,7 +157,7 @@ createQueries.QUERIES = {
   markdownUrl: /^(?![+a-z]+:)([^#?]+)\.md(#.+)?$/i,
   // ReGeX to match the {Type}<Type> (Structure Type metadatas)
   // eslint-disable-next-line no-useless-escape
-  normalizeTypes: /(\{)(?! )[a-z0-9.| \[\]\\]+(?! )(\})/gim,
+  normalizeTypes: /(\{|<)(?! )[a-z0-9.| \[\]\\]+(?! )(\}|>)/gim,
   // ReGeX for handling Stability Indexes Metadata
   stabilityIndex: /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s,
   // ReGeX for handling the Stability Index Prefix

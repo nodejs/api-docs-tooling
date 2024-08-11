@@ -21,14 +21,14 @@ import {
  * @returns {string} The Markdown link as a string (formatted in Markdown)
  */
 export const transformTypeToReferenceLink = type => {
-  const typeInput = type.replace('{', '').replace('}', '');
+  const typeInput = type.replace(/[{}<>]/g, '');
 
   /**
    * Handles the mapping (if there's a match) of the input text
    * into the reference type from the API docs
    *
    * @param {string} lookupPiece
-   * @returns {string | undefined} The reference URL or undefined if no match was found
+   * @returns {string} The reference URL or empty string if no match
    */
   const transformType = lookupPiece => {
     // Transform JS primitive type references into Markdown links (MDN)
