@@ -26,8 +26,8 @@ const createParser = () => {
     addYAMLMetadata,
     addHeadingMetadata,
     addStabilityIndexMetadata,
-    updateTypesToMarkdownLinks,
-    updateStailityPrefixToMarkdownLinks,
+    updateTypeReference,
+    updateStabilityPrefixToLink,
   } = createQueries();
 
   /**
@@ -55,15 +55,8 @@ const createParser = () => {
     // hence we want to ensure that it first resolves before we pass it to the parser
     const resolvedApiDoc = await Promise.resolve(apiDoc);
 
-    // Normalizes all the types in the API doc file to be reference links
-    // Note: It also matches contents within codeblocks and inline code
-    // hence it is a bit more costly than the other transformations
-    // @TODO: Is it more efficient to parse the tree twice, and going over
-    // the Text nodes and updating them? It is supposed to also be safer.
-    updateTypesToMarkdownLinks(resolvedApiDoc);
-
     // Normalizes all the Stability Index prefixes with Markdown links
-    updateStailityPrefixToMarkdownLinks(resolvedApiDoc);
+    updateStabilityPrefixToLink(resolvedApiDoc);
 
     // Parses the API doc into an AST tree using `unified` and `remark`
     const apiDocTree = remarkProcessor.parse(resolvedApiDoc);
@@ -114,26 +107,30 @@ const createParser = () => {
           ? apiDocTree.children.length
           : apiDocTree.children.indexOf(nextHeadingNode);
 
-      // Retrieves all the Nodes that should belong to the current API doc section
+      // Retrieves all the nodes that should belong to the current API docs section
       // `index + 1` is used to skip the current Heading Node
       const apiSectionTree = createTree(
         'root',
         apiDocTree.children.slice(index + 1, stop)
       );
 
-      // Visits all Stability Index Nodes from the current subtree if there's any
-      // and then apply the Stability Index Metadata to the current Metadata entry
+      // Visits all Stability Index nodes from the current subtree if there's any
+      // and then apply the Stability Index metadata to the current metadata entry
       visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node =>
-        addStabilityIndexMetadata(
-          createTree('root', node.children),
-          apiEntryMetadata
-        )
+        addStabilityIndexMetadata(node, apiEntryMetadata)
       );
 
-      // Visits all YAML Nodes from the current subtree if there's any
+      // Visits all HTML nodes from the current subtree and if there's any that matches
+      // our YAML metadata structure, it transforsm into YAML metadata
       // and then apply the YAML Metadata to the current Metadata entry
       visit(apiSectionTree, createQueries.UNIST.isYamlNode, node =>
         addYAMLMetadata(node, apiEntryMetadata)
+      );
+
+      // Visits all Text nodes from the current subtree and if there's any that matches
+      // any API doc type reference and then updates the type reference to be a Markdown link
+      visit(apiSectionTree, createQueries.UNIST.isTextWithType, node =>
+        updateTypeReference(node)
       );
 
       // Removes already parsed items from the subtree so that they aren't included in the final content

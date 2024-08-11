@@ -1,11 +1,17 @@
 'use strict';
 
+import { u as createTree } from 'unist-builder';
 import { SKIP } from 'unist-util-visit';
 
 import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
 
-import * as parserUtils from './utils/parser.mjs';
 import { transformNodesToString } from './utils/unist.mjs';
+
+import {
+  parseHeadingIntoMetadata,
+  parseYAMLIntoMetadata,
+  transformTypeToReferenceLink,
+} from './utils/parser.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
@@ -25,9 +31,7 @@ const createQueries = () => {
       (_, __, inner) => inner
     );
 
-    apiEntryMetadata.updateProperties(
-      parserUtils.parseYAMLIntoMetadata(sanitizedString)
-    );
+    apiEntryMetadata.updateProperties(parseYAMLIntoMetadata(sanitizedString));
 
     return [SKIP];
   };
@@ -39,10 +43,10 @@ const createQueries = () => {
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addHeadingMetadata = (node, apiEntryMetadata) => {
-    const heading = transformNodesToString(node.children);
+    const stringifiedHeading = transformNodesToString(node.children);
 
     // Append the heading metadata to the node's `data` property
-    node.data = parserUtils.parseHeadingIntoMetadata(heading, node.depth);
+    node.data = parseHeadingIntoMetadata(stringifiedHeading, node.depth);
 
     apiEntryMetadata.setHeading(node);
   };
@@ -57,6 +61,24 @@ const createQueries = () => {
       createQueries.QUERIES.markdownUrl,
       (_, filename, hash = '') => `${filename}.html${hash}`
     );
+
+    return [SKIP];
+  };
+
+  /**
+   * Updates a Markdown text containing an API type reference
+   * into a Markdown link referencing to the correct API docs
+   *
+   * @param {import('mdast').Text} node A Markdown link node
+   */
+  const updateTypeReference = node => {
+    const replacedTypes = node.value.replace(
+      createQueries.QUERIES.normalizeTypes,
+      transformTypeToReferenceLink
+    );
+
+    node.type = 'html';
+    node.value = replacedTypes;
 
     return [SKIP];
   };
@@ -84,46 +106,37 @@ const createQueries = () => {
    * @param {import('mdast').Blockquote} node Thead Link Reference Node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
-  const addStabilityIndexMetadata = (node, apiEntryMetadata) => {
-    const stabilityPrefix = transformNodesToString(
-      // `node` is a `blockquote` node, and the first child will always be
-      // a `paragraph` node, so we can safely access the children of the first child
-      // which we use as the prefix and description of the Stability Index
-      node.children[0].children
-    );
+  const addStabilityIndexMetadata = ({ children }, apiEntryMetadata) => {
+    // `node` is a `blockquote` node, and the first child will always be
+    // a `paragraph` node, so we can safely access the children of the first child
+    // which we use as the prefix and description of the Stability Index
+    const stabilityPrefix = transformNodesToString(children);
 
-    // Attempts to grab the Stability Index and Description from the prefix
+    // Attempts to grab the Stability index and description from the prefix
     const matches = createQueries.QUERIES.stabilityIndex.exec(stabilityPrefix);
 
     // Ensures that the matches are valid and that we have at least 3 entries
-    if (matches && matches.length >= 3) {
-      // The 2nd match should be the group that matches the Stability Index
-      const index = Number(matches[1]);
-      // The 3rd match should be the group containing all the remaining text
-      // which is used as a description (we trim it to an one liner)
-      const description = matches[2].replace(/\n/g, ' ').trim();
+    if (matches && matches.length === 3) {
+      // Creates a new Tree node containing the Stability Index metadata
+      const stabilityIndexNode = createTree(
+        'root',
+        {
+          data: {
+            // The 2nd match should be the group that matches the Stability Index
+            index: Number(matches[1]),
+            // The 3rd match should be the group containing all the remaining text
+            // which is used as a description (we trim it to an one liner)
+            description: matches[2].replace(/\n/g, ' ').trim(),
+          },
+        },
+        children
+      );
 
-      // Append the stability index to the node's `data` property
-      node.data = { index, description };
-
-      apiEntryMetadata.addStability(node);
+      // Adds the Stability Index metadata to the current Metadata entry
+      apiEntryMetadata.addStability(stabilityIndexNode);
     }
 
     return [SKIP];
-  };
-
-  /**
-   * Updates type links `{types}` into Markdown links referencing to the correct
-   * API docs (either MDN or other sources) for the types
-   *
-   * @param {import('vfile').VFile} vfile The source Markdown file before any modifications
-   */
-  const updateTypesToMarkdownLinks = vfile => {
-    // The `vfile` value is a String (check `loaders.mjs`)
-    vfile.value = String(vfile.value).replace(
-      createQueries.QUERIES.normalizeTypes,
-      parserUtils.transformTypeToReferenceLink
-    );
   };
 
   /**
@@ -132,7 +145,7 @@ const createQueries = () => {
    *
    * @param {import('vfile').VFile} vfile The source Markdown file before any modifications
    */
-  const updateStailityPrefixToMarkdownLinks = vfile => {
+  const updateStabilityPrefixToLink = vfile => {
     // The `vfile` value is a String (check `loaders.mjs`)
     vfile.value = String(vfile.value).replace(
       createQueries.QUERIES.stabilityIndexPrefix,
@@ -144,24 +157,24 @@ const createQueries = () => {
     addYAMLMetadata,
     addHeadingMetadata,
     updateMarkdownLink,
+    updateTypeReference,
     updateLinkReference,
     addStabilityIndexMetadata,
-    updateTypesToMarkdownLinks,
-    updateStailityPrefixToMarkdownLinks,
+    updateStabilityPrefixToLink,
   };
 };
 
 // This defines the actual REGEX Queries
 createQueries.QUERIES = {
   // Fixes the references to Markdown pages into the API documentation
-  markdownUrl: /^(?![+a-z]+:)([^#?]+)\.md(#.+)?$/i,
+  markdownUrl: /^(?![+a-zA-Z]+:)([^#?]+)\.md(#.+)?$/,
   // ReGeX to match the {Type}<Type> (Structure Type metadatas)
   // eslint-disable-next-line no-useless-escape
-  normalizeTypes: /(\{|<)(?! )[a-z0-9.| \[\]\\]+(?! )(\}|>)/gim,
+  normalizeTypes: /(\{|<)(?! )[a-zA-Z0-9.| \[\]\\]+(?! )(\}|>)/g,
   // ReGeX for handling Stability Indexes Metadata
   stabilityIndex: /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s,
   // ReGeX for handling the Stability Index Prefix
-  stabilityIndexPrefix: /Stability: ([0-5])/gi,
+  stabilityIndexPrefix: /Stability: ([0-5])/,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--(YAML| YAML)?([\s\S]*?)-->/,
 };

@@ -63,9 +63,8 @@ export const transformTypeToReferenceLink = type => {
     const trimmedPiece = piece.trim();
 
     // This is what we will compare against the API types mappings
-    // Thie regex below is used to remove `\[]` from the end of the type
-    // in case it is an array of a type
-    const result = transformType(trimmedPiece.replace('\\[]', ''));
+    // The ReGeX below is used to remove `[]` from the end of the type
+    const result = transformType(trimmedPiece.replace('[]', ''));
 
     // If we have a valid result and the piece is not empty, we return the Markdown link
     if (trimmedPiece.length && result.length) {
