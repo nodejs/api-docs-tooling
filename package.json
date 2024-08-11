@@ -23,6 +23,7 @@
     "globals": "^15.9.0",
     "husky": "^9.1.4",
     "lint-staged": "^15.2.8",
+    "mdast": "^3.0.0",
     "prettier": "3.3.3"
   },
   "dependencies": {
