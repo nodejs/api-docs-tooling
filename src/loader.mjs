@@ -27,9 +27,9 @@ const createLoader = () => {
     );
 
     return resolvedFiles.map(async filePath => {
-      const fileBuffer = await readFile(filePath);
+      const fileContents = await readFile(filePath, 'utf-8');
 
-      return new VFile({ path: filePath, value: fileBuffer });
+      return new VFile({ path: filePath, value: fileContents });
     });
   };
 

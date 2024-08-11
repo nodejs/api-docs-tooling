@@ -45,32 +45,28 @@ const createMetadata = slugger => {
    * transformed into NavigationEntries and MetadataEntries
    *
    * @type {{
-   *  heading: HeadingMetadataEntry,
-   *  properties: ApiDocRawMetadataEntry,
+   *  heading: ApiDocMetadataEntry['heading'],
    *  stability: ApiDocMetadataEntry['stability'],
+   *  properties: ApiDocRawMetadataEntry,
    * }}
    */
   const internalMetadata = {
-    heading: {
-      text: undefined,
-      type: undefined,
-      name: undefined,
-      depth: -1,
-    },
+    heading: createTree('root', []),
+    stability: createTree('root', []),
     properties: {
       type: undefined,
       source_link: undefined,
       updates: [],
       changes: [],
+      tags: [],
     },
-    stability: createTree('root', []),
   };
 
   return {
     /**
      * Set the Heading of a given Metadata
      *
-     * @param {HeadingMetadataEntry} heading The new heading metadata
+     * @param {HeadingMetadataParent} heading The new heading metadata
      */
     setHeading: heading => {
       internalMetadata.heading = heading;
@@ -78,7 +74,7 @@ const createMetadata = slugger => {
     /**
      * Set the Stability Index of a given Metadata
      *
-     * @param {import('unist').Parent} stability The stability index node to be added
+     * @param {StabilityIndexParent} stability The stability index node to be added
      */
     addStability: stability => {
       internalMetadata.stability.children.push(stability);
@@ -100,6 +96,7 @@ const createMetadata = slugger => {
     updateProperties: properties => {
       if (properties.type) {
         internalMetadata.properties.type = properties.type;
+        internalMetadata.heading.data.type = properties.type;
       }
 
       if (properties.source_link) {
@@ -112,6 +109,10 @@ const createMetadata = slugger => {
 
       if (properties.updates) {
         internalMetadata.properties.updates.push(...properties.updates);
+      }
+
+      if (properties.tags) {
+        internalMetadata.properties.tags.push(...properties.tags);
       }
     },
     /**
@@ -131,17 +132,17 @@ const createMetadata = slugger => {
       // a certain navigation section to a page ad the exact point of the page (scroll)
       // This is useful for classes, globals and other type of YAML entries, as they reside
       // within a module (page) and we want to link to them directly
-      const slugHash = `#${slugger.slug(internalMetadata.heading.text)}`;
+      const slugHash = `#${slugger.slug(internalMetadata.heading.data.text)}`;
 
       const {
-        type: yamlType,
         source_link: sourceLink,
         updates = [],
         changes = [],
+        tags = [],
       } = internalMetadata.properties;
 
-      // We override the type of the heading if we have a YAML type
-      internalMetadata.heading.type = yamlType || internalMetadata.heading.type;
+      // Defines the toJSON method for the Heading AST node to be converted as JSON
+      internalMetadata.heading.toJSON = () => internalMetadata.heading.data;
 
       // Maps the Stability Index AST nodes into a JSON objects from their data properties
       internalMetadata.stability.toJSON = () =>
@@ -165,6 +166,9 @@ const createMetadata = slugger => {
         stability: internalMetadata.stability,
         // The AST tree of the API section
         content: section,
+        // Extra YAML metadata that are Strings
+        // and we use to tag special API sections
+        tags,
       };
     },
   };

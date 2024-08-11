@@ -8,7 +8,9 @@
     "test": "node --test",
     "test:watch": "node --test --watch",
     "test:coverage": "node --experimental-test-coverage --test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "run": "node bin/cli.mjs",
+    "watch": "node --watch bin/cli.mjs"
   },
   "bin": {
     "api-docs-tooling": "./bin/cli.mjs"
@@ -27,9 +29,11 @@
     "commander": "^12.1.0",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.0",
-    "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
     "semver": "^7.6.3",
+    "unified": "^11.0.5",
     "unist-builder": "^4.0.0",
     "unist-util-find-after": "^5.0.0",
     "unist-util-position": "^5.0.0",

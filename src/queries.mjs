@@ -1,5 +1,7 @@
 'use strict';
 
+import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
+
 import * as parserUtils from './utils/parser.mjs';
 import { transformNodesToString } from './utils/unist.mjs';
 
@@ -35,12 +37,10 @@ const createQueries = () => {
   const addHeadingMetadata = (node, apiEntryMetadata) => {
     const heading = transformNodesToString(node.children);
 
-    const parsedHeading = parserUtils.parseHeadingIntoMetadata(
-      heading,
-      node.depth
-    );
+    // Append the heading metadata to the node's `data` property
+    node.data = parserUtils.parseHeadingIntoMetadata(heading, node.depth);
 
-    apiEntryMetadata.setHeading(parsedHeading);
+    apiEntryMetadata.setHeading(node);
   };
 
   /**
@@ -95,13 +95,39 @@ const createQueries = () => {
       // which is used as a description (we trim it to an one liner)
       const description = matches[2].replaceAll('\n', ' ').trim();
 
-      // Append the stability index to the node's `data` property and add it to
-      // the current metadata as a yet another stability index entry
-      apiEntryMetadata.addStability({
-        ...node,
-        data: { index, description },
-      });
+      // Append the stability index to the node's `data` property
+      node.data = { index, description };
+
+      apiEntryMetadata.addStability(node);
     }
+  };
+
+  /**
+   * Updates type links `{types}` into Markdown links referencing to the correct
+   * API docs (either MDN or other sources) for the types
+   *
+   * @param {import('vfile').VFile} vfile The source Markdown file before any modifications
+   */
+  const updateTypesToMarkdownLinks = vfile => {
+    // The `vfile` value is a String (check `loaders.mjs`)
+    vfile.value = vfile.value.replaceAll(
+      createQueries.QUERIES.normalizeTypes,
+      parserUtils.transformTypeToReferenceLink
+    );
+  };
+
+  /**
+   * Updates the Stability Index Prefixes to be Markdown Links
+   * to the API documentation
+   *
+   * @param {import('vfile').VFile} vfile The source Markdown file before any modifications
+   */
+  const updateStailityPrefixToMarkdownLinks = vfile => {
+    // The `vfile` value is a String (check `loaders.mjs`)
+    vfile.value = vfile.value.replaceAll(
+      createQueries.QUERIES.stabilityIndexPrefix,
+      match => `[${match}](${DOC_API_STABILITY_SECTION_REF_URL})`
+    );
   };
 
   return {
@@ -110,6 +136,8 @@ const createQueries = () => {
     updateMarkdownLink,
     updateLinkReference,
     addStabilityIndexMetadata,
+    updateTypesToMarkdownLinks,
+    updateStailityPrefixToMarkdownLinks,
   };
 };
 
@@ -119,9 +147,11 @@ createQueries.QUERIES = {
   markdownUrl: /^(?![+a-z]+:)([^#?]+)\.md(#.+)?$/i,
   // ReGeX to match the {Type}<Type> (Structure Type metadatas)
   // eslint-disable-next-line no-useless-escape
-  normalizeTypes: /(\{|<)(?! )[a-z0-9.| \n\[\]\\]+(?! )(\}|>)/gim,
+  normalizeTypes: /(\{)(?! )[a-z0-9.| \[\]\\]+(?! )(\})/gim,
   // ReGeX for handling Stability Indexes Metadata
   stabilityIndex: /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s,
+  // ReGeX for handling the Stability Index Prefix
+  stabilityIndexPrefix: /Stability: ([0-5])/gi,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--(YAML| YAML)?([\s\S]*?)-->/,
 };

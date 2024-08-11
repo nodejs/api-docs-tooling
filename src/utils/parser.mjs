@@ -55,7 +55,7 @@ export const transformTypeToReferenceLink = type => {
       return DOC_TYPES_MAPPING_NODE_MODULES[lookupPiece];
     }
 
-    return undefined;
+    return '';
   };
 
   const typePieces = typeInput.split('|').map(piece => {
@@ -63,19 +63,23 @@ export const transformTypeToReferenceLink = type => {
     const trimmedPiece = piece.trim();
 
     // This is what we will compare against the API types mappings
-    const result = transformType(trimmedPiece.replace(/(?:\[])+$/, ''));
+    // Thie regex below is used to remove `\[]` from the end of the type
+    // in case it is an array of a type
+    const result = transformType(trimmedPiece.replace('\\[]', ''));
 
-    return result && `[\`<${trimmedPiece}>\`](${result})`;
+    // If we have a valid result and the piece is not empty, we return the Markdown link
+    if (trimmedPiece.length && result.length) {
+      return `[\`<${trimmedPiece}>\`](${result})`;
+    }
   });
 
   // Filter out pieces that we failed to map and then join the valid ones
-  // into different links separated by a `|`
+  // into different links separated by a ` | `
   const markdownLinks = typePieces.filter(Boolean).join(' | ');
 
   // Return the replaced links or the original content if they all failed to be replaced
   // Note that if some failed to get replaced, only the valid ones will be returned
-  // NOTE: Based on the original code, we don't seem to care when we fail specific entries to be replaced
-  // although I believe this should be revisited and either show the original type content or show a warning
+  // If no valid entry exists, we return the original string/type
   return markdownLinks || type;
 };
 
@@ -96,13 +100,13 @@ export const parseYAMLIntoMetadata = yamlString => {
 
   // Ensures that the parsed YAML is an object, because even if it is not
   // i.e. a plain string or an array, it will simply not result into anything
-  /** @type {ApiDocRawMetadataEntry} */
-  const parsedYaml = yaml.parse(replacedContent);
+  /** @type {ApiDocRawMetadataEntry | string} */
+  let parsedYaml = yaml.parse(replacedContent);
 
   // Ensure that only Objects get parsed on Object.keys(), since some `<!--`
   // comments, might be just plain strings and not even a valid YAML metadata
-  if (typeof parsedYaml !== 'object') {
-    return {};
+  if (typeof parsedYaml === 'string') {
+    parsedYaml = { tags: [parsedYaml] };
   }
 
   // This cleans up the YAML metadata into something more standardized and that

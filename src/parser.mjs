@@ -9,7 +9,6 @@ import { SKIP, visit } from 'unist-util-visit';
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
 
-import { transformTypeToReferenceLink } from './utils/parser.mjs';
 import { getRemark } from './utils/remark.mjs';
 import { createNodeSlugger } from './utils/slugger.mjs';
 
@@ -27,6 +26,8 @@ const createParser = () => {
     addYAMLMetadata,
     addHeadingMetadata,
     addStabilityIndexMetadata,
+    updateTypesToMarkdownLinks,
+    updateStailityPrefixToMarkdownLinks,
   } = createQueries();
 
   /**
@@ -47,22 +48,18 @@ const createParser = () => {
      */
     const metadataCollection = [];
 
+    // Creates a new Slugger instance for the current API doc file
+    const nodeSlugger = createNodeSlugger();
+
     // We allow the API doc VFile to be a Promise of a VFile also,
     // hence we want to ensure that it first resolves before we pass it to the parser
     const resolvedApiDoc = await Promise.resolve(apiDoc);
 
     // Normalizes all the types in the API doc file to be reference links
-    // which needs to be done before the actual processing is done
-    // since we're replacing raw text within the Markdown
-    // @TODO: This could be moved to another place responsible for handling
-    // text substitutions at the beginning of the parsing process (as dependencies)
-    resolvedApiDoc.value = String(resolvedApiDoc.value).replaceAll(
-      createQueries.QUERIES.normalizeTypes,
-      transformTypeToReferenceLink
-    );
+    updateTypesToMarkdownLinks(resolvedApiDoc);
 
-    // Creates a new Slugger instance for the current API doc file
-    const nodeSlugger = createNodeSlugger();
+    // Normalizes all the Stability Index prefixes with Markdown links
+    updateStailityPrefixToMarkdownLinks(resolvedApiDoc);
 
     // Parses the API doc into an AST tree using `unified` and `remark`
     const apiDocTree = remarkProcessor.parse(resolvedApiDoc);
