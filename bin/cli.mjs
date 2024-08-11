@@ -22,7 +22,7 @@ program
   .description('CLI tool to generate API documentation of a Node.js project.')
   .addOption(
     new Option(
-      '-i, --input <patterns>',
+      '-i, --input [patterns...]',
       'Specify input file patterns using glob syntax'
     ).makeOptionMandatory()
   )
