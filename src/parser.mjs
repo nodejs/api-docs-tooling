@@ -9,7 +9,6 @@ import { SKIP, visit } from 'unist-util-visit';
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
 
-import { transformTypeToReferenceLink } from './utils/parser.mjs';
 import { getRemark } from './utils/remark.mjs';
 import { createNodeSlugger } from './utils/slugger.mjs';
 
@@ -27,6 +26,8 @@ const createParser = () => {
     addYAMLMetadata,
     addHeadingMetadata,
     addStabilityIndexMetadata,
+    updateTypeReference,
+    updateStabilityPrefixToLink,
   } = createQueries();
 
   /**
@@ -47,22 +48,15 @@ const createParser = () => {
      */
     const metadataCollection = [];
 
+    // Creates a new Slugger instance for the current API doc file
+    const nodeSlugger = createNodeSlugger();
+
     // We allow the API doc VFile to be a Promise of a VFile also,
     // hence we want to ensure that it first resolves before we pass it to the parser
     const resolvedApiDoc = await Promise.resolve(apiDoc);
 
-    // Normalizes all the types in the API doc file to be reference links
-    // which needs to be done before the actual processing is done
-    // since we're replacing raw text within the Markdown
-    // @TODO: This could be moved to another place responsible for handling
-    // text substitutions at the beginning of the parsing process (as dependencies)
-    resolvedApiDoc.value = String(resolvedApiDoc.value).replaceAll(
-      createQueries.QUERIES.normalizeTypes,
-      transformTypeToReferenceLink
-    );
-
-    // Creates a new Slugger instance for the current API doc file
-    const nodeSlugger = createNodeSlugger();
+    // Normalizes all the Stability Index prefixes with Markdown links
+    updateStabilityPrefixToLink(resolvedApiDoc);
 
     // Parses the API doc into an AST tree using `unified` and `remark`
     const apiDocTree = remarkProcessor.parse(resolvedApiDoc);
@@ -70,24 +64,18 @@ const createParser = () => {
     // Get all Markdown Footnote definitions from the tree
     const markdownDefinitions = selectAll('definition', apiDocTree);
 
-    // Handles Link References
-    visit(apiDocTree, createQueries.UNIST.isLinkReference, node => {
-      updateLinkReference(node, markdownDefinitions);
-
-      return SKIP;
-    });
+    // Handles Markdown link references and updates them to be plain links
+    visit(apiDocTree, createQueries.UNIST.isLinkReference, node =>
+      updateLinkReference(node, markdownDefinitions)
+    );
 
     // Removes all the original definitions from the tree as they are not needed
     // anymore, since all link references got updated to be plain links
     remove(apiDocTree, markdownDefinitions);
 
-    // Handles normalisation URLs that reference to API doc files with .md extension
+    // Handles the normalisation URLs that reference to API doc files with .md extension
     // to replace the .md into .html, since the API doc files get eventually compiled as HTML
-    visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, node => {
-      updateMarkdownLink(node);
-
-      return SKIP;
-    });
+    visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, updateMarkdownLink);
 
     // Handles iterating the tree and creating subtrees for each API doc entry
     // where an API doc entry is defined by a Heading Node
@@ -119,33 +107,31 @@ const createParser = () => {
           ? apiDocTree.children.length
           : apiDocTree.children.indexOf(nextHeadingNode);
 
-      // Retrieves all the Nodes that should belong to the current API doc section
+      // Retrieves all the nodes that should belong to the current API docs section
       // `index + 1` is used to skip the current Heading Node
       const apiSectionTree = createTree(
         'root',
         apiDocTree.children.slice(index + 1, stop)
       );
 
-      // Visits all Stability Index Nodes from the current subtree if there's any
-      // and then apply the Stability Index Metadata to the current Metadata entry
-      visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node => {
-        // Retrieves the subtree of the Stability Index Node
-        const stabilityNode = createTree('root', node.children);
+      // Visits all Stability Index nodes from the current subtree if there's any
+      // and then apply the Stability Index metadata to the current metadata entry
+      visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node =>
+        addStabilityIndexMetadata(node, apiEntryMetadata)
+      );
 
-        // Adds the Stability Index Metadata to the current Metadata entry
-        addStabilityIndexMetadata(stabilityNode, apiEntryMetadata);
-
-        return SKIP;
-      });
-
-      // Visits all YAML Nodes from the current subtree if there's any
+      // Visits all HTML nodes from the current subtree and if there's any that matches
+      // our YAML metadata structure, it transforms into YAML metadata
       // and then apply the YAML Metadata to the current Metadata entry
-      visit(apiSectionTree, createQueries.UNIST.isYamlNode, node => {
-        // Adds the YAML Metadata to the current Metadata entry
-        addYAMLMetadata(node, apiEntryMetadata);
+      visit(apiSectionTree, createQueries.UNIST.isYamlNode, node =>
+        addYAMLMetadata(node, apiEntryMetadata)
+      );
 
-        return SKIP;
-      });
+      // Visits all Text nodes from the current subtree and if there's any that matches
+      // any API doc type reference and then updates the type reference to be a Markdown link
+      visit(apiSectionTree, createQueries.UNIST.isTextWithType, node =>
+        updateTypeReference(node)
+      );
 
       // Removes already parsed items from the subtree so that they aren't included in the final content
       remove(apiSectionTree, [
