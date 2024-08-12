@@ -17,6 +17,8 @@ describe('createNodeSlugger', () => {
 
   it('should reset the cache of the Slugger', () => {
     const slugger = createNodeSlugger();
-    slugger.reset();
+    slugger.slug('Test'); // Create a slug to populate the cache
+    slugger.reset(); // Reset the cache
+    strictEqual(slugger.slug('Test'), 'test'); // Ensure the cache was reset
   });
 });
