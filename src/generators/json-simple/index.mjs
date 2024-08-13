@@ -34,18 +34,18 @@ export default {
     const remarkProcessor = getRemark();
 
     // Iterates the input (ApiDocMetadataEntry) and performs a few changes
-    const mappedInput = input.map(({ content, ...rest }) => {
-      // Depp clones the content nodes to avoid affecting upstream nodes
-      const clonedContent = JSON.parse(JSON.stringify(content));
+    const mappedInput = input.map(node => {
+      // Deep clones the content nodes to avoid affecting upstream nodes
+      const content = JSON.parse(JSON.stringify(node.content));
 
       // Removes all the Stability Index nodes, since they shouldn't be included in the final JSON
       // and are already represented in the metadata (metadata.stability.toJSON)
-      remove(clonedContent, [createQueries.UNIST.isStabilityNode]);
+      remove(content, [createQueries.UNIST.isStabilityNode]);
 
       // For the JSON generate we want to transform the whole content into JSON
-      clonedContent.toJSON = () => remarkProcessor.stringify(clonedContent);
+      content.toJSON = () => remarkProcessor.stringify(content);
 
-      return { ...rest, content: clonedContent };
+      return { ...node, content };
     });
 
     // This simply grabs all the different files and stringifies them
