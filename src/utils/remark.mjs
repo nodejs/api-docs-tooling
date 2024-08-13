@@ -27,7 +27,7 @@ export const getRemarkRehype = () =>
     .use(remarkRehype, { allowDangerousHtml: true, passThrough: ['element'] })
     // This is a custom ad-hoc within the Shiki Rehype plugin, used to highlight code
     // and transform them into HAST nodes
-    // @TODO: Get ride fo @shikijis/rehype and use our own Rehype plugin for Shiki
+    // @TODO: Get rid of @shikijis/rehype and use our own Rehype plugin for Shiki
     // since we have CJS/ESM nodes. (Base off from the nodejs/nodejs.org repository)
     .use(syntaxHighlighter)
     // We allow dangerous HTML to be passed through, since we have HTML within our Markdown
