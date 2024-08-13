@@ -8,18 +8,18 @@
  *
  * This generates a Markdown string containing a list as the ToC for the API documentation.
  *
- * @param {Array<ApiDocMetadataEntry>} nodes The API metadata nodes to be used for the ToC
- * @param {{ maxDepth: number; parser: (node: ApiDocMetadataEntry) => string }} options The optional ToC options
+ * @param {Array<ApiDocMetadataEntry>} metadataEntries The API metadata nodes to be used for the ToC
+ * @param {{ maxDepth: number; parser: (metadata: ApiDocMetadataEntry) => string }} options The optional ToC options
  */
-const tableOfContents = (nodes, options) => {
-  return nodes.reduce((acc, node) => {
+const tableOfContents = (metadataEntries, options) => {
+  return metadataEntries.reduce((acc, entry) => {
     // Check if the depth of the heading is less than or equal to the maximum depth
-    if (node.heading.data.depth <= options.maxDepth) {
+    if (entry.heading.data.depth <= options.maxDepth) {
       // Generate the indentation based on the depth of the heading
-      const indent = '  '.repeat(node.heading.data.depth - 1);
+      const indent = '  '.repeat(entry.heading.data.depth - 1);
 
       // Append the ToC entry to the accumulator
-      acc += `${indent}- ${options.parser(node)}\n`;
+      acc += `${indent}- ${options.parser(entry)}\n`;
     }
 
     return acc;
@@ -29,29 +29,31 @@ const tableOfContents = (nodes, options) => {
 /**
  * Builds the Label with extra metadata to be used in the ToC
  *
- * @param {ApiDocMetadataEntry} node The current node that is being parsed
+ * @param {ApiDocMetadataEntry} metadata The current node that is being parsed
  */
-tableOfContents.parseNavigationNode = node =>
-  `<a class="nav-${node.api}" href="${node.api}.html">${node.heading.data.name}</a>`;
+tableOfContents.parseNavigationNode = ({ api, heading }) =>
+  `<a class="nav-${api}" href="${api}.html">${heading.data.name}</a>`;
 
 /**
  * Builds the Label with extra metadata to be used in the ToC
  *
- * @param {ApiDocMetadataEntry} node
+ * @param {ApiDocMetadataEntry} metadata
  */
-tableOfContents.parseToCNode = node => {
-  // If the node has a stability index, add the stability index to the ToC entry
-  if (node.stability.children.length === 1) {
-    const firstStability = node.stability.children[0];
+tableOfContents.parseToCNode = ({ stability, slug, heading }) => {
+  // If the node has one stability index, we add the stability index class
+  // into the ToC; Otherwise, we cannot determine which class to add
+  // which is intentional, as some nodes have multiple stabilities
+  if (stability.children.length === 1) {
+    const [firstStability] = stability.children;
 
     return (
       `<span class="stability_${firstStability.data.index}">` +
-      `<a href="${node.slug}">${node.heading.data.text}</a></span>`
+      `<a href="${slug}">${heading.data.text}</a></span>`
     );
   }
 
   // Otherwise, just the plain text of the heading with a link
-  return `<a href="${node.slug}">${node.heading.data.text}</a>`;
+  return `<a href="${slug}">${heading.data.text}</a>`;
 };
 
 export default tableOfContents;

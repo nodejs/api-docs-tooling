@@ -48,7 +48,7 @@ export default {
     const generatedValues = [];
 
     // Gets a Remark Processor that parses Markdown to minified HTML
-    const remarkWithRehype = getRemarkRehype();
+    const remarkRehypeProcessor = getRemarkRehype();
 
     const grouppedModules = groupNodesByModule(input);
 
@@ -65,7 +65,7 @@ export default {
       .sort((a, b) => a.heading.data.name.localeCompare(b.heading.data.name));
 
     // Generates the global Table of Contents (Sidebar Navigation)
-    const parsedSideNav = remarkWithRehype.processSync(
+    const parsedSideNav = remarkRehypeProcessor.processSync(
       tableOfContents(headNodes, {
         maxDepth: 1,
         parser: tableOfContents.parseNavigationNode,
@@ -112,7 +112,7 @@ export default {
 
       // Generates the Table of Contents for the current module, which is appended
       // to the top of the page and also to a dropdown
-      const parsedToC = remarkWithRehype.processSync(
+      const parsedToC = remarkRehypeProcessor.processSync(
         tableOfContents(nodes, {
           maxDepth: 4,
           parser: tableOfContents.parseToCNode,
@@ -121,7 +121,11 @@ export default {
 
       // Builds the content of the module, including all sections,
       // stability indexes, and content for the current file
-      const parsedContent = buildContent(headNodes, nodes, remarkWithRehype);
+      const parsedContent = buildContent(
+        headNodes,
+        nodes,
+        remarkRehypeProcessor
+      );
 
       // Retrieves when this node was added to the API docs
       const addedAt = head.updates.find(({ type }) => type === 'introduced_in');

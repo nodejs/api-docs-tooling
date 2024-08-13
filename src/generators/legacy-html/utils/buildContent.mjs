@@ -2,8 +2,11 @@
 
 import { h as createElement } from 'hastscript';
 import { u as createTree } from 'unist-builder';
+import { SKIP, visit } from 'unist-util-visit';
 
 import buildExtraContent from './buildExtraContent.mjs';
+
+import createQueries from '../../../queries.mjs';
 
 import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
 
@@ -25,31 +28,34 @@ const buildHeadingElement = (node, remark) => {
 
   // Creates the heading element with the heading text and the link to the heading
   return createElement(`h${node.heading.data.depth + 1}`, [
-    ...remark.runSync(node.heading).children,
+    // The inner Heading markdown content is still using Remark nodes, and they need
+    // to be converted into Rehype nodes
+    remark.runSync(node.heading),
     headingLinkElement,
   ]);
 };
 
 /**
- * Builds a Markdown Stability Index
+ * Builds an HTML Stability element
  *
- * @param {ApiDocMetadataEntry} node The node to build the Markdown Stability Index for
- * @param {import('unified').Processor} remark The Remark instance to be used to process
- * @returns {import('unist').Parent} The AST tree of the Stability Index content
+ * @param {import('mdast').Blockquote} node The HTML AST tree of the Stability Index content
+ * @param {number} index The index of the current node
+ * @param {import('unist').Parent} parent The parent node of the current node
  */
-const buildStabilityIndexes = (node, remark) => {
-  // Iterates over each stability index to create a `div` element with the stability index class
-  const parsedStabilityIndexes = node.stability.children.map(stabilityNode =>
-    createElement(
-      // Creates the `div` element with the class `api_stability` and the stability index class
-      `div.api_stability.api_stability_${stabilityNode.data.index}`,
-      // Processed the Markdown nodes into HTML nodes
-      remark.runSync(stabilityNode).children
-    )
+const buildStability = ({ children, data }, index, parent) => {
+  const stabilityElement = createElement(
+    // Creates the `div` element with the class `api_stability` and the stability index class
+    // FYI: Since the Stability Index `blockquote` node gets modified within `queries.mjs`
+    // it contains the StabilityIndexMetadataEntry within the `data` property
+    `div.api_stability.api_stability_${data.index}`,
+    // Processed the Markdown nodes into HTML nodes
+    children
   );
 
-  // Creates a tree to surround the Stability Indexes
-  return createTree('root', parsedStabilityIndexes);
+  // Replaces the Stability Index `blockquote` node with the new Stability Index element
+  parent.children.splice(index, 1, stabilityElement);
+
+  return [SKIP];
 };
 
 /**
@@ -117,30 +123,32 @@ const buildMetadataElement = node => {
  * @param {import('unified').Processor} remark The Remark instance to be used to process
  */
 export default (headNodes, nodes, remark) => {
-  // Builds extra content based on the node tags
-  const extraContent = buildExtraContent(headNodes, nodes);
-
   // Creates the root node for the content
   const parsedNodes = createTree(
     'root',
     // Parses the metadata pieces of each node and the content
-    nodes.map((node, index) => {
+    nodes.map(node => {
+      // Depp clones the content nodes to avoid affecting upstream nodes
+      const clonedContent = JSON.parse(JSON.stringify(node.content));
+
+      // Parses the Blockquotes into Stability elements
+      // This is treated differently as we want to preserve the position of a Stability Index
+      // within the content, so we can't just remove it and append it to the metadata
+      visit(clonedContent, createQueries.UNIST.isStabilityNode, buildStability);
+
       const headingElement = buildHeadingElement(node, remark);
       const metadataElement = buildMetadataElement(node);
-      const stabilityIndexes = buildStabilityIndexes(node, remark);
+      const extraContent = buildExtraContent(headNodes, node);
 
       // Processes the Markdown AST tree into an HTML AST tree
-      const processedContent = remark.runSync(node.content);
-
-      const extraContentForNode = extraContent.children[index];
+      const sectionContent = remark.runSync(clonedContent);
 
       // Concatenates all the strings and parses with remark into an AST tree
       return createElement('section', [
         headingElement,
         metadataElement,
-        ...extraContentForNode,
-        ...stabilityIndexes.children,
-        ...processedContent.children,
+        extraContent,
+        sectionContent,
       ]);
     })
   );
