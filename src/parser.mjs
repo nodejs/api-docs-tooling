@@ -21,12 +21,12 @@ const createParser = () => {
   const remarkProcessor = getRemark();
 
   const {
-    updateLinkReference,
-    updateMarkdownLink,
+    setHeadingMetadata,
     addYAMLMetadata,
-    addHeadingMetadata,
-    addStabilityIndexMetadata,
+    updateMarkdownLink,
     updateTypeReference,
+    updateLinkReference,
+    addStabilityMetadata,
     updateStabilityPrefixToLink,
   } = createQueries();
 
@@ -75,7 +75,9 @@ const createParser = () => {
 
     // Handles the normalisation URLs that reference to API doc files with .md extension
     // to replace the .md into .html, since the API doc files get eventually compiled as HTML
-    visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, updateMarkdownLink);
+    visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, node =>
+      updateMarkdownLink(node)
+    );
 
     // Handles iterating the tree and creating subtrees for each API doc entry
     // where an API doc entry is defined by a Heading Node
@@ -87,7 +89,7 @@ const createParser = () => {
       const apiEntryMetadata = createMetadata(nodeSlugger);
 
       // Adds the Metadata of the current Heading Node to the Metadata entry
-      addHeadingMetadata(headingNode, apiEntryMetadata);
+      setHeadingMetadata(headingNode, apiEntryMetadata);
 
       // We retrieve the immediate next Heading if it exists
       // This is used for ensuring that we don't include items that would
@@ -109,50 +111,42 @@ const createParser = () => {
 
       // Retrieves all the nodes that should belong to the current API docs section
       // `index + 1` is used to skip the current Heading Node
-      const apiSectionTree = createTree(
+      const subTree = createTree(
         'root',
         apiDocTree.children.slice(index + 1, stop)
       );
 
       // Visits all Stability Index nodes from the current subtree if there's any
       // and then apply the Stability Index metadata to the current metadata entry
-      visit(apiSectionTree, createQueries.UNIST.isStabilityIndex, node =>
-        addStabilityIndexMetadata(node, apiEntryMetadata)
+      visit(subTree, createQueries.UNIST.isStabilityNode, node =>
+        addStabilityMetadata(node, apiEntryMetadata)
       );
 
       // Visits all HTML nodes from the current subtree and if there's any that matches
       // our YAML metadata structure, it transforms into YAML metadata
       // and then apply the YAML Metadata to the current Metadata entry
-      visit(apiSectionTree, createQueries.UNIST.isYamlNode, node =>
+      visit(subTree, createQueries.UNIST.isYamlNode, node =>
         addYAMLMetadata(node, apiEntryMetadata)
       );
 
       // Visits all Text nodes from the current subtree and if there's any that matches
       // any API doc type reference and then updates the type reference to be a Markdown link
-      visit(apiSectionTree, createQueries.UNIST.isTextWithType, node =>
+      visit(subTree, createQueries.UNIST.isTextWithType, node =>
         updateTypeReference(node)
       );
 
       // Removes already parsed items from the subtree so that they aren't included in the final content
-      remove(apiSectionTree, [
-        createQueries.UNIST.isStabilityIndex,
-        createQueries.UNIST.isYamlNode,
-      ]);
+      remove(subTree, [createQueries.UNIST.isYamlNode]);
 
       // Applies the AST transformations to the subtree based on the API doc entry Metadata
       // Note that running the transformation on the subtree isn't costly as it is a reduced tree
       // and the GFM transformations aren't that heavy
-      const transformedApiSectionTree = remarkProcessor.runSync(apiSectionTree);
-
-      // Adds the `toJSON` method to stringify the tree back to Markdown
-      // So that it gets serialized correctly by JSON.stringify
-      transformedApiSectionTree.toJSON = () =>
-        remarkProcessor.stringify(transformedApiSectionTree);
+      const parsedSubTree = remarkProcessor.runSync(subTree);
 
       // We seal and create the API doc entry Metadata and push them to the collection
       const parsedApiEntryMetadata = apiEntryMetadata.create(
         resolvedApiDoc,
-        transformedApiSectionTree
+        parsedSubTree
       );
 
       // We push the parsed API doc entry Metadata to the collection

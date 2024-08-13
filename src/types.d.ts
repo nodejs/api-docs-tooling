@@ -1,3 +1,4 @@
+import type { Root } from 'mdast';
 import type { SemVer } from 'semver';
 import type { Parent, Node, Data } from 'unist';
 
@@ -83,7 +84,7 @@ declare global {
       Array<StabilityIndexMetadataEntry>
     >;
     // The subtree containing all Nodes of the API doc entry
-    content: WithJSON<Parent, string>;
+    content: Root;
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
