@@ -42,7 +42,7 @@ const createQueries = () => {
    * @param {import('mdast').Heading} node A Markdown heading node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
-  const addHeadingMetadata = (node, apiEntryMetadata) => {
+  const setHeadingMetadata = (node, apiEntryMetadata) => {
     const stringifiedHeading = transformNodesToString(node.children);
 
     // Append the heading metadata to the node's `data` property
@@ -106,30 +106,32 @@ const createQueries = () => {
    * @param {import('mdast').Blockquote} node Thead Link Reference Node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
-  const addStabilityIndexMetadata = ({ children }, apiEntryMetadata) => {
+  const addStabilityMetadata = (node, apiEntryMetadata) => {
     // `node` is a `blockquote` node, and the first child will always be
     // a `paragraph` node, so we can safely access the children of the first child
     // which we use as the prefix and description of the Stability Index
-    const stabilityPrefix = transformNodesToString(children[0].children);
+    const stabilityPrefix = transformNodesToString(node.children[0].children);
 
     // Attempts to grab the Stability index and description from the prefix
     const matches = createQueries.QUERIES.stabilityIndex.exec(stabilityPrefix);
 
     // Ensures that the matches are valid and that we have at least 3 entries
     if (matches && matches.length === 3) {
+      // Updates the `data` property of the Stability Index node
+      // so that the original node data can also be inferred
+      node.data = {
+        // The 2nd match should be the group that matches the Stability Index
+        index: Number(matches[1]),
+        // The 3rd match should be the group containing all the remaining text
+        // which is used as a description (we trim it to an one liner)
+        description: matches[2].replace(/\n/g, ' ').trim(),
+      };
+
       // Creates a new Tree node containing the Stability Index metadata
       const stabilityIndexNode = createTree(
         'root',
-        {
-          data: {
-            // The 2nd match should be the group that matches the Stability Index
-            index: Number(matches[1]),
-            // The 3rd match should be the group containing all the remaining text
-            // which is used as a description (we trim it to an one liner)
-            description: matches[2].replace(/\n/g, ' ').trim(),
-          },
-        },
-        children
+        { data: node.data },
+        node.children
       );
 
       // Adds the Stability Index metadata to the current Metadata entry
@@ -155,11 +157,11 @@ const createQueries = () => {
 
   return {
     addYAMLMetadata,
-    addHeadingMetadata,
+    setHeadingMetadata,
     updateMarkdownLink,
     updateTypeReference,
     updateLinkReference,
-    addStabilityIndexMetadata,
+    addStabilityMetadata,
     updateStabilityPrefixToLink,
   };
 };
@@ -180,7 +182,7 @@ createQueries.QUERIES = {
 };
 
 createQueries.UNIST = {
-  isStabilityIndex: ({ type, children }) =>
+  isStabilityNode: ({ type, children }) =>
     type === 'blockquote' &&
     createQueries.QUERIES.stabilityIndex.test(transformNodesToString(children)),
   isYamlNode: ({ type, value }) =>
