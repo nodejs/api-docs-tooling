@@ -69,7 +69,7 @@ export const transformTypeToReferenceLink = type => {
 
     // If we have a valid result and the piece is not empty, we return the Markdown link
     if (trimmedPiece.length && result.length) {
-      return `[\`<${trimmedPiece}>\`](${result})`;
+      return `<a class="type" href="${result}">&lt;${trimmedPiece}&gt;</a>`;
     }
   });
 

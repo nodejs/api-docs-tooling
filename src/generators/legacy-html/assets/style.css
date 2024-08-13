@@ -190,7 +190,7 @@ em code {
 
 .critical,
 .critical code {
-  color: var(--color-critical);
+  color: var(--color-critical) !important;
 }
 
 li.picker-header {
@@ -354,7 +354,6 @@ hr.line {
 
 .api_metadata {
   font-size: 0.85rem;
-  margin-bottom: 1rem;
 }
 
 .api_metadata span {
