@@ -59,6 +59,18 @@ const buildStability = ({ children, data }, index, parent) => {
 };
 
 /**
+ * Transforms the node Markdown link into an HTML link
+ *
+ * @param {import('mdast').Html} node The node containing the HTML content
+ */
+const buildHtmlTypeLink = node => {
+  node.value = node.value.replace(
+    createQueries.QUERIES.linksWithTypes,
+    (_, type, link) => `<a href="${link}" class="type">&lt;${type}&gt;</a>`
+  );
+};
+
+/**
  * Builds the Metadata Properties into content
  *
  * @param {ApiDocMetadataEntry} node The node to build to build the properties from
@@ -128,20 +140,24 @@ export default (headNodes, nodes, remark) => {
     'root',
     // Parses the metadata pieces of each node and the content
     nodes.map(node => {
-      // Depp clones the content nodes to avoid affecting upstream nodes
-      const clonedContent = JSON.parse(JSON.stringify(node.content));
+      // Deep clones the content nodes to avoid affecting upstream nodes
+      const content = JSON.parse(JSON.stringify(node.content));
 
       // Parses the Blockquotes into Stability elements
       // This is treated differently as we want to preserve the position of a Stability Index
       // within the content, so we can't just remove it and append it to the metadata
-      visit(clonedContent, createQueries.UNIST.isStabilityNode, buildStability);
+      visit(content, createQueries.UNIST.isStabilityNode, buildStability);
+
+      // Parses the type references that got replaced into Markdown links (raw)
+      // into actual HTML links, these then get parsed into HAST nodes on `runSync`
+      visit(content, createQueries.UNIST.isHtmlWithType, buildHtmlTypeLink);
 
       const headingElement = buildHeadingElement(node, remark);
       const metadataElement = buildMetadataElement(node);
       const extraContent = buildExtraContent(headNodes, node);
 
       // Processes the Markdown AST tree into an HTML AST tree
-      const sectionContent = remark.runSync(clonedContent);
+      const sectionContent = remark.runSync(content);
 
       // Concatenates all the strings and parses with remark into an AST tree
       return createElement('section', [
