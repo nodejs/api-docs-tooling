@@ -12,17 +12,27 @@ import {
 /**
  * Builds the Dropdown for the current Table of Contents
  *
+ * @TODO: Use createElement from HAST instead of string concatenation
+ *
  * @param {string} tableOfContents The stringified ToC
  */
-const buildToC = tableOfContents =>
-  `<li class="picker-header"><a href="#">` +
-  `<span class="picker-arrow"></span>` +
-  `Table of contents</a><div class="picker">` +
-  `<div class="toc">${tableOfContents}</div></div></li>
-`;
+const buildToC = tableOfContents => {
+  if (tableOfContents.length) {
+    return (
+      `<li class="picker-header"><a href="#">` +
+      `<span class="picker-arrow"></span>` +
+      `Table of contents</a><div class="picker">` +
+      `<div class="toc">${tableOfContents}</div></div></li>`
+    );
+  }
+
+  return '';
+};
 
 /**
  * Builds the Navigation Dropdown for the current file
+ *
+ * @TODO: Use createElement from HAST instead of string concatenation
  *
  * @param {string} navigationContents The stringified Navigation
  */
@@ -34,6 +44,8 @@ const buildNavigation = navigationContents =>
 
 /**
  * Generates the dropdown for viewing the current API doc in different versions
+ *
+ * @TODO: Use createElement from HAST instead of string concatenation
  *
  * @param {string} api The current API node name
  * @param {string} added The version the API was added
@@ -66,6 +78,8 @@ const buildVersions = (api, added, versions) => {
 
 /**
  * Builds the "Edit on GitHub" link for the current API doc
+ *
+ * @TODO: Use createElement from HAST instead of string concatenation
  *
  * @param {string} api The current API node name
  */

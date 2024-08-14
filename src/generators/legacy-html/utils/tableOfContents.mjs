@@ -8,11 +8,15 @@
  *
  * This generates a Markdown string containing a list as the ToC for the API documentation.
  *
- * @param {Array<ApiDocMetadataEntry>} metadataEntries The API metadata nodes to be used for the ToC
+ * @param {Array<ApiDocMetadataEntry>} entries The API metadata nodes to be used for the ToC
  * @param {{ maxDepth: number; parser: (metadata: ApiDocMetadataEntry) => string }} options The optional ToC options
  */
-const tableOfContents = (metadataEntries, options) => {
-  return metadataEntries.reduce((acc, entry) => {
+const tableOfContents = (entries, options) => {
+  // Filter out the entries that have a name property / or that have empty content
+  const validHeadings = entries.filter(({ heading }) => heading.data.name);
+
+  // Generate the ToC based on the API headings (sections)
+  return validHeadings.reduce((acc, entry) => {
     // Check if the depth of the heading is less than or equal to the maximum depth
     if (entry.heading.data.depth <= options.maxDepth) {
       // Generate the indentation based on the depth of the heading

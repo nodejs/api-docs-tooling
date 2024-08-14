@@ -80,12 +80,19 @@ export default {
     const replaceTemplateValues = values => {
       const { api, added, section, version, toc, nav, content } = values;
 
+      // Surrounds the Table of Contents with a `details` element to make it collapsible
+      // Which is added to the top of the page, and also to a dropdown
+      // @TODO: Possibly find a permanente place for this in the future
+      const tocTemplate =
+        `<details role="navigation" id="toc" open>` +
+        `<summary>Table of contents</summary${toc}></details>`;
+
       return apiTemplate
         .replace('__ID__', api)
         .replace(/__FILENAME__/g, api)
         .replace('__SECTION__', section)
         .replace(/__VERSION__/g, version)
-        .replace(/__TOC__/g, toc)
+        .replace(/__TOC__/g, toc.length ? tocTemplate : '')
         .replace(/__GTOC__/g, nav)
         .replace('__CONTENT__', content)
         .replace(/__TOC_PICKER__/g, dropdowns.buildToC(toc))

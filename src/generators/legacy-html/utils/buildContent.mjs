@@ -14,10 +14,9 @@ import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
  * Builds a Markdown heading for a given node
  *
  * @param {ApiDocMetadataEntry} node The node to build the Markdown heading for
- * @param {import('unified').Processor} remark The Remark instance to be used to process
  * @returns {import('unist').Parent} The HTML AST tree of the heading content
  */
-const buildHeadingElement = (node, remark) => {
+const buildHeadingElement = node => {
   const [, headingId] = node.slug.split('#');
 
   // Creates the element that references the link to the heading
@@ -30,7 +29,7 @@ const buildHeadingElement = (node, remark) => {
   return createElement(`h${node.heading.data.depth + 1}`, [
     // The inner Heading markdown content is still using Remark nodes, and they need
     // to be converted into Rehype nodes
-    remark.runSync(node.heading),
+    ...node.heading.children,
     headingLinkElement,
   ]);
 };
@@ -152,23 +151,22 @@ export default (headNodes, nodes, remark) => {
       // into actual HTML links, these then get parsed into HAST nodes on `runSync`
       visit(content, createQueries.UNIST.isHtmlWithType, buildHtmlTypeLink);
 
-      const headingElement = buildHeadingElement(node, remark);
+      const headingElement = buildHeadingElement(node);
       const metadataElement = buildMetadataElement(node);
       const extraContent = buildExtraContent(headNodes, node);
-
-      // Processes the Markdown AST tree into an HTML AST tree
-      const sectionContent = remark.runSync(content);
 
       // Concatenates all the strings and parses with remark into an AST tree
       return createElement('section', [
         headingElement,
         metadataElement,
         extraContent,
-        sectionContent,
+        content,
       ]);
     })
   );
 
+  const processedNodes = remark.runSync(parsedNodes);
+
   // Stringifies the processed nodes to return the final Markdown content
-  return remark.stringify(parsedNodes);
+  return remark.stringify(processedNodes);
 };
