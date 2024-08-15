@@ -42,6 +42,8 @@ export default {
   dependsOn: 'legacy-html',
 
   async generate(input, { version, releases, output }) {
+    const inputWithoutIndex = input.filter(entry => entry.api !== 'index');
+
     // Gets a Remark Processor that parses Markdown to minified HTML
     const remarkWithRehype = getRemarkRehype();
 
@@ -52,24 +54,27 @@ export default {
     // Reads the API template.html file to be used as a base for the HTML files
     const apiTemplate = await readFile(join(baseDir, 'template.html'), 'utf-8');
 
-    const aggregatedContent = input.map(entry => entry.content).join('\n');
-    const aggregatedToC = input.map(entry => entry.toc).join('\n');
+    // Aggregates all individual Table of Contents into one giant string
+    const aggregatedToC = inputWithoutIndex.map(entry => entry.toc).join('\n');
+
+    // Aggregates all individual content into one giant string
+    const aggregatedContent = inputWithoutIndex
+      .map(entry => entry.content)
+      .join('\n');
 
     // Creates a "mimic" of an `ApiDocMetadataEntry` which fulfils the requirements
     // for generating the `tableOfContents` wioth the `tableOfContents.parseNavigationNode` parser
-    const sideNavigationFromValues = input.map(entry => ({
+    const sideNavigationFromValues = inputWithoutIndex.map(entry => ({
       api: entry.api,
-      heading: { depth: 1, name: entry.section },
+      heading: { data: { depth: 1, name: entry.section } },
     }));
 
     // Generates the global Table of Contents (Sidebar Navigation)
-    const parsedSideNav = String(
-      remarkWithRehype.processSync(
-        tableOfContents(sideNavigationFromValues, {
-          maxDepth: 1,
-          parser: tableOfContents.parseNavigationNode,
-        })
-      )
+    const parsedSideNav = remarkWithRehype.processSync(
+      tableOfContents(sideNavigationFromValues, {
+        maxDepth: 1,
+        parser: tableOfContents.parseNavigationNode,
+      })
     );
 
     const generatedAllTemplate = apiTemplate
@@ -77,7 +82,7 @@ export default {
       .replace(/__FILENAME__/g, 'all')
       .replace('__SECTION__', 'All')
       .replace(/__VERSION__/g, `v${version.toString()}`)
-      .replace(/__TOC__/g, aggregatedToC)
+      .replace(/__TOC__/g, tableOfContents.wrapToC(aggregatedToC))
       .replace(/__GTOC__/g, parsedSideNav)
       .replace('__CONTENT__', aggregatedContent)
       .replace(/__TOC_PICKER__/g, dropdowns.buildToC(aggregatedToC))
