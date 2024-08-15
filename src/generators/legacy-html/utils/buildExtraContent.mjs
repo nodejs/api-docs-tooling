@@ -54,6 +54,7 @@ const buildStabilityOverview = headMetadata => {
  *
  * @param {Array<ApiDocMetadataEntry>} headNodes The API metadata nodes to be used for the Stability Overview
  * @param {ApiDocMetadataEntry} node The current API metadata node to be transformed into HTML content
+ * @returns {import('unist').Parent} The HTML AST tree for the extra content
  */
 export default (headNodes, node) => {
   return createTree('root', [

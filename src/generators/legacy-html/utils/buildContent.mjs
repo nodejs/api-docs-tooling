@@ -13,25 +13,34 @@ import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
 /**
  * Builds a Markdown heading for a given node
  *
- * @param {ApiDocMetadataEntry} node The node to build the Markdown heading for
- * @returns {import('unist').Parent} The HTML AST tree of the heading content
+ * @param {ApiDocMetadataEntry['heading']} node The node to build the Markdown heading for
+ * @param {number} index The index of the current node
+ * @param {import('unist').Parent} parent The parent node of the current node
+ * @returns {import('hast').Element} The HTML AST tree of the heading content
  */
-const buildHeadingElement = node => {
-  const [, headingId] = node.slug.split('#');
-
-  // Creates the element that references the link to the heading
-  const headingLinkElement = createElement(
-    'span',
-    createElement('a.mark#headingId', { href: `#${headingId}` }, '#')
-  );
-
+const buildHeading = ({ data, children }, index, parent) => {
   // Creates the heading element with the heading text and the link to the heading
-  return createElement(`h${node.heading.data.depth + 1}`, [
+  const headingElment = createElement(`h${data.depth + 1}`, [
     // The inner Heading markdown content is still using Remark nodes, and they need
     // to be converted into Rehype nodes
-    ...node.heading.children,
-    headingLinkElement,
+    ...children,
+    // Creates the element that references the link to the heading
+    // (The `#` anchor on the right of each Heading section)
+    createElement(
+      'span',
+      createElement(`a.mark#${data.slug}`, { href: `#${data.slug}` }, '#')
+    ),
   ]);
+
+  // Removes the original Heading node from the content tree
+  parent.children.splice(index, 1);
+
+  // Adds the new Heading element to the top of the content tree
+  // since the heading is the first element of the content
+  // We also ensure a node is only created if it is a valid Heading
+  if (data.name && data.slug && children.length) {
+    parent.children.unshift(headingElment);
+  }
 };
 
 /**
@@ -130,17 +139,20 @@ const buildMetadataElement = node => {
  * Builds the whole content of a given node (API module)
  *
  * @param {Array<ApiDocMetadataEntry>} headNodes The API metadata Nodes that are considered the "head" of each module
- * @param {Array<ApiDocMetadataEntry>} nodes The API metadata Nodes to be transformed into HTML content
+ * @param {Array<ApiDocMetadataEntry>} metadataEntries The API metadata Nodes to be transformed into HTML content
  * @param {import('unified').Processor} remark The Remark instance to be used to process
  */
-export default (headNodes, nodes, remark) => {
+export default (headNodes, metadataEntries, remark) => {
   // Creates the root node for the content
   const parsedNodes = createTree(
     'root',
     // Parses the metadata pieces of each node and the content
-    nodes.map(node => {
+    metadataEntries.map(entry => {
       // Deep clones the content nodes to avoid affecting upstream nodes
-      const content = JSON.parse(JSON.stringify(node.content));
+      const content = JSON.parse(JSON.stringify(entry.content));
+
+      // Parses the Heading nodes into Heading elements
+      visit(content, createQueries.UNIST.isHeading, buildHeading);
 
       // Parses the Blockquotes into Stability elements
       // This is treated differently as we want to preserve the position of a Stability Index
@@ -151,16 +163,15 @@ export default (headNodes, nodes, remark) => {
       // into actual HTML links, these then get parsed into HAST nodes on `runSync`
       visit(content, createQueries.UNIST.isHtmlWithType, buildHtmlTypeLink);
 
-      const headingElement = buildHeadingElement(node);
-      const metadataElement = buildMetadataElement(node);
-      const extraContent = buildExtraContent(headNodes, node);
+      // Splits the content into the Heading node and the rest of the content
+      const [headingNode, ...restNodes] = content.children;
 
       // Concatenates all the strings and parses with remark into an AST tree
       return createElement('section', [
-        headingElement,
-        metadataElement,
-        extraContent,
-        content,
+        headingNode,
+        buildMetadataElement(entry),
+        buildExtraContent(headNodes, entry),
+        ...restNodes,
       ]);
     })
   );

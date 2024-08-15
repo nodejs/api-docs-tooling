@@ -13,10 +13,10 @@
  */
 const tableOfContents = (entries, options) => {
   // Filter out the entries that have a name property / or that have empty content
-  const validHeadings = entries.filter(({ heading }) => heading.data.name);
+  const validEntries = entries.filter(({ heading }) => heading.data.name);
 
   // Generate the ToC based on the API headings (sections)
-  return validHeadings.reduce((acc, entry) => {
+  return validEntries.reduce((acc, entry) => {
     // Check if the depth of the heading is less than or equal to the maximum depth
     if (entry.heading.data.depth <= options.maxDepth) {
       // Generate the indentation based on the depth of the heading
@@ -43,7 +43,9 @@ tableOfContents.parseNavigationNode = ({ api, heading }) =>
  *
  * @param {ApiDocMetadataEntry} metadata
  */
-tableOfContents.parseToCNode = ({ stability, slug, heading }) => {
+tableOfContents.parseToCNode = ({ stability, api, heading }) => {
+  const fullSlug = `${api}.html#${heading.data.slug}`;
+
   // If the node has one stability index, we add the stability index class
   // into the ToC; Otherwise, we cannot determine which class to add
   // which is intentional, as some nodes have multiple stabilities
@@ -52,12 +54,29 @@ tableOfContents.parseToCNode = ({ stability, slug, heading }) => {
 
     return (
       `<span class="stability_${firstStability.data.index}">` +
-      `<a href="${slug}">${heading.data.text}</a></span>`
+      `<a href="${fullSlug}">${heading.data.text}</a></span>`
     );
   }
 
   // Otherwise, just the plain text of the heading with a link
-  return `<a href="${slug}">${heading.data.text}</a>`;
+  return `<a href="${fullSlug}">${heading.data.text}</a>`;
+};
+
+/**
+ * Wraps the Table of Contents (ToC) with a template
+ * used for rendering within the page template
+ *
+ * @param {string} toc
+ */
+tableOfContents.wrapToC = toc => {
+  if (toc && toc.length > 0) {
+    return (
+      `<details role="navigation" id="toc" open>` +
+      `<summary>Table of contents</summary>${toc}</details>`
+    );
+  }
+
+  return '';
 };
 
 export default tableOfContents;
