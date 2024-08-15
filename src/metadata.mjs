@@ -51,7 +51,7 @@ const createMetadata = slugger => {
    * }}
    */
   const internalMetadata = {
-    heading: createTree('root', []),
+    heading: createTree('root', { data: {} }),
     stability: createTree('root', []),
     properties: {
       type: undefined,

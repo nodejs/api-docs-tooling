@@ -4,25 +4,33 @@ import GitHubSlugger from 'github-slugger';
 import { VFile } from 'vfile';
 
 import createMetadata from '../metadata.mjs';
+import { u } from 'unist-builder';
 
 describe('createMetadata', () => {
   it('should set the heading correctly', () => {
     const slugger = new GitHubSlugger();
     const metadata = createMetadata(slugger);
-    const heading = {
-      text: 'Test Heading',
-      type: 'test',
-      name: 'test',
-      depth: 1,
-    };
+    const heading = u('heading', {
+      type: 'heading',
+      data: {
+        text: 'Test Heading',
+        type: 'test',
+        name: 'test',
+        depth: 1,
+      },
+    });
     metadata.setHeading(heading);
-    strictEqual(metadata.create(new VFile(), {}).heading, heading);
+    strictEqual(metadata.create(new VFile(), {}).heading.data, heading.data);
   });
 
   it('should set the stability correctly', () => {
     const slugger = new GitHubSlugger();
     const metadata = createMetadata(slugger);
-    const stability = 2;
+    const stability = {
+      type: 'root',
+      data: { index: 2, description: '' },
+      children: [],
+    };
     metadata.addStability(stability);
     const actual = metadata.create(new VFile(), {}).stability;
     delete actual.toJSON;
@@ -38,19 +46,26 @@ describe('createMetadata', () => {
     const apiDoc = new VFile({ path: 'test.md' });
     const section = { type: 'root', children: [] };
     const heading = {
-      text: 'Test Heading',
-      type: 'test',
-      name: 'test',
-      depth: 1,
+      type: 'heading',
+      data: {
+        text: 'Test Heading',
+        type: 'test',
+        name: 'test',
+        depth: 1,
+      },
     };
-    const stability = 2;
+    const stability = {
+      type: 'root',
+      data: { index: 2, description: '' },
+      children: [],
+    };
     const properties = { source_link: 'test.com' };
     metadata.setHeading(heading);
     metadata.addStability(stability);
     metadata.updateProperties(properties);
     const expected = {
       api: 'test',
-      slug: 'test.html#test-heading',
+      slug: 'test-heading',
       sourceLink: 'test.com',
       updates: [],
       changes: [],
@@ -61,6 +76,7 @@ describe('createMetadata', () => {
     };
     const actual = metadata.create(apiDoc, section);
     delete actual.stability.toJSON;
+    delete actual.heading.toJSON;
     deepStrictEqual(actual, expected);
   });
 });
