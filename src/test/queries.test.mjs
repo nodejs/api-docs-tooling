@@ -18,20 +18,20 @@ describe('createQueries', () => {
   it('should update type to reference correctly', () => {
     const queries = createQueries();
     const node = { value: 'This is a {string} type.' };
-    queries.updateTypeToReferenceLink(node);
+    queries.updateTypeReference(node);
     strictEqual(node.type, 'html');
     strictEqual(
       node.value,
-      'This is a [`string`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type) type.'
+      'This is a [`<string>`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type) type.'
     );
   });
 
   it('should update type to reference not correctly if no match', () => {
     const queries = createQueries();
     const node = { value: 'This is a {test} type.' };
-    queries.updateTypeToReferenceLink(node);
+    queries.updateTypeReference(node);
     strictEqual(node.type, 'html');
-    strictEqual(node.value, 'This is a test type.');
+    strictEqual(node.value, 'This is a {test} type.');
   });
 
   it('should add heading metadata correctly', () => {
@@ -43,14 +43,23 @@ describe('createQueries', () => {
     const apiEntryMetadata = {
       setHeading: heading => {
         deepStrictEqual(heading, {
-          text: 'Test Heading',
-          type: 'module',
-          name: 'Test Heading',
+          children: [
+            {
+              type: 'text',
+              value: 'Test Heading',
+            },
+          ],
+          data: {
+            depth: 2,
+            name: 'Test Heading',
+            text: 'Test Heading',
+            type: 'module',
+          },
           depth: 2,
         });
       },
     };
-    queries.addHeadingMetadata(node, apiEntryMetadata);
+    queries.setHeadingMetadata(node, apiEntryMetadata);
   });
 
   it('should update markdown link correctly', () => {
@@ -81,13 +90,13 @@ describe('createQueries', () => {
       ],
     };
     const apiEntryMetadata = {
-      setStability: stability => {
-        deepStrictEqual(stability.toJSON(), {
+      addStability: stability => {
+        deepStrictEqual(stability.data, {
           index: 2,
           description: 'Frozen',
         });
       },
     };
-    queries.addStabilityIndexMetadata(node, apiEntryMetadata);
+    queries.addStabilityMetadata(node, apiEntryMetadata);
   });
 });

@@ -23,8 +23,13 @@ describe('createMetadata', () => {
     const slugger = new GitHubSlugger();
     const metadata = createMetadata(slugger);
     const stability = 2;
-    metadata.setStability(stability);
-    strictEqual(metadata.create(new VFile(), {}).stability, stability);
+    metadata.addStability(stability);
+    const actual = metadata.create(new VFile(), {}).stability;
+    delete actual.toJSON;
+    deepStrictEqual(actual, {
+      children: [stability],
+      type: 'root',
+    });
   });
 
   it('should create a metadata entry correctly', () => {
@@ -41,7 +46,7 @@ describe('createMetadata', () => {
     const stability = 2;
     const properties = { source_link: 'test.com' };
     metadata.setHeading(heading);
-    metadata.setStability(stability);
+    metadata.addStability(stability);
     metadata.updateProperties(properties);
     const expected = {
       api: 'test',
@@ -50,9 +55,12 @@ describe('createMetadata', () => {
       updates: [],
       changes: [],
       heading,
-      stability,
+      stability: { type: 'root', children: [stability] },
       content: section,
+      tags: [],
     };
-    deepStrictEqual(metadata.create(apiDoc, section), expected);
+    const actual = metadata.create(apiDoc, section);
+    delete actual.stability.toJSON;
+    deepStrictEqual(actual, expected);
   });
 });

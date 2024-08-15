@@ -1,3 +1,4 @@
+import type { Root } from 'mdast';
 import type { SemVer } from 'semver';
 import type { Parent, Node, Data } from 'unist';
 
@@ -36,9 +37,12 @@ declare global {
     depth: number;
   }
 
+  export interface HeadingMetadataParent
+    extends NodeWithData<Parent, HeadingMetadataEntry> {}
+
   export interface ApiDocMetadataChange {
     // The Node.js version or versions where said change was introduced simultaneously
-    version: string[];
+    version: Array<string>;
     // The GitHub PR URL of said change
     'pr-url': string | undefined;
     // The description of said change
@@ -49,15 +53,16 @@ declare global {
     // The type of the API doc Metadata update
     type: 'added' | 'removed' | 'deprecated' | 'introduced_in' | 'napiVersion';
     // The Node.js version or versions where said metadata stability index changed
-    version: string[];
+    version: Array<string>;
   }
 
   export interface ApiDocRawMetadataEntry {
     type?: string;
     name?: string;
     source_link?: string;
-    updates?: ApiDocMetadataUpdate[];
-    changes?: ApiDocMetadataChange[];
+    updates?: Array<ApiDocMetadataUpdate>;
+    changes?: Array<ApiDocMetadataChange>;
+    tags?: Array<string>;
   }
 
   export interface ApiDocMetadataEntry {
@@ -68,18 +73,21 @@ declare global {
     // The GitHub URL to the source of the API entry
     sourceLink: string | undefined;
     // Any updates to the API doc Metadata
-    updates: ApiDocMetadataUpdate[];
+    updates: Array<ApiDocMetadataUpdate>;
     // Any changes to the API doc Metadata
-    changes: ApiDocMetadataChange[];
+    changes: Array<ApiDocMetadataChange>;
     // The parsed Markdown content of a Navigation Entry
-    heading: HeadingMetadataEntry;
+    heading: WithJSON<HeadingMetadataParent, HeadingMetadataEntry>;
     // The API doc metadata Entry Stability Index if exists
     stability: WithJSON<
       StabilityIndexParent,
       Array<StabilityIndexMetadataEntry>
     >;
     // The subtree containing all Nodes of the API doc entry
-    content: WithJSON<Parent, string>;
+    content: Root;
+    // Extra YAML section entries that are stringd and serve
+    // to provide additional metadata about the API doc entry
+    tags: Array<string>;
   }
 
   export interface ApiDocReleaseEntry {
