@@ -1,4 +1,4 @@
-import type { Root } from 'mdast';
+import type { Heading, Root } from 'mdast';
 import type { SemVer } from 'semver';
 import type { Parent, Node, Data } from 'unist';
 
@@ -20,7 +20,7 @@ declare global {
   }
 
   export interface StabilityIndexParent extends Parent {
-    children: Array<NodeWithData<Node, StabilityIndexMetadataEntry>>;
+    children: Array<NodeWithData<Root, StabilityIndexMetadataEntry>>;
   }
 
   export interface HeadingMetadataEntry {
@@ -35,10 +35,11 @@ declare global {
     text: string;
     name: string;
     depth: number;
+    slug: string;
   }
 
   export interface HeadingMetadataParent
-    extends NodeWithData<Parent, HeadingMetadataEntry> {}
+    extends NodeWithData<Heading, HeadingMetadataEntry> {}
 
   export interface ApiDocMetadataChange {
     // The Node.js version or versions where said change was introduced simultaneously

@@ -69,7 +69,9 @@ const createMetadata = slugger => {
      * @param {HeadingMetadataParent} heading The new heading metadata
      */
     setHeading: heading => {
-      internalMetadata.heading = heading;
+      // We clone the heading to ensure that we don't accidentally override it
+      // with later mutations below on the `.create` method
+      internalMetadata.heading = { ...heading };
     },
     /**
      * Set the Stability Index of a given Metadata
@@ -77,7 +79,9 @@ const createMetadata = slugger => {
      * @param {StabilityIndexParent} stability The stability index node to be added
      */
     addStability: stability => {
-      internalMetadata.stability.children.push(stability);
+      // We clone the stability to ensure that we don't accidentally override it
+      // with later mutations below on the `.create` method
+      internalMetadata.stability.children.push({ ...stability });
     },
     /**
      * Set the Metadata (from YAML if exists) properties to the current Metadata entry
@@ -132,7 +136,7 @@ const createMetadata = slugger => {
       // a certain navigation section to a page ad the exact point of the page (scroll)
       // This is useful for classes, globals and other type of YAML entries, as they reside
       // within a module (page) and we want to link to them directly
-      const slugHash = `#${slugger.slug(internalMetadata.heading.text)}`;
+      const sectionSlug = slugger.slug(internalMetadata.heading.data.text);
 
       const {
         source_link: sourceLink,
@@ -140,6 +144,9 @@ const createMetadata = slugger => {
         changes = [],
         tags = [],
       } = internalMetadata.properties;
+
+      // Also add the slug to the heading data as it is used to build the heading
+      internalMetadata.heading.data.slug = sectionSlug;
 
       // Defines the toJSON method for the Heading AST node to be converted as JSON
       internalMetadata.heading.toJSON = () => internalMetadata.heading.data;
@@ -153,7 +160,7 @@ const createMetadata = slugger => {
         // The API file basename (without the extension)
         api: apiDoc.stem,
         // The path/slug of the API section
-        slug: `${apiDoc.stem}.html${slugHash}`,
+        slug: sectionSlug,
         // The source link of said API section
         sourceLink: sourceLink,
         // The latest updates to an API section
