@@ -20,7 +20,7 @@ import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
  */
 const buildHeading = ({ data, children }, index, parent) => {
   // Creates the heading element with the heading text and the link to the heading
-  const headingElment = createElement(`h${data.depth + 1}`, [
+  const headingElement = createElement(`h${data.depth + 1}`, [
     // The inner Heading markdown content is still using Remark nodes, and they need
     // to be converted into Rehype nodes
     ...children,
@@ -39,7 +39,7 @@ const buildHeading = ({ data, children }, index, parent) => {
   // since the heading is the first element of the content
   // We also ensure a node is only created if it is a valid Heading
   if (data.name && data.slug && children.length) {
-    parent.children.unshift(headingElment);
+    parent.children.unshift(headingElement);
   }
 };
 
@@ -131,7 +131,7 @@ const buildMetadataElement = node => {
     metadataElement.children.push(historyDetailsElement);
   }
 
-  // Parses and processes the mixed Markdonw/HTML content into an HTML AST tree
+  // Parses and processes the mixed Markdown/HTML content into an HTML AST tree
   return metadataElement;
 };
 

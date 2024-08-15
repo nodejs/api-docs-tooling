@@ -50,7 +50,7 @@ export default {
     // Gets a Remark Processor that parses Markdown to minified HTML
     const remarkRehypeProcessor = getRemarkRehype();
 
-    const grouppedModules = groupNodesByModule(input);
+    const groupedModules = groupNodesByModule(input);
 
     // Current directory path relative to the `index.mjs` file
     const baseDir = import.meta.dirname;
@@ -101,7 +101,7 @@ export default {
      * @param {string} template The template to be used to generate the HTML content
      */
     const processModuleNodes = head => {
-      const nodes = grouppedModules.get(head.api);
+      const nodes = groupedModules.get(head.api);
 
       // Replaces the entry corresponding to the current module
       // as an active entry within the side navigation

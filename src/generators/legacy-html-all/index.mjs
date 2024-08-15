@@ -63,7 +63,7 @@ export default {
       .join('\n');
 
     // Creates a "mimic" of an `ApiDocMetadataEntry` which fulfils the requirements
-    // for generating the `tableOfContents` wioth the `tableOfContents.parseNavigationNode` parser
+    // for generating the `tableOfContents` with the `tableOfContents.parseNavigationNode` parser
     const sideNavigationFromValues = inputWithoutIndex.map(entry => ({
       api: entry.api,
       heading: { data: { depth: 1, name: entry.section } },

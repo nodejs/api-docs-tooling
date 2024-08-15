@@ -5,7 +5,7 @@ import { h as createElement } from 'hastscript';
 import { getWasmInstance } from '@shikijs/core/wasm-inlined';
 
 import cLanguage from 'shiki/langs/c.mjs';
-import coffeLanguage from 'shiki/langs/coffeescript.mjs';
+import coffeeScriptLanguage from 'shiki/langs/coffeescript.mjs';
 import cPlusPlusLanguage from 'shiki/langs/cpp.mjs';
 import diffLanguage from 'shiki/langs/diff.mjs';
 import dockerLanguage from 'shiki/langs/docker.mjs';
@@ -49,7 +49,7 @@ export default {
     ...cLanguage,
     ...cPlusPlusLanguage,
     ...httpLanguage,
-    ...coffeLanguage,
+    ...coffeeScriptLanguage,
   ],
   transformers: [
     // Adds the "copy" button to the `pre` element
