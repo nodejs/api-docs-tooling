@@ -132,7 +132,7 @@ const createMetadata = slugger => {
       // a certain navigation section to a page ad the exact point of the page (scroll)
       // This is useful for classes, globals and other type of YAML entries, as they reside
       // within a module (page) and we want to link to them directly
-      const slugHash = `#${slugger.slug(internalMetadata.heading.data.text)}`;
+      const slugHash = `#${slugger.slug(internalMetadata.heading.text)}`;
 
       const {
         source_link: sourceLink,

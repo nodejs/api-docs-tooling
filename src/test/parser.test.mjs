@@ -13,21 +13,79 @@ describe('createParser', () => {
     const expected = [
       {
         api: 'test',
-        slug: 'test.html#test-heading',
-        sourceLink: undefined,
+        slug: 'test.html#',
         updates: [],
         changes: [],
         heading: {
-          text: 'Test Heading',
-          type: 'module',
-          name: 'Test Heading',
+          children: [
+            {
+              position: {
+                end: {
+                  column: 15,
+                  line: 1,
+                  offset: 14,
+                },
+                start: {
+                  column: 3,
+                  line: 1,
+                  offset: 2,
+                },
+              },
+              type: 'text',
+              value: 'Test Heading',
+            },
+          ],
+          data: {
+            depth: 1,
+            name: 'Test Heading',
+            text: 'Test Heading',
+            type: 'module',
+          },
           depth: 1,
+          position: {
+            end: {
+              column: 15,
+              line: 1,
+              offset: 14,
+            },
+            start: {
+              column: 1,
+              line: 1,
+              offset: 0,
+            },
+          },
+          type: 'heading',
         },
-        stability: undefined,
-        content: { type: 'root', children: [] },
+        sourceLink: undefined,
+        stability: { type: 'root', children: [] },
+        content: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  value: 'This is a test.',
+                  position: {
+                    start: { line: 3, column: 1, offset: 16 },
+                    end: { line: 3, column: 16, offset: 31 },
+                  },
+                },
+              ],
+              position: {
+                start: { line: 3, column: 1, offset: 16 },
+                end: { line: 3, column: 16, offset: 31 },
+              },
+            },
+          ],
+        },
+        tags: [],
       },
     ];
     const actual = await parser.parseApiDoc(apiDoc);
+    delete actual[0].heading.toJSON;
+    delete actual[0].stability.toJSON;
     delete actual[0].content.toJSON;
     deepStrictEqual(actual, expected);
   });
@@ -47,37 +105,121 @@ describe('createParser', () => {
     const expected = [
       {
         api: 'test1',
-        slug: 'test1.html#test-heading-1',
-        sourceLink: undefined,
+        slug: 'test1.html#',
         updates: [],
         changes: [],
         heading: {
-          text: 'Test Heading 1',
-          type: 'module',
-          name: 'Test Heading 1',
+          type: 'heading',
           depth: 1,
+          children: [
+            {
+              type: 'text',
+              value: 'Test Heading 1',
+              position: {
+                start: { line: 1, column: 3, offset: 2 },
+                end: { line: 1, column: 17, offset: 16 },
+              },
+            },
+          ],
+          position: {
+            start: { line: 1, column: 1, offset: 0 },
+            end: { line: 1, column: 17, offset: 16 },
+          },
+          data: {
+            text: 'Test Heading 1',
+            type: 'module',
+            name: 'Test Heading 1',
+            depth: 1,
+          },
         },
-        stability: undefined,
-        content: { type: 'root', children: [] },
+        sourceLink: undefined,
+        stability: { type: 'root', children: [] },
+        content: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  value: 'This is a test.',
+                  position: {
+                    start: { line: 3, column: 1, offset: 18 },
+                    end: { line: 3, column: 16, offset: 33 },
+                  },
+                },
+              ],
+              position: {
+                start: { line: 3, column: 1, offset: 18 },
+                end: { line: 3, column: 16, offset: 33 },
+              },
+            },
+          ],
+        },
+        tags: [],
       },
       {
         api: 'test2',
-        slug: 'test2.html#test-heading-2',
-        sourceLink: undefined,
+        slug: 'test2.html#',
         updates: [],
         changes: [],
         heading: {
-          text: 'Test Heading 2',
-          type: 'module',
-          name: 'Test Heading 2',
+          type: 'heading',
           depth: 1,
+          children: [
+            {
+              type: 'text',
+              value: 'Test Heading 2',
+              position: {
+                start: { line: 1, column: 3, offset: 2 },
+                end: { line: 1, column: 17, offset: 16 },
+              },
+            },
+          ],
+          position: {
+            start: { line: 1, column: 1, offset: 0 },
+            end: { line: 1, column: 17, offset: 16 },
+          },
+          data: {
+            text: 'Test Heading 2',
+            type: 'module',
+            name: 'Test Heading 2',
+            depth: 1,
+          },
         },
-        stability: undefined,
-        content: { type: 'root', children: [] },
+        sourceLink: undefined,
+        stability: { type: 'root', children: [] },
+        content: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  value: 'This is another test.',
+                  position: {
+                    start: { line: 3, column: 1, offset: 18 },
+                    end: { line: 3, column: 22, offset: 39 },
+                  },
+                },
+              ],
+              position: {
+                start: { line: 3, column: 1, offset: 18 },
+                end: { line: 3, column: 22, offset: 39 },
+              },
+            },
+          ],
+        },
+        tags: [],
       },
     ];
     const actual = await parser.parseApiDocs(apiDocs);
-    actual.forEach(entry => delete entry.content.toJSON);
+    actual.forEach(entry => {
+      delete entry.heading.toJSON;
+      delete entry.stability.toJSON;
+      delete entry.content.toJSON;
+    });
     deepStrictEqual(actual, expected);
   });
 });
