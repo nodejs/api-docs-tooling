@@ -38,9 +38,12 @@ export default {
       // Deep clones the content nodes to avoid affecting upstream nodes
       const content = JSON.parse(JSON.stringify(node.content));
 
-      // Removes all the Stability Index nodes, since they shouldn't be included in the final JSON
-      // and are already represented in the metadata (metadata.stability.toJSON)
-      remove(content, [createQueries.UNIST.isStabilityNode]);
+      // Removes numerous nodes from the content that should not be on the "body"
+      // of the JSON version of the API docs as they are already represented in the metadata
+      remove(content, [
+        createQueries.UNIST.isStabilityNode,
+        createQueries.UNIST.isHeading,
+      ]);
 
       // For the JSON generate we want to transform the whole content into JSON
       content.toJSON = () => remarkProcessor.stringify(content);

@@ -64,6 +64,9 @@ const createParser = () => {
     // Get all Markdown Footnote definitions from the tree
     const markdownDefinitions = selectAll('definition', apiDocTree);
 
+    // Get all Markdown Heading entries from the tree
+    const headingNodes = selectAll('heading', apiDocTree);
+
     // Handles Markdown link references and updates them to be plain links
     visit(apiDocTree, createQueries.UNIST.isLinkReference, node =>
       updateLinkReference(node, markdownDefinitions)
@@ -78,6 +81,12 @@ const createParser = () => {
     visit(apiDocTree, createQueries.UNIST.isMarkdownUrl, node =>
       updateMarkdownLink(node)
     );
+
+    // If the document has no headings but it has content, we add a fake heading to the top
+    // so that our parsing logic can work correctly, and generate content for the whole file
+    if (headingNodes.length === 0 && apiDocTree.children.length > 0) {
+      apiDocTree.children.unshift(createTree('heading', { depth: 1 }, []));
+    }
 
     // Handles iterating the tree and creating subtrees for each API doc entry
     // where an API doc entry is defined by a Heading Node
@@ -113,7 +122,7 @@ const createParser = () => {
       // `index + 1` is used to skip the current Heading Node
       const subTree = createTree(
         'root',
-        apiDocTree.children.slice(index + 1, stop)
+        apiDocTree.children.slice(index, stop)
       );
 
       // Visits all Stability Index nodes from the current subtree if there's any
