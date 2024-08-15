@@ -28,7 +28,8 @@ const createQueries = () => {
   const addYAMLMetadata = (node, apiEntryMetadata) => {
     const sanitizedString = node.value.replace(
       createQueries.QUERIES.yamlInnerContent,
-      (_, __, inner) => inner
+      // Either capture a YAML multinline block, or a simple single-line YAML block
+      (_, simple, yaml) => simple || yaml
     );
 
     apiEntryMetadata.updateProperties(parseYAMLIntoMetadata(sanitizedString));
@@ -175,13 +176,13 @@ createQueries.QUERIES = {
   normalizeTypes: /(\{|<)(?! )[a-zA-Z0-9.| \[\]\\]+(?! )(\}|>)/g,
   // ReGex to match the type API type references that got already parsed
   // so that they can be transformed into HTML links
-  linksWithTypes: /\[`<([a-zA-Z0-9.| \\[\]]+)>`\]\((.*)\)/,
+  linksWithTypes: /\[`<([a-zA-Z0-9.| \\[\]]+)>`\]\((\S+)\)/g,
   // ReGeX for handling Stability Indexes Metadata
   stabilityIndex: /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s,
   // ReGeX for handling the Stability Index Prefix
   stabilityIndexPrefix: /Stability: ([0-5])/,
   // ReGeX for retrieving the inner content from a YAML block
-  yamlInnerContent: /^<!--(YAML| YAML)?([\s\S]*?)-->/,
+  yamlInnerContent: /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/,
 };
 
 createQueries.UNIST = {
