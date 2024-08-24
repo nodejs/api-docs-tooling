@@ -27,10 +27,10 @@
     "prettier": "3.3.3"
   },
   "dependencies": {
-    "@shikijs/rehype": "^1.12.1",
     "commander": "^12.1.0",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.0",
+    "hast-util-to-string": "^3.0.0",
     "hastscript": "^9.0.0",
     "html-minifier-terser": "^7.2.0",
     "rehype-stringify": "^10.0.0",

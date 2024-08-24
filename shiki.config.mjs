@@ -32,7 +32,7 @@ const copyButtonElement = createElement(
  *
  * Creates a Shiki configuration for the API Docs tooling
  *
- * @type {import('@shikijs/rehype').RehypeShikiOptions}
+ * @type {import('@shikijs/core').HighlighterCoreOptions}
  */
 export default {
   loadWasm: getWasmInstance,

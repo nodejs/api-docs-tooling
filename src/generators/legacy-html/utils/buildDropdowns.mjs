@@ -12,7 +12,8 @@ import {
 /**
  * Builds the Dropdown for the current Table of Contents
  *
- * @TODO: Use createElement from HAST instead of string concatenation
+ * Note.: We use plain strings here instead of HAST, since these are just
+ * templates and not actual content that needs to be transformed.
  *
  * @param {string} tableOfContents The stringified ToC
  */
@@ -32,7 +33,8 @@ const buildToC = tableOfContents => {
 /**
  * Builds the Navigation Dropdown for the current file
  *
- * @TODO: Use createElement from HAST instead of string concatenation
+ * Note.: We use plain strings here instead of HAST, since these are just
+ * templates and not actual content that needs to be transformed.
  *
  * @param {string} navigationContents The stringified Navigation
  */
@@ -45,7 +47,8 @@ const buildNavigation = navigationContents =>
 /**
  * Generates the dropdown for viewing the current API doc in different versions
  *
- * @TODO: Use createElement from HAST instead of string concatenation
+ * Note.: We use plain strings here instead of HAST, since these are just
+ * templates and not actual content that needs to be transformed.
  *
  * @param {string} api The current API node name
  * @param {string} added The version the API was added
@@ -79,7 +82,8 @@ const buildVersions = (api, added, versions) => {
 /**
  * Builds the "Edit on GitHub" link for the current API doc
  *
- * @TODO: Use createElement from HAST instead of string concatenation
+ * Note.: We use plain strings here instead of HAST, since these are just
+ * templates and not actual content that needs to be transformed.
  *
  * @param {string} api The current API node name
  */
