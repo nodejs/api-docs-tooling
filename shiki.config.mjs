@@ -1,7 +1,5 @@
 'use strict';
 
-import { h as createElement } from 'hastscript';
-
 import { getWasmInstance } from '@shikijs/core/wasm-inlined';
 
 import cLanguage from 'shiki/langs/c.mjs';
@@ -18,14 +16,6 @@ import shellSessionLanguage from 'shiki/langs/shellsession.mjs';
 import typeScriptLanguage from 'shiki/langs/typescript.mjs';
 
 import shikiNordTheme from 'shiki/themes/nord.mjs';
-
-// Creates a static button element which is used for the "copy" button
-// within codeboxes for copying the code to the clipboard
-const copyButtonElement = createElement(
-  'button',
-  { class: 'copy-button' },
-  createElement('text', 'copy')
-);
 
 /**
  * @TODO: Use `shiki.config.mjs` from nodejs/nodejs.org
@@ -50,9 +40,5 @@ export default {
     ...cPlusPlusLanguage,
     ...httpLanguage,
     ...coffeeScriptLanguage,
-  ],
-  transformers: [
-    // Adds the "copy" button to the `pre` element
-    { pre: node => void node.children.push(copyButtonElement) },
   ],
 };

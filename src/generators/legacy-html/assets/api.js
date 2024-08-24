@@ -165,6 +165,8 @@
 
         let code = '';
 
+        console.log(parentNode);
+
         if (flavorToggle) {
           if (flavorToggle.checked) {
             code = parentNode.querySelector('.mjs').textContent;

@@ -16,6 +16,14 @@ const languagePrefix = 'language-';
 // Creates a Singleton instance for Shiki's syntax highlighter using WASM
 const shikiHighlighter = await getSingletonHighlighterCore(shikiConfig);
 
+// Creates a static button element which is used for the "copy" button
+// within codeboxes for copying the code to the clipboard
+const copyButtonElement = createElement(
+  'button',
+  { class: 'copy-button' },
+  'copy'
+);
+
 /**
  * Checks if the given node is a valid code element.
  *
@@ -92,6 +100,9 @@ export default function rehypeShikiji() {
       // Adds the original language back to the <pre> element
       children[0].properties.class = `${children[0].properties.class} ${codeLanguage}`;
 
+      // Adds the "copy" button to the <pre> element
+      children[0].children.push(copyButtonElement);
+
       // Replaces the <pre> element with the updated one
       parent.children.splice(index, 1, ...children);
     });
@@ -152,6 +163,7 @@ export default function rehypeShikiji() {
               checked: languages[0] === 'cjs',
             }),
             ...codeElements,
+            copyButtonElement,
           ]
         );
 
