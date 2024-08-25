@@ -94,7 +94,8 @@ export default function rehypeShikiji() {
       // Parses the <pre> contents and returns a HAST tree with the highlighted code
       const { children } = shikiHighlighter.codeToHast(preElementContents, {
         lang: languageId,
-        theme: shikiConfig.theme,
+        // Allows support for dual themes (light, dark) for Shiki
+        themes: { light: shikiConfig.themes[0], dark: shikiConfig.themes[1] },
       });
 
       // Adds the original language back to the <pre> element
@@ -147,11 +148,14 @@ export default function rehypeShikiji() {
               // We grab Shiki's styling from the code tag
               // back to the pre element tag to ensure consistency
               style: codeElements[0].properties.style,
+              class: 'shiki',
             },
             [
               createElement('input', {
                 class: 'js-flavor-toggle',
                 type: 'checkbox',
+                // If the CJS code block is the first one, then we should keep
+                // the checkbox checked so that it highglit the CJS by default
                 checked: codeElements[0].properties.language === 'cjs',
               }),
               ...codeElements,

@@ -531,7 +531,7 @@ tt,
 pre {
   padding: 1rem;
   vertical-align: top;
-  background-color: var(--background-color-highlight);
+  border-radius: 4px;
   margin: 1rem;
   overflow-x: auto;
 }
@@ -1027,7 +1027,8 @@ kbd {
   text-transform: uppercase;
   font-weight: 700;
   padding: 0 0.5rem;
-  margin-right: 0.2rem;
+  margin-right: 10px;
+  margin-top: -2px;
   height: 1.5rem;
   transition-property: background-color, border-color, color, box-shadow, filter;
   transition-duration: 0.3s;

@@ -15,18 +15,20 @@ import shellScriptLanguage from 'shiki/langs/shellscript.mjs';
 import shellSessionLanguage from 'shiki/langs/shellsession.mjs';
 import typeScriptLanguage from 'shiki/langs/typescript.mjs';
 
-import shikiNordTheme from 'shiki/themes/nord.mjs';
+import lightTheme from 'shiki/themes/catppuccin-latte.mjs';
+import darkTheme from 'shiki/themes/catppuccin-mocha.mjs';
 
 /**
- * @TODO: Use `shiki.config.mjs` from nodejs/nodejs.org
- *
  * Creates a Shiki configuration for the API Docs tooling
  *
  * @type {import('@shikijs/core').HighlighterCoreOptions}
  */
 export default {
   loadWasm: getWasmInstance,
-  theme: shikiNordTheme,
+  // Only register the themes we need, to support light/dark theme
+  themes: [lightTheme, darkTheme],
+  // Only register the languages that the API docs use
+  // and override the JavaScript language with the aliases
   langs: [
     { ...javaScriptLanguage[0], aliases: ['mjs', 'cjs', 'js'] },
     ...jsonLanguage,
