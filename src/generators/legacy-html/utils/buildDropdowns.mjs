@@ -1,6 +1,6 @@
 'use strict';
 
-import { coerce, gte } from 'semver';
+import { coerce, major } from 'semver';
 
 import { getVersionFromSemVer } from '../../../utils/generators.mjs';
 
@@ -58,7 +58,7 @@ const buildVersions = (api, added, versions) => {
   // All Node.js versions that support the current API; If there's no "introduced_at" field,
   // we simply show all versions, as we cannot pinpoint the exact version
   const compatibleVersions = versions.filter(({ version }) =>
-    added ? gte(version, coerce(added), { loose: true }) : true
+    added ? major(version) >= major(coerce(added)) : true
   );
 
   // Parses the SemVer version into something we use for URLs and to display the Node.js version
