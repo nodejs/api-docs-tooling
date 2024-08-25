@@ -130,10 +130,13 @@ export default {
       // Retrieves when this node was added to the API docs
       const addedAt = head.updates.find(({ type }) => type === 'introduced_in');
 
+      // In case there's no Heading, we make a little capitalization of the filename
+      const apiAsHeading = head.api.charAt(0).toUpperCase() + head.api.slice(1);
+
       const generatedTemplate = {
         api: head.api,
         added: addedAt ? addedAt.version[0] : '',
-        section: head.heading.data.name,
+        section: head.heading.data.name || apiAsHeading,
         version: `v${version.toString()}`,
         toc: String(parsedToC),
         nav: String(activeSideNav),
