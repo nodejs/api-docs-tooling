@@ -108,7 +108,6 @@ export default function rehypeShikiji() {
     });
 
     visit(tree, 'element', (_, index, parent) => {
-      const languages = [];
       const codeElements = [];
 
       let currentIndex = index;
@@ -126,54 +125,52 @@ export default function rehypeShikiji() {
           // For this iteration of our code, we only support multi-code tab for
           // JavaScript languages for Node.js (CJS / MJS)
           if (language === 'cjs' || language === 'mjs') {
-            // Add the language to the languages array
-            languages.push(language);
-
             // We patch up Shiki's `pre` element properties into the `code` element
             // since we want to keep the original properties
             codeElement.properties.class = `${className} ${language}`;
             codeElement.properties.style = preElement.properties.style;
+            codeElement.properties.language = language;
 
             // Add the code element to the pre children
             codeElements.push(codeElement);
           }
         }
 
-        const nextNode = parent?.children[currentIndex + 1];
+        currentIndex += 1;
 
-        // If the CodeBoxes are on the root tree the next Element will be
-        // an empty text element so we should skip it
-        currentIndex += nextNode && nextNode?.type === 'text' ? 2 : 1;
-      }
+        // Since we only support CJS/MJS switch, we should have exactly 2 elements
+        // in order to create a switchable code tab
+        if (codeElements.length === 2) {
+          const switchablePreElement = createElement(
+            'pre',
+            {
+              // We grab Shiki's styling from the code tag
+              // back to the pre element tag to ensure consistency
+              style: codeElements[0].properties.style,
+            },
+            [
+              createElement('input', {
+                class: 'js-flavor-toggle',
+                type: 'checkbox',
+                checked: codeElements[0].properties.language === 'cjs',
+              }),
+              ...codeElements,
+              copyButtonElement,
+            ]
+          );
 
-      // Since we only support CJS/MJS switch, we should have exactly 2 elements
-      // in order to create a switchable code tab
-      if (languages.length === 2) {
-        const codeTabElement = createElement(
-          'pre',
-          {
-            // We grab Shiki's styling from the code tag
-            // back to the pre element tag to ensure consistency
-            style: codeElements[0].properties.style,
-          },
-          [
-            createElement('input', {
-              class: 'js-flavor-toggle',
-              type: 'checkbox',
-              checked: languages[0] === 'cjs',
-            }),
-            ...codeElements,
-            copyButtonElement,
-          ]
-        );
+          // This removes all the original code Elements and adds a new CodeTab Element
+          // at the original start of the first Code Element
+          parent.children.splice(
+            index,
+            currentIndex - index,
+            switchablePreElement
+          );
 
-        // This removes all the original code Elements and adds a new CodeTab Element
-        // at the original start of the first Code Element
-        parent.children.splice(index, currentIndex - index, codeTabElement);
-
-        // Prevent visiting the code block children and for the next N Elements
-        // since all of them belong to this CodeTabs Element
-        return [SKIP];
+          // Prevent visiting the code block children and for the next N Elements
+          // since all of them belong to this CodeTabs Element
+          return [SKIP];
+        }
       }
     });
   };
