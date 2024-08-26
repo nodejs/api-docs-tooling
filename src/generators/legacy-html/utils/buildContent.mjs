@@ -88,32 +88,98 @@ const buildMetadataElement = node => {
   const metadataElement = createElement('div.api_metadata');
 
   // We use a `span` element to display the source link as a clickable link to the source within Node.js
-  if (node.sourceLink && node.sourceLink.length) {
+  if (typeof node.source_link === 'string') {
     // Creates the source link URL with the base URL and the source link
-    const sourceLink = `${DOC_NODE_BLOB_BASE_URL}${node.sourceLink}`;
+    const sourceLink = `${DOC_NODE_BLOB_BASE_URL}${node.source_link}`;
 
     // Creates the source link element with the source link and the source link text
     const sourceLinkElement = createElement('span', [
       createElement('b', 'Source Code: '),
-      createElement('a', { href: sourceLink }, node.sourceLink),
+      createElement('a', { href: sourceLink }, node.source_link),
     ]);
 
     // Appends the source link element to the metadata element
     metadataElement.children.push(sourceLinkElement);
   }
 
+  // We use a `span` element to display the added in version
+  if (typeof node.added_in !== 'undefined') {
+    const addedIn = Array.isArray(node.added_in)
+      ? node.added_in.join(', ')
+      : node.added_in;
+
+    // Creates the added in element with the added in version
+    const addedinElement = createElement('span', [
+      createElement('b', 'Added In: '),
+      addedIn,
+    ]);
+
+    // Appends the added in element to the metadata element
+    metadataElement.children.push(addedinElement);
+  }
+
+  // We use a `span` element to display the deprecated in version
+  if (typeof node.deprecated_in !== 'undefined') {
+    const deprecatedIn = Array.isArray(node.deprecated_in)
+      ? node.deprecated_in.join(', ')
+      : node.deprecated_in;
+
+    // Creates the deprecated in element with the deprecated in version
+    const deprecatedInElement = createElement('span', [
+      createElement('b', 'Deprecated In: '),
+      deprecatedIn,
+    ]);
+
+    // Appends the deprecated in element to the metadata element
+    metadataElement.children.push(deprecatedInElement);
+  }
+
+  // We use a `span` element to display the removed in version
+  if (typeof node.removed_in !== 'undefined') {
+    const removedIn = Array.isArray(node.removed_in)
+      ? node.removed_in.join(', ')
+      : node.removed_in;
+
+    // Creates the removed in element with the removed in version
+    const removedInElement = createElement('span', [
+      createElement('b', 'Removed In: '),
+      removedIn,
+    ]);
+
+    // Appends the removed in element to the metadata element
+    metadataElement.children.push(removedInElement);
+  }
+
+  // We use a `span` element to display the N-API version if it is available
+  if (typeof node.n_api_version === 'number') {
+    // Creates the N-API version element with the N-API version
+    const nApiVersionElement = createElement('span', [
+      createElement('b', 'N-API Version: '),
+      node.n_api_version,
+    ]);
+
+    // Appends the source n-api element to the metadata element
+    metadataElement.children.push(nApiVersionElement);
+  }
+
   // If there are changes, we create a `details` element with a `table` element to display the changes
   // Differently from the old API docs, on this version we always enforce a table to display the changes
-  if (node.changes && node.changes.length) {
+  if (typeof node.changes !== 'undefined' && node.changes.length) {
     // Maps the changes into a `tr` element with the version and the description
-    const mappedHistoryEntries = node.changes.map(({ version, description }) =>
-      createElement('tr', [
-        createElement('td', version.join(', ')),
-        createElement('td', description),
-      ])
+    // An array containing hast nodes for the history entries if any
+    const historyEntries = node.changes.map(
+      ({ version: changeVersions, description }) =>
+        createElement('tr', [
+          createElement(
+            'td',
+            Array.isArray(changeVersions)
+              ? changeVersions.join(', ')
+              : changeVersions
+          ),
+          createElement('td', description),
+        ])
     );
 
-    // Creates the history details element with a summary and a table with the changes
     const historyDetailsElement = createElement('details.changelog', [
       createElement('summary', 'History'),
       createElement('table', [
@@ -123,7 +189,7 @@ const buildMetadataElement = node => {
             createElement('th', 'Changes'),
           ]),
         ]),
-        createElement('tbody', mappedHistoryEntries),
+        createElement('tbody', historyEntries),
       ]),
     ]);
 

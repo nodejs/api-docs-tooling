@@ -354,6 +354,7 @@ hr.line {
 
 .api_metadata {
   font-size: 0.85rem;
+  margin-bottom: 1rem;
 }
 
 .api_metadata span {

@@ -66,7 +66,7 @@ describe('createMetadata', () => {
     const expected = {
       api: 'test',
       slug: 'test-heading',
-      sourceLink: 'test.com',
+      source_link: 'test.com',
       updates: [],
       changes: [],
       heading,

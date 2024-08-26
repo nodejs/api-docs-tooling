@@ -14,7 +14,7 @@ const buildStabilityOverview = headMetadata => {
   );
 
   const mappedHeadNodesIntoTable = headNodesWithStability.map(
-    ({ heading, slug, stability }) => {
+    ({ heading, api, stability }) => {
       // Retrieves the first Stability Index, as we only want to use the first one
       // to generate the Stability Overview
       const [{ data }] = stability.children;
@@ -23,7 +23,7 @@ const buildStabilityOverview = headMetadata => {
         'tr',
         createElement(
           'td.module_stability',
-          createElement('a', { href: slug }, heading.data.name)
+          createElement('a', { href: `${api}.html` }, heading.data.name)
         ),
         createElement(
           `td.api_stability.api_stability_${data.index}`,

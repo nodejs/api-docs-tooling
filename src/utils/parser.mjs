@@ -4,7 +4,6 @@ import yaml from 'yaml';
 
 import {
   DOC_API_HEADING_TYPES,
-  DOC_API_YAML_KEYS_UPDATE,
   DOC_MDN_BASE_URL_JS_GLOBALS,
   DOC_MDN_BASE_URL_JS_PRIMITIVES,
   DOC_TYPES_MAPPING_GLOBALS,
@@ -108,34 +107,6 @@ export const parseYAMLIntoMetadata = yamlString => {
   if (typeof parsedYaml === 'string') {
     parsedYaml = { tags: [parsedYaml] };
   }
-
-  // This cleans up the YAML metadata into something more standardized and that
-  // can be consumed by our metadata parser
-  Object.keys(parsedYaml).forEach(key => {
-    // We normalise entries from the `changes` object, ensuring that
-    // the versions property is always an array
-    if (key === 'changes' && Array.isArray(parsedYaml[key])) {
-      // The `changes` entry must always be an array of objects
-      // if that's not the case, we should report a warning in the future
-      parsedYaml[key] = parsedYaml[key].map(change => ({
-        ...change,
-        version: [change.version].flat(),
-      }));
-    }
-
-    // We transform some entries in a standardized "updates" field
-    // and then remove them from the parsedYaml
-    if (DOC_API_YAML_KEYS_UPDATE.includes(key)) {
-      // We ensure that the `updates` is an array of objects; Within `metadata.mjs`
-      // we actually merge these different arrays, into one single array,
-      // differently from `changes` the `updates` are scattered through the API section
-      // and need to be merged together into one big `updates` array
-      parsedYaml.updates = [{ type: key, version: [parsedYaml[key]].flat() }];
-
-      // We remove the original entry, as it is becoming a `updates` entry
-      delete parsedYaml[key];
-    }
-  });
 
   return parsedYaml;
 };
