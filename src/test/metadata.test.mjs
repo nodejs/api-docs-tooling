@@ -64,15 +64,19 @@ describe('createMetadata', () => {
     metadata.addStability(stability);
     metadata.updateProperties(properties);
     const expected = {
+      added_in: undefined,
       api: 'test',
+      changes: [],
+      content: section,
+      deprecated_in: undefined,
+      heading,
+      n_api_version: undefined,
+      removed_in: undefined,
       slug: 'test-heading',
       source_link: 'test.com',
-      updates: [],
-      changes: [],
-      heading,
       stability: { type: 'root', children: [stability] },
-      content: section,
       tags: [],
+      updates: [],
     };
     const actual = metadata.create(apiDoc, section);
     delete actual.stability.toJSON;
