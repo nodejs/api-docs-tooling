@@ -4,7 +4,6 @@ import { u as createTree } from 'unist-builder';
 
 import { compare } from 'semver';
 
-import { DOC_API_UPDATE_MAPPING } from './constants.mjs';
 import { coerceSemVer } from './utils/generators.mjs';
 
 /**
@@ -19,25 +18,18 @@ import { coerceSemVer } from './utils/generators.mjs';
 const createMetadata = slugger => {
   /**
    * Maps `updates` into `changes` format, merges them and sorts them by version
-   *
-   * @param {Array<ApiDocMetadataUpdate>} updates Original updates to be merged
+   * ç
    * @param {Array<ApiDocMetadataChange>} changes Changes to be merged into updates
    * @returns {Array<ApiDocMetadataChange>} Mapped, merged and sorted changes
    */
-  const mergeUpdatesIntoChanges = (updates, changes) => {
-    // Maps the `updates` array into the same format used by the `changes` array
-    // So that for generators such as HTML, we render all the changes + updates
-    // into one single list of changes, for example a HTML table
-    const mappedUpdatesIntoChanges = updates.map(({ version, type }) => ({
-      version,
-      'pr-url': undefined,
-      description: `${DOC_API_UPDATE_MAPPING[type]}: ${version.join(', ')}`,
-    }));
-
+  const sortChanges = changes => {
     // Sorts the updates and changes by the first version on a given entry
-    return [...mappedUpdatesIntoChanges, ...changes].sort((a, b) =>
-      compare(coerceSemVer(a.version[0]), coerceSemVer(b.version[0]))
-    );
+    return changes.sort((a, b) => {
+      const aVersion = Array.isArray(a.version) ? a.version[0] : a.version;
+      const bVersion = Array.isArray(b.version) ? b.version[0] : b.version;
+
+      return compare(coerceSemVer(aVersion), coerceSemVer(bVersion));
+    });
   };
 
   /**
@@ -53,13 +45,7 @@ const createMetadata = slugger => {
   const internalMetadata = {
     heading: createTree('root', { data: {} }),
     stability: createTree('root', []),
-    properties: {
-      type: undefined,
-      source_link: undefined,
-      updates: [],
-      changes: [],
-      tags: [],
-    },
+    properties: { type: undefined, changes: [], tags: [] },
   };
 
   return {
@@ -98,26 +84,13 @@ const createMetadata = slugger => {
      * @param {Partial<ApiDocRawMetadataEntry>} properties Extra Metadata properties to be defined
      */
     updateProperties: properties => {
-      if (properties.type) {
-        internalMetadata.properties.type = properties.type;
-        internalMetadata.heading.data.type = properties.type;
-      }
+      Object.entries(properties).forEach(([key, value]) => {
+        if (Array.isArray(internalMetadata.properties[key])) {
+          return internalMetadata.properties[key].push(...value);
+        }
 
-      if (properties.source_link) {
-        internalMetadata.properties.source_link = properties.source_link;
-      }
-
-      if (properties.changes) {
-        internalMetadata.properties.changes.push(...properties.changes);
-      }
-
-      if (properties.updates) {
-        internalMetadata.properties.updates.push(...properties.updates);
-      }
-
-      if (properties.tags) {
-        internalMetadata.properties.tags.push(...properties.tags);
-      }
+        internalMetadata.properties[key] = value;
+      });
     },
     /**
      * Generates a new Navigation entry and pushes them to the internal collection
@@ -139,7 +112,12 @@ const createMetadata = slugger => {
       const sectionSlug = slugger.slug(internalMetadata.heading.data.text);
 
       const {
-        source_link: sourceLink,
+        type,
+        added,
+        deprecated,
+        removed,
+        napiVersion,
+        source_link,
         updates = [],
         changes = [],
         tags = [],
@@ -147,6 +125,10 @@ const createMetadata = slugger => {
 
       // Also add the slug to the heading data as it is used to build the heading
       internalMetadata.heading.data.slug = sectionSlug;
+
+      // If a `type` property is defined we override the type that comes from the heading
+      internalMetadata.heading.data.type =
+        type ?? internalMetadata.heading.data.type;
 
       // Defines the toJSON method for the Heading AST node to be converted as JSON
       internalMetadata.heading.toJSON = () => internalMetadata.heading.data;
@@ -157,24 +139,18 @@ const createMetadata = slugger => {
 
       // Returns the Metadata entry for the API doc
       return {
-        // The API file basename (without the extension)
         api: apiDoc.stem,
-        // The path/slug of the API section
         slug: sectionSlug,
-        // The source link of said API section
-        sourceLink: sourceLink,
-        // The latest updates to an API section
+        source_link,
+        added_in: added,
+        deprecated_in: deprecated,
+        removed_in: removed,
+        n_api_version: napiVersion,
         updates,
-        // The full-changeset to an API section
-        changes: mergeUpdatesIntoChanges(updates, changes),
-        // The Heading metadata
+        changes: sortChanges(changes),
         heading: internalMetadata.heading,
-        // The Stability Index of the API section
         stability: internalMetadata.stability,
-        // The AST tree of the API section
         content: section,
-        // Extra YAML metadata that are Strings
-        // and we use to tag special API sections
         tags,
       };
     },

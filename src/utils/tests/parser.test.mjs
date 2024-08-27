@@ -25,47 +25,32 @@ describe('transformTypeToReferenceLink', () => {
 
 describe('parseYAMLIntoMetadata', () => {
   it('should parse a YAML string into a JavaScript object', () => {
-    const input = 'name: test\ntype: string\nintroduced_in: v1.0.0';
+    const input = 'name: test\ntype: module\nintroduced_in: v1.0.0';
     const expectedOutput = {
       name: 'test',
-      type: 'string',
-      updates: [
-        {
-          type: 'introduced_in',
-          version: ['v1.0.0'],
-        },
-      ],
+      type: 'module',
+      introduced_in: 'v1.0.0',
     };
     deepStrictEqual(parseYAMLIntoMetadata(input), expectedOutput);
   });
 
   it('should parse a YAML string with multiple versions into a JavaScript object', () => {
-    const input = 'name: test\ntype: string\nintroduced_in: [v1.0.0, v1.1.0]';
+    const input = 'name: test\ntype: module\nintroduced_in: [v1.0.0, v1.1.0]';
     const expectedOutput = {
       name: 'test',
-      type: 'string',
-      updates: [
-        {
-          type: 'introduced_in',
-          version: ['v1.0.0', 'v1.1.0'],
-        },
-      ],
+      type: 'module',
+      introduced_in: ['v1.0.0', 'v1.1.0'],
     };
     deepStrictEqual(parseYAMLIntoMetadata(input), expectedOutput);
   });
 
   it('should parse a YAML string with source_link into a JavaScript object', () => {
     const input =
-      'name: test\ntype: string\nintroduced_in: v1.0.0\nsource_link: https://github.com/nodejs/node';
+      'name: test\ntype: module\nintroduced_in: v1.0.0\nsource_link: https://github.com/nodejs/node';
     const expectedOutput = {
       name: 'test',
-      type: 'string',
-      updates: [
-        {
-          type: 'introduced_in',
-          version: ['v1.0.0'],
-        },
-      ],
+      type: 'module',
+      introduced_in: 'v1.0.0',
       source_link: 'https://github.com/nodejs/node',
     };
     deepStrictEqual(parseYAMLIntoMetadata(input), expectedOutput);

@@ -43,26 +43,23 @@ declare global {
 
   export interface ApiDocMetadataChange {
     // The Node.js version or versions where said change was introduced simultaneously
-    version: Array<string>;
+    version: string | Array<string>;
     // The GitHub PR URL of said change
     'pr-url': string | undefined;
     // The description of said change
     description: string;
   }
 
-  export interface ApiDocMetadataUpdate {
-    // The type of the API doc Metadata update
-    type: 'added' | 'removed' | 'deprecated' | 'introduced_in' | 'napiVersion';
-    // The Node.js version or versions where said metadata stability index changed
-    version: Array<string>;
-  }
-
   export interface ApiDocRawMetadataEntry {
     type?: string;
     name?: string;
     source_link?: string;
-    updates?: Array<ApiDocMetadataUpdate>;
     changes?: Array<ApiDocMetadataChange>;
+    added?: string;
+    removed?: string;
+    deprecated?: string;
+    introduced_in?: string;
+    napiVersion?: number;
     tags?: Array<string>;
   }
 
@@ -72,9 +69,19 @@ declare global {
     // The unique slug of a Heading/Navigation entry which is linkable through an anchor
     slug: string;
     // The GitHub URL to the source of the API entry
-    sourceLink: string | undefined;
-    // Any updates to the API doc Metadata
-    updates: Array<ApiDocMetadataUpdate>;
+    source_link: string | Array<string> | undefined;
+    // When a said API section got added (in which version(s) of Node.js)
+    added_in: string | Array<string> | undefined;
+    // When a said API section got removed (in which version(s) of Node.js)
+    removed_in: string | Array<string> | undefined;
+    // When a said API section got deprecated (in which version(s) of Node.js)
+    deprecated_in: string | Array<string> | undefined;
+    // This is usually used for the head API section in the beginning of an API doc
+    // to indicate in which version this page got added to the Node.js API docs
+    introduced_in: string | Array<string> | undefined;
+    // If the API section is covered by N-API versioning
+    // this field will show its related minimum N-API version
+    n_api_version: number | undefined;
     // Any changes to the API doc Metadata
     changes: Array<ApiDocMetadataChange>;
     // The parsed Markdown content of a Navigation Entry
