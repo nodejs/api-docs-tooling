@@ -70,6 +70,8 @@ declare global {
     slug: string;
     // The GitHub URL to the source of the API entry
     source_link: string | Array<string> | undefined;
+    // Base name of the api doc file (ex/ `addons.md`)
+    api_doc_source: string;
     // When a said API section got added (in which version(s) of Node.js)
     added_in: string | Array<string> | undefined;
     // When a said API section got removed (in which version(s) of Node.js)
