@@ -17,21 +17,32 @@ describe('createQueries', () => {
   // valid type
   it('should update type to reference correctly', () => {
     const queries = createQueries();
-    const node = { value: 'This is a {string} type.' };
-    queries.updateTypeReference(node);
-    strictEqual(node.type, 'html');
-    strictEqual(
-      node.value,
-      'This is a [`<string>`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type) type.'
+    const node = {
+      value: 'This is a {string} type.',
+      position: { start: 0, end: 0 },
+    };
+    const parent = { children: [node] };
+    queries.updateTypeReference(node, parent);
+    deepStrictEqual(
+      parent.children.map(c => c.value),
+      [
+        'This is a ',
+        undefined, // link
+        ' type.',
+      ]
     );
   });
 
   it('should update type to reference not correctly if no match', () => {
     const queries = createQueries();
-    const node = { value: 'This is a {test} type.' };
-    queries.updateTypeReference(node);
-    strictEqual(node.type, 'html');
-    strictEqual(node.value, 'This is a {test} type.');
+    const node = {
+      value: 'This is a {test} type.',
+      position: { start: 0, end: 0 },
+    };
+    const parent = { children: [node] };
+    queries.updateTypeReference(node, parent);
+    strictEqual(parent.children[0].type, 'text');
+    strictEqual(parent.children[0].value, 'This is a {test} type.');
   });
 
   it('should add heading metadata correctly', () => {

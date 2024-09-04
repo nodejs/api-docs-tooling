@@ -58,7 +58,14 @@ export const DOC_API_SLUGS_REPLACEMENTS = [
 // is a specific type of API Doc entry (e.g., Event, Class, Method, etc)
 // and to extract the inner content of said Heading to be used as the API doc entry name
 export const DOC_API_HEADING_TYPES = [
-  { type: 'method', regex: /^`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)\([^)]*\)`?$/i },
+  {
+    type: 'method',
+    regex:
+      // Group 1: foo[bar]()
+      // Group 2: foo.bar()
+      // Group 3: foobar()
+      /^`?(?:\w*(?:(\[[^\]]+\])|(?:\.(\w+)))|(\w+))\([^)]*\)`?$/i,
+  },
   { type: 'event', regex: /^Event: +`?['"]?([^'"]+)['"]?`?$/i },
   {
     type: 'class',
@@ -71,11 +78,13 @@ export const DOC_API_HEADING_TYPES = [
   },
   {
     type: 'classMethod',
-    regex: /^Static method: +`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)\([^)]*\)`?$/i,
+    regex:
+      /^Static method: +`?[A-Z]\w+(?:\.[A-Z]\w+)*(?:(\[\w+\.\w+\])|\.(\w+))\([^)]*\)`?$/i,
   },
   {
     type: 'property',
-    regex: /^(?:Class property: +)?`?([A-Z]\w+(?:\.[A-Z]\w+)*\.\w+)`?$/i,
+    regex:
+      /^(?:Class property: +)?`?[A-Z]\w+(?:\.[A-Z]\w+)*(?:(\[\w+\.\w+\])|\.(\w+))`?$/i,
   },
 ];
 

@@ -70,6 +70,8 @@ declare global {
     slug: string;
     // The GitHub URL to the source of the API entry
     source_link: string | Array<string> | undefined;
+    // Path to the api doc file relative to the root of the nodejs repo root (ex/ `doc/api/addons.md`)
+    api_doc_source: string;
     // When a said API section got added (in which version(s) of Node.js)
     added_in: string | Array<string> | undefined;
     // When a said API section got removed (in which version(s) of Node.js)
@@ -96,6 +98,8 @@ declare global {
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
+    // The raw file content
+    rawContent: string;
   }
 
   export interface ApiDocReleaseEntry {

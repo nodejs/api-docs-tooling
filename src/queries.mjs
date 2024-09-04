@@ -1,7 +1,7 @@
 'use strict';
 
 import { u as createTree } from 'unist-builder';
-import { SKIP } from 'unist-util-visit';
+import { SKIP, visit } from 'unist-util-visit';
 
 import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
 
@@ -12,12 +12,14 @@ import {
   parseYAMLIntoMetadata,
   transformTypeToReferenceLink,
 } from './utils/parser.mjs';
+import { getRemark } from './utils/remark.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
  * of metadata and content metadata manipulation within an API Doc
  */
 const createQueries = () => {
+  const remark = getRemark();
   /**
    * Sanitizes the YAML source by returning the inner YAML content
    * and then parsing it into an API Metadata object and updating the current Metadata
@@ -71,15 +73,24 @@ const createQueries = () => {
    * into a Markdown link referencing to the correct API docs
    *
    * @param {import('mdast').Text} node A Markdown link node
+   * @param {import('mdast').Parent} parent The parent node
    */
-  const updateTypeReference = node => {
+  const updateTypeReference = (node, parent) => {
     const replacedTypes = node.value.replace(
       createQueries.QUERIES.normalizeTypes,
       transformTypeToReferenceLink
     );
 
-    node.type = 'html';
-    node.value = replacedTypes;
+    const {
+      children: [newNode],
+    } = remark.parse(replacedTypes);
+    const index = parent.children.indexOf(node);
+    const originalPosition = node.position;
+    visit(newNode, node => {
+      (node.position.start += originalPosition.start),
+        (node.position.end += originalPosition.end);
+    });
+    parent.children.splice(index, 1, ...newNode.children);
 
     return [SKIP];
   };
