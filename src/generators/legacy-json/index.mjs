@@ -3,12 +3,20 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { groupNodesByModule } from '../../utils/generators.mjs';
-import buildContent from './utils/buildContent.mjs';
+import buildSection from './utils/buildSection.mjs';
 
 /**
+ * This generator is responsible for generating the legacy JSON files for the
+ *  legacy API docs for retro-compatibility. It is to be replaced while we work
+ *  on the new schema for this file.
+ *
+ * This is a top-level generator, intaking the raw AST tree of the api docs.
+ * It generates JSON files to the specified output directory given by the
+ *  config.
+ *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, import('./types.d.ts').Section>}
+ * @type {import('../types.d.ts').GeneratorMetadata<Input, import('./types.d.ts').Section[]>}
  */
 export default {
   name: 'legacy-json',
@@ -25,7 +33,7 @@ export default {
 
     const groupedModules = groupNodesByModule(input);
 
-    // Gets the first nodes of each module, which is considered the "head" of the module
+    // Gets the first nodes of each module, which is considered the "head"
     const headNodes = input.filter(node => node.heading.depth === 1);
 
     /**
@@ -35,19 +43,20 @@ export default {
     const processModuleNodes = head => {
       const nodes = groupedModules.get(head.api);
 
-      const parsedContent = buildContent(head, nodes);
-      generatedValues.push(parsedContent);
+      const section = buildSection(head, nodes);
+      generatedValues.push(section);
 
-      return parsedContent;
+      return section;
     };
 
     for (const node of headNodes) {
-      const result = processModuleNodes(node);
-      // console.log(result)
+      // Get the json for the node's section
+      const section = processModuleNodes(node);
 
+      // Write it to the output file
       await writeFile(
         join(output, `${node.api}.json`),
-        JSON.stringify(result),
+        JSON.stringify(section),
         'utf8'
       );
     }
