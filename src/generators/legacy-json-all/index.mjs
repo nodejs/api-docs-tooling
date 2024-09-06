@@ -1,7 +1,7 @@
 'use strict';
 
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
+import { writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 /**
  * @typedef {Array<import('../types.d.ts').Section[]>} Input
