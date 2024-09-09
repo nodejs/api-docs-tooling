@@ -1,3 +1,10 @@
+import {
+  DEFAULT_EXPRESSION,
+  LEADING_HYPHEN,
+  NAME_EXPRESSION,
+  RETURN_EXPRESSION,
+  TYPE_EXPRESSION,
+} from '../constants.mjs';
 import { buildHierarchy } from './buildHierarchy.mjs';
 
 const sectionTypePlurals = {
@@ -8,11 +15,33 @@ const sectionTypePlurals = {
   property: 'properties',
   global: 'globals',
   example: 'examples',
-  ctor: 'ctors',
+  // Constructors should go under a class sections' signatures property
+  ctor: 'signatures',
   classMethod: 'classMethods',
   event: 'events',
   var: 'vars',
 };
+
+/**
+ * @param {import('../types.d.ts').HierarchizedEntry} entry
+ * @returns {import('../types.d.ts').Meta | undefined}
+ */
+function createMeta(entry) {
+  const makeArrayIfNotAlready = val => (Array.isArray(val) ? val : [val]);
+
+  const { added_in, n_api_version, deprecated_in, removed_in, changes } = entry;
+  if (added_in || n_api_version || deprecated_in || removed_in) {
+    return {
+      changes,
+      added: makeArrayIfNotAlready(added_in),
+      napiVersion: makeArrayIfNotAlready(n_api_version),
+      deprecated: makeArrayIfNotAlready(deprecated_in),
+      removed: makeArrayIfNotAlready(removed_in),
+    };
+  }
+
+  return undefined;
+}
 
 /**
  * @param {import('../types.d.ts').HierarchizedEntry} entry Section's AST entry
@@ -33,7 +62,7 @@ function createSection(entry, head) {
 
 /**
  *
- * @param {*} values TODO type
+ * @param {Array<import('../types.d.ts').List} values TODO type
  * @returns {import('../types.d.ts').MethodSignature}
  */
 function parseSignature(values) {
@@ -51,12 +80,14 @@ function parseSignature(values) {
     return true;
   });
 
+  // TODO the unfortunate logic
+
   return signature;
 }
 
 /**
  *
- * @param {import('mdast').PhrasingContent[]} nodes
+ * @param {Array<import('mdast').PhrasingContent>} nodes
  */
 function textJoin(nodes) {
   return nodes
@@ -81,28 +112,67 @@ function textJoin(nodes) {
 }
 
 /**
- * @param {import('../types.d.ts').HierarchizedEntry} entry
- * @returns {import('../types.d.ts').Meta | undefined}
+ * Find name, type, default, desc properties
+ * @param {import('mdast').ListItem} child
+ * @returns {import('../types.d.ts').List}
  */
-function createMeta(entry) {
-  const makeArrayIfNotAlready = val => (Array.isArray(val) ? val : [val]);
+function parseListItem(child) {
+  /**
+   * @type {import('../types.d.ts').List}
+   */
+  const current = {};
 
-  const { added_in, n_api_version, deprecated_in, removed_in, changes } = entry;
-  if (added_in || n_api_version || deprecated_in || removed_in) {
-    return {
-      changes,
-      added: makeArrayIfNotAlready(added_in),
-      napiVersion: makeArrayIfNotAlready(n_api_version),
-      deprecated: makeArrayIfNotAlready(deprecated_in),
-      removed: makeArrayIfNotAlready(removed_in),
-    };
+  // TODO this
+  // current.textRaw = child.children
+  //   .filter(node => node.type !== 'list')
+  //   .map(node => node.)
+
+  if (current.textRaw) {
+    throw new Error(`empty list item: ${JSON.stringify(child)}`);
   }
 
-  return undefined;
-}
+  let text = current.textRaw;
 
-function parseListItem() {
-  return { type: 'asd' };
+  // Extract name
+  if (RETURN_EXPRESSION.test(text)) {
+    current.name = 'return';
+    text = text.replace(RETURN_EXPRESSION, '');
+  } else {
+    const [, name] = text.match(NAME_EXPRESSION) || [];
+    if (name) {
+      current.name = name;
+      text = text.replace(NAME_EXPRESSION, '');
+    }
+  }
+
+  // Extract type (if provided)
+  const [, type] = text.match(TYPE_EXPRESSION) || [];
+  if (type) {
+    current.type = type;
+    text = text.replace(TYPE_EXPRESSION, '');
+  }
+
+  // Remove leading hyphens
+  text = text.replace(LEADING_HYPHEN, '');
+
+  // Extract default value (if exists)
+  const [, defaultValue] = text.match(DEFAULT_EXPRESSION) || [];
+  if (defaultValue) {
+    current.default = defaultValue.replace(/\.$/, '');
+    text = text.parseListItem(DEFAULT_EXPRESSION, '');
+  }
+
+  // Add remaining text to the desc
+  if (text) {
+    current.desc = text;
+  }
+
+  const options = child.children.find(child => child.type === 'list');
+  if (options) {
+    current.options = options.children.map(child => parseListItem(child));
+  }
+
+  return current;
 }
 
 /**
@@ -137,10 +207,10 @@ function handleEntry(entry, parentSection) {
   };
 
   /**
-   *
+   * Grabs stability number & text and adds it to the section
    * @param {import('../types.d.ts').Section} section
    */
-  const manageMetadata = section => {
+  const parseStability = section => {
     let needsCompressing = false;
 
     // Remove metadata not directly the inferable from the markdown
@@ -172,37 +242,63 @@ function handleEntry(entry, parentSection) {
    *
    * @param {import('../types.d.ts').Section} section
    */
-  const handleFrontingLists = section => {
+  const parseListIfThereIsOne = section => {
     const list =
       nodes.length && nodes[0].type === 'list' ? nodes.shift() : null;
+    if (!list) {
+      return;
+    }
 
-    if (list) {
-      const values = list
-        ? list.children.map(child => parseListItem(child))
-        : [];
+    /**
+     * @type {Array<import('../types.d.ts').List>}
+     */
+    const values = list ? list.children.map(child => parseListItem(child)) : [];
+    switch (section.type) {
+      case 'ctor':
+      case 'classMethod':
+      case 'method': {
+        const signature = parseSignature(values);
+        section.signatures = [signature];
 
-      switch (section.type) {
-        case 'ctor':
-        case 'classMethod':
-        case 'method': {
-          const signature = parseSignature(values);
-          section.signatures = [signature];
+        break;
+      }
+
+      case 'property': {
+        if (!values.length) {
           break;
         }
-        case 'property':
-          break;
-        case 'event':
-          section.params = values;
-          break;
-        default:
-          // List wasn't consumed, add it back
-          nodes.unshift(list);
+
+        const signature = values[0];
+        signature.textRaw = `\`${section.name}\` ${signature.textRaw}`;
+
+        for (const key in signature) {
+          if (!signature[key]) {
+            continue;
+          }
+
+          if (key === 'type') {
+            // We'll set propertySigType to type at the end since we still need the
+            //  original type for a few more checks
+            section.propertySigType = signature.type;
+          } else {
+            section[key] = signature[key];
+          }
+        }
+
+        break;
       }
+
+      case 'event':
+        section.params = values;
+        break;
+
+      default:
+        // List wasn't consumed, add it back
+        nodes.unshift(list);
     }
   };
 
   /**
-   *
    * @param {import('../types.d.ts').Section} section
    */
   const addDescription = section => {
@@ -218,7 +314,7 @@ function handleEntry(entry, parentSection) {
   };
 
   /**
-   *
+   * Creates the sections for the children of this entry
    * @param {import('../types.d.ts').Section} section
    */
   const handleChildren = section => {
@@ -229,14 +325,51 @@ function handleEntry(entry, parentSection) {
     entry.hierarchyChildren.forEach(child => handleEntry(child, section));
   };
 
+  /**
+   * @param {import('../types.d.ts').Section} section
+   * @param {import('../types.d.ts').Section} parentSection
+   */
+  const makeChildrenTopLevelIfMisc = (section, parentSection) => {
+    if (parentSection.type === 'misc') {
+      return;
+    }
+
+    for (const key of Object.keys(section)) {
+      if (key in ['textRaw', 'name', 'type', 'desc', 'miscs']) {
+        continue;
+      }
+
+      if (parentSection[key]) {
+        if (Array.isArray(parentSection[key])) {
+          parentSection[key] = parentSection[key].concat(section[key]);
+        }
+      } else {
+        parentSection[key] = section[key];
+      }
+    }
+  };
+
   const section = setupSection();
 
-  manageMetadata(section);
-  handleFrontingLists(section);
+  parseStability(section);
+
+  parseListIfThereIsOne(section);
+
   addDescription(section);
+
   handleChildren(section);
 
-  // TODO: the cleanup work the current parser does
+  makeChildrenTopLevelIfMisc(section, parentSection);
+
+  if (section.type === 'property') {
+    if (section.propertySigType) {
+      section.type = section.propertySigType;
+      section.propertySigType = undefined;
+    } else {
+      // Delete the type here because ???
+      section.type = undefined;
+    }
+  }
 }
 
 /**
@@ -248,12 +381,12 @@ export default (head, entries) => {
   /**
    * @type {import('../types.d.ts').ModuleSection}
    */
-  const module = {
+  const rootModule = {
     type: 'module',
     source: `doc/api/${head.api_doc_source}`,
   };
 
-  buildHierarchy(entries).forEach(entry => handleEntry(entry, module));
+  buildHierarchy(entries).forEach(entry => handleEntry(entry, rootModule));
 
-  return module;
+  return rootModule;
 };

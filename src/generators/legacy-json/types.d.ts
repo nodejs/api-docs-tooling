@@ -1,3 +1,5 @@
+import { ListItem } from 'mdast';
+
 export interface HierarchizedEntry extends ApiDocMetadataEntry {
   hierarchyChildren: ApiDocMetadataEntry[];
 }
@@ -60,4 +62,13 @@ export interface EventSection extends SectionBase {
 export interface MiscSection extends SectionBase {
   type: 'misc';
   [key: string]: string | undefined;
+}
+
+export interface List {
+  textRaw: string;
+  desc?: string;
+  name: string;
+  type?: string;
+  default?: string;
+  options?: List;
 }
