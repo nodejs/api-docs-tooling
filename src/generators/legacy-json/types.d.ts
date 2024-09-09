@@ -26,16 +26,22 @@ export interface SectionBase {
   desc: string;
   shortDesc?: string;
   stability?: number;
-  stabilityText?: string; // TODO find the type for this
+  stabilityText?: string;
   meta?: Meta;
 }
 
 export interface ModuleSection extends SectionBase {
   type: 'module';
   source: string;
-  miscs: MiscSection[];
-  modules: ModuleSection[];
-  // TODO ...
+  miscs?: MiscSection[];
+  modules?: ModuleSection[];
+  classes?: SignatureSection[];
+  methods?: MethodSignature[];
+  properties?: PropertySection[];
+  globals?: object[]; // TODO
+  examples?: object[]; // TODO
+  signatures?: SignatureSection[];
+  // TODO the rest
 }
 
 export interface SignatureSection extends SectionBase {
@@ -43,20 +49,25 @@ export interface SignatureSection extends SectionBase {
   signatures: MethodSignature[];
 }
 
+export interface Parameter {
+  name: string;
+  optional?: boolean;
+  default?: string;
+}
+
 export interface MethodSignature {
-  params: object[]; // TODO
-  return?: object; // TODO
+  params: Parameter[];
+  return?: string;
 }
 
 export interface PropertySection extends SectionBase {
   type: 'property';
-  typeof?: string;
   [key: string]: string | undefined;
 }
 
 export interface EventSection extends SectionBase {
   type: 'event';
-  params: object[]; // TODO
+  params: ListItem[];
 }
 
 export interface MiscSection extends SectionBase {

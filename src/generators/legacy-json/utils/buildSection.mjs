@@ -127,7 +127,7 @@ function parseListItem(child) {
   //   .filter(node => node.type !== 'list')
   //   .map(node => node.)
 
-  if (current.textRaw) {
+  if (!current.textRaw) {
     throw new Error(`empty list item: ${JSON.stringify(child)}`);
   }
 
