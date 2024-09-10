@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema.jsonc",
+  "modules": [
+    {
+      "type": "module",
+      "source": "doc/api/buffer.md",
+      "@name": "Buffer",
+      "@module": "node:buffer",
+      "classes": [],
+      "methods": [],
+      "properties": [],
+      "globals": []
+    }
+  ]
+}

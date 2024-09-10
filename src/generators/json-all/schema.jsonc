@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nodejs-api-doc-all@v0.0.0",
+  "title": "Node.js API Documentation Schema (All)",
+  "readOnly": true,
+
+  "properties": {
+    "modules": {
+      "type": "array",
+      // TODO figure out how to reference the other file here
+      // "items": { "$ref": "http://json-schema.org/draft-07/schema#" }
+      "items": { "$ref": "../json/parsed-schema.json" }
+    }
+  }
+}
