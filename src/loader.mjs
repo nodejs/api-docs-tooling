@@ -34,6 +34,7 @@ const createLoader = () => {
     );
 
     const progressBar = createProgressBar('Loading files');
+
     startProgressBar(progressBar, resolvedFiles.length);
 
     return resolvedFiles.map(async filePath => {
