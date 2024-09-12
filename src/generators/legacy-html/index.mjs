@@ -169,6 +169,7 @@ export default {
       await writeFile(join(output, `${node.api}.html`), minified);
       updateProgressBar(progressBar);
     }
+
     // Stops the progress bar and clears the line
     stopProgressBar(progressBar);
 
