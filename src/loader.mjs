@@ -42,7 +42,9 @@ const createLoader = () => {
       updateProgressBar(progressBar);
       // normally we stop the progress bar when the loop is done
       // but here we return the loop so we need to stop it when the last file is loaded
-      if (progressBar.value === progressBar.total) stopProgressBar(progressBar);
+      if (progressBar.value === progressBar.total) {
+        stopProgressBar(progressBar);
+      }
 
       return new VFile({ path: filePath, value: fileContents });
     });
