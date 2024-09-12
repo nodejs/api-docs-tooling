@@ -177,6 +177,7 @@ export default {
         updateProgressBar(progressBar);
       }
     }
+
     // Stops the progress bar and clears the line
     stopProgressBar(progressBar);
 
