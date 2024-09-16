@@ -39,7 +39,7 @@
     "remark-rehype": "^11.1.0",
     "remark-stringify": "^11.0.0",
     "semver": "^7.6.3",
-    "shiki": "^1.16.2",
+    "shiki": "^1.17.7",
     "unified": "^11.0.5",
     "unist-builder": "^4.0.0",
     "unist-util-find-after": "^5.0.0",
