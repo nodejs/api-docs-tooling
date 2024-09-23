@@ -1,5 +1,5 @@
 /**
- * So we need the files to be in a hierarchy based off of depth, but they're
+ * We need the files to be in a hierarchy based off of depth, but they're
  *  given to us flattened. So, let's fix that.
  *
  * Assuming that {@link entries} is in the same order as the elements are in
@@ -24,8 +24,8 @@ export function buildHierarchy(entries) {
     const entry = entries[i];
     const currentDepth = entry.heading.depth;
 
-    // We're a top-level entry
     if (currentDepth <= 1) {
+      // We're a top-level entry
       roots.push(entry);
       continue;
     }
@@ -38,12 +38,14 @@ export function buildHierarchy(entries) {
       if (previousEntry.hierarchyChildren === undefined) {
         previousEntry.hierarchyChildren = [];
       }
+
       previousEntry.hierarchyChildren.push(entry);
     } else {
       // Loop to find the entry we're a child of
       for (let j = i - 2; j >= 0; j--) {
         const jEntry = entries[j];
         const jDepth = jEntry.heading.depth;
+
         if (currentDepth > jDepth) {
           // Found it
           jEntry.hierarchyChildren.push(entry);

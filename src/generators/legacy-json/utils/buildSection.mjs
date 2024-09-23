@@ -2,6 +2,7 @@ import {
   DEFAULT_EXPRESSION,
   LEADING_HYPHEN,
   NAME_EXPRESSION,
+  PARAM_EXPRESSION,
   RETURN_EXPRESSION,
   TYPE_EXPRESSION,
 } from '../constants.mjs';
@@ -33,10 +34,14 @@ function createMeta(entry) {
   if (added_in || n_api_version || deprecated_in || removed_in) {
     return {
       changes,
-      added: makeArrayIfNotAlready(added_in),
-      napiVersion: makeArrayIfNotAlready(n_api_version),
-      deprecated: makeArrayIfNotAlready(deprecated_in),
-      removed: makeArrayIfNotAlready(removed_in),
+      added: added_in ? makeArrayIfNotAlready(added_in) : undefined,
+      napiVersion: n_api_version
+        ? makeArrayIfNotAlready(n_api_version)
+        : undefined,
+      deprecated: deprecated_in
+        ? makeArrayIfNotAlready(deprecated_in)
+        : undefined,
+      removed: removed_in ? makeArrayIfNotAlready(removed_in) : undefined,
     };
   }
 
@@ -51,27 +56,30 @@ function createMeta(entry) {
 function createSection(entry, head) {
   const text = textJoin(head.children);
 
-  // TODO check if type or name can be undefined
   return {
     textRaw: text,
     type: head.data.type,
-    name: head.data.name,
+    name: text.toLowerCase().replaceAll(' ', '_'),
+    displayName: head.data.name,
     meta: createMeta(entry),
+    introduced_in: entry.introduced_in,
   };
 }
 
 /**
- *
- * @param {Array<import('../types.d.ts').List} values TODO type
+ * @param {string} textRaw Something like `new buffer.Blob([sources[, options]])`
+ * @param {Array<import('../types.d.ts').List} values
  * @returns {import('../types.d.ts').MethodSignature}
  */
-function parseSignature(values) {
+function parseSignature(textRaw, values) {
   /**
    * @type {import('../types.d.ts').MethodSignature}
    */
-  const signature = {};
+  const signature = {
+    params: [],
+  };
 
-  signature.params = values.filter(value => {
+  const rawParameters = values.filter(value => {
     if (value.name === 'return') {
       signature.return = value;
       return false;
@@ -80,7 +88,127 @@ function parseSignature(values) {
     return true;
   });
 
-  // TODO the unfortunate logic
+  /**
+   * Extract a list of the signatures from the method's declaration
+   * @example `[sources[, options]]`
+   */
+  let [, declaredParameters] = textRaw.match(PARAM_EXPRESSION) || [];
+
+  if (!declaredParameters) {
+    return;
+  }
+
+  /**
+   * @type {string[]}
+   * @example ['sources[,', 'options]]']
+   */
+  declaredParameters = declaredParameters.split(',');
+
+  let optionalDepth = 0;
+  const optionalCharDict = { '[': 1, ' ': 0, ']': -1 };
+
+  declaredParameters.forEach((declaredParameter, i) => {
+    /**
+     * @example 'length]]'
+     * @example 'arrayBuffer['
+     * @example '[sources['
+     * @example 'end'
+     */
+    declaredParameter = declaredParameter.trim();
+
+    if (!declaredParameter) {
+      throw new Error(`Empty parameter slot: ${textRaw}`);
+    }
+
+    // We need to find out if this parameter is optional or not. We can tell this
+    //  if we're wrapped in brackets, so let's look for them.
+
+    let pos;
+    for (pos = 0; pos < declaredParameter.length; pos++) {
+      const levelChange = optionalCharDict[declaredParameter[pos]];
+
+      if (levelChange === undefined) {
+        break;
+      }
+
+      optionalDepth += levelChange;
+    }
+
+    // Cut off any trailing brackets
+    declaredParameter = declaredParameter.substring(pos);
+
+    const isParameterOptional = optionalDepth > 0;
+
+    for (pos = declaredParameter.length - 1; pos >= 0; pos--) {
+      const levelChange = optionalCharDict[declaredParameter[pos]];
+
+      if (levelChange === undefined) {
+        break;
+      }
+
+      optionalDepth += levelChange;
+    }
+
+    // Cut off any leading brackets
+    declaredParameter = declaredParameter.substring(0, pos + 1);
+
+    // Default value of this parameter in the method's declaration
+    let defaultValue;
+
+    const equalSignPos = declaredParameter.indexOf('=');
+    if (equalSignPos !== -1) {
+      // We have a default value, save it and then cut it off of the signature
+      defaultValue = declaredParameter.substring(equalSignPos, 1).trim();
+      declaredParameter = declaredParameter.substring(0, equalSignPos);
+      console.log('eq', declaredParameter);
+    }
+
+    let parameter = rawParameters[i];
+    if (!parameter || declaredParameter !== parameter.name) {
+      // If we're here then the method likely has shared signatures
+      //  Something like, `new Console(stdout[, stderr][, ignoreErrors])` and
+      //  `new Console(options)`
+      parameter = undefined;
+
+      // Try finding a parameter this is being shared with
+      for (const otherParam of rawParameters) {
+        if (declaredParameter === otherParam.name) {
+          // Found a matching one
+          // TODO break?
+          parameter = otherParam;
+        } else if (otherParam.options) {
+          // Found a matching one in the parameter's options
+          for (const option of otherParam.options) {
+            if (declaredParameter === option.name) {
+              parameter = Object.assign({}, option);
+              break;
+            }
+          }
+        }
+      }
+
+      if (!parameter) {
+        // Couldn't find the shared one, I have no idea what this case is but we'll see
+        if (declaredParameter.startsWith('...')) {
+          parameter = { name: declaredParameter };
+        } else {
+          throw new Error(
+            `Invalid param "${declaredParameter}"\n` + ` > ${textRaw}`
+          );
+        }
+      }
+    }
+
+    if (isParameterOptional) {
+      parameter.optional = true;
+    }
+
+    if (defaultValue) {
+      parameter.default = defaultValue;
+    }
+
+    signature.params.push(parameter);
+  });
 
   return signature;
 }
@@ -93,9 +221,6 @@ function textJoin(nodes) {
   return nodes
     .map(node => {
       switch (node.type) {
-        case 'linkReference':
-          console.error(`todo link reference`);
-          return `TODO`;
         case `strong`:
           return `**${textJoin(node.children)}**`;
         case `emphasis`:
@@ -122,10 +247,9 @@ function parseListItem(child) {
    */
   const current = {};
 
-  // TODO this
-  // current.textRaw = child.children
-  //   .filter(node => node.type !== 'list')
-  //   .map(node => node.)
+  current.textRaw = textJoin(
+    child.children.filter(node => node.type !== 'list')
+  );
 
   if (!current.textRaw) {
     throw new Error(`empty list item: ${JSON.stringify(child)}`);
@@ -159,7 +283,7 @@ function parseListItem(child) {
   const [, defaultValue] = text.match(DEFAULT_EXPRESSION) || [];
   if (defaultValue) {
     current.default = defaultValue.replace(/\.$/, '');
-    text = text.parseListItem(DEFAULT_EXPRESSION, '');
+    text = text.replace(DEFAULT_EXPRESSION, '');
   }
 
   // Add remaining text to the desc
@@ -257,8 +381,7 @@ function handleEntry(entry, parentSection) {
       case 'ctor':
       case 'classMethod':
       case 'method': {
-        const signature = parseSignature(values);
-        section.signatures = [signature];
+        section.signatures = [parseSignature(section.textRaw, values)];
 
         break;
       }
@@ -330,7 +453,7 @@ function handleEntry(entry, parentSection) {
    * @param {import('../types.d.ts').Section} parentSection
    */
   const makeChildrenTopLevelIfMisc = (section, parentSection) => {
-    if (parentSection.type === 'misc') {
+    if (parentSection.type !== 'misc') {
       return;
     }
 

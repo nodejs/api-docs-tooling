@@ -4,6 +4,6 @@ export interface Output {
   miscs: MiscSection[];
   modules: Section[];
   classes: SignatureSection[];
-  globals: object[]; // TODO
+  globals: (ModuleSection | { type: 'global' })[];
   methods: SignatureSection[];
 }

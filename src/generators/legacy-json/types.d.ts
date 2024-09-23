@@ -38,10 +38,8 @@ export interface ModuleSection extends SectionBase {
   classes?: SignatureSection[];
   methods?: MethodSignature[];
   properties?: PropertySection[];
-  globals?: object[]; // TODO
-  examples?: object[]; // TODO
+  globals?: ModuleSection | { type: 'global' };
   signatures?: SignatureSection[];
-  // TODO the rest
 }
 
 export interface SignatureSection extends SectionBase {
