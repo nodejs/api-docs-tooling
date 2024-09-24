@@ -1,3 +1,5 @@
+import { unified } from 'unified';
+import html from 'remark-html';
 import {
   DEFAULT_EXPRESSION,
   LEADING_HYPHEN,
@@ -160,7 +162,6 @@ function parseSignature(textRaw, values) {
       // We have a default value, save it and then cut it off of the signature
       defaultValue = declaredParameter.substring(equalSignPos, 1).trim();
       declaredParameter = declaredParameter.substring(0, equalSignPos);
-      console.log('eq', declaredParameter);
     }
 
     let parameter = rawParameters[i];
@@ -188,7 +189,7 @@ function parseSignature(textRaw, values) {
       }
 
       if (!parameter) {
-        // Couldn't find the shared one, I have no idea what this case is but we'll see
+        // Couldn't find the shared one
         if (declaredParameter.startsWith('...')) {
           parameter = { name: declaredParameter };
         } else {
@@ -221,10 +222,13 @@ function textJoin(nodes) {
   return nodes
     .map(node => {
       switch (node.type) {
-        case `strong`:
+        case 'strong':
           return `**${textJoin(node.children)}**`;
-        case `emphasis`:
+        case 'emphasis':
           return `_${textJoin(node.children)}_`;
+        case 'link': {
+          return `[${node.label}][]`;
+        }
         default:
           if (node.children) {
             return textJoin(node.children);
@@ -249,7 +253,9 @@ function parseListItem(child) {
 
   current.textRaw = textJoin(
     child.children.filter(node => node.type !== 'list')
-  );
+  )
+    .replace(/\s+/g, ' ')
+    .replace(/<!--.*?-->/gs, '');
 
   if (!current.textRaw) {
     throw new Error(`empty list item: ${JSON.stringify(child)}`);
@@ -260,6 +266,11 @@ function parseListItem(child) {
   // Extract name
   if (RETURN_EXPRESSION.test(text)) {
     current.name = 'return';
+
+    let [, returnType] = text.match(/`(.*?)`/);
+    returnType = returnType.substring(1, returnType.length - 1);
+    current.type = returnType;
+
     text = text.replace(RETURN_EXPRESSION, '');
   } else {
     const [, name] = text.match(NAME_EXPRESSION) || [];
@@ -267,13 +278,13 @@ function parseListItem(child) {
       current.name = name;
       text = text.replace(NAME_EXPRESSION, '');
     }
-  }
 
-  // Extract type (if provided)
-  const [, type] = text.match(TYPE_EXPRESSION) || [];
-  if (type) {
-    current.type = type;
-    text = text.replace(TYPE_EXPRESSION, '');
+    // Extract type (if provided)
+    const [, type] = text.match(TYPE_EXPRESSION) || [];
+    if (type) {
+      current.type = type;
+      text = text.replace(TYPE_EXPRESSION, '');
+    }
   }
 
   // Remove leading hyphens
@@ -350,6 +361,7 @@ function handleEntry(entry, parentSection) {
         if (stability) {
           section.stability = parseInt(stability[1], 10);
           section.stabilityText = stability[2].replaceAll('\n', ' ').trim();
+
           delete nodes[i];
           needsCompressing = true;
         }
@@ -433,7 +445,20 @@ function handleEntry(entry, parentSection) {
       section.shortDesc = section.desc;
     }
 
-    // TODO parse definitoons
+    // Render the description as if it was html
+    section.desc = unified()
+      .use(function () {
+        this.Parser = () => ({ type: 'root', children: nodes });
+      })
+      .use(html, { sanitize: false })
+      .processSync('')
+      .toString()
+      .trim();
+
+    if (!section.desc) {
+      // Rendering returned nothing
+      delete section.desc;
+    }
   };
 
   /**
