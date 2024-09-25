@@ -30,15 +30,17 @@ export default {
       methods: [],
     };
 
+    const propertiesToCopy = [
+      'miscs',
+      'modules',
+      'classes',
+      'globals',
+      'methods',
+    ];
+
     for (const section of input) {
       // Copy the relevant properties from each section into our output
-      for (const property of [
-        'miscs',
-        'modules',
-        'classes',
-        'globals',
-        'methods',
-      ]) {
+      for (const property of propertiesToCopy) {
         if (section[property]) {
           generatedValue[property].push(...section[property]);
         }

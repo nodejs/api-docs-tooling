@@ -41,6 +41,10 @@ export function buildHierarchy(entries) {
 
       previousEntry.hierarchyChildren.push(entry);
     } else {
+      if (i < 2) {
+        throw new Error(`can't find parent since i < 2 (${i})`);
+      }
+
       // Loop to find the entry we're a child of
       for (let j = i - 2; j >= 0; j--) {
         const jEntry = entries[j];
