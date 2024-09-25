@@ -255,7 +255,7 @@ function parseListItem(child) {
     child.children.filter(node => node.type !== 'list')
   )
     .replace(/\s+/g, ' ')
-    .replace(/<!--.*?-->/gs, '');
+    .replaceAll(/<!--.*?-->/gs, '');
 
   if (!current.textRaw) {
     throw new Error(`empty list item: ${JSON.stringify(child)}`);
