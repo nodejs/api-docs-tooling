@@ -4,7 +4,7 @@ import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /**
- * @typedef {Array<import('../types.d.ts').Section[]>} Input
+ * @typedef {Array<import('../legacy-json/types.d.ts').Section>} Input
  *
  * @type {import('../types.d.ts').GeneratorMetadata<Input, import('./types.d.ts').Output>}
  */
