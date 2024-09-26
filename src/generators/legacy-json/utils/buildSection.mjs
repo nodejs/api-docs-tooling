@@ -215,7 +215,6 @@ function parseSignature(textRaw, values) {
 }
 
 /**
- *
  * @param {Array<import('mdast').PhrasingContent>} nodes
  */
 function textJoin(nodes) {
@@ -266,10 +265,13 @@ function parseListItem(child) {
   // Extract name
   if (RETURN_EXPRESSION.test(text)) {
     current.name = 'return';
-
-    let [, returnType] = text.match(/`(.*?)`/);
-    returnType = returnType.substring(1, returnType.length - 1);
-    current.type = returnType;
+    // console.log(text)
+    let matchResult = text.match(/`(.*?)`/);
+    if (matchResult) {
+      let returnType = matchResult[1];
+      returnType = returnType.substring(1, returnType.length - 1);
+      current.type = returnType;
+    }
 
     text = text.replace(RETURN_EXPRESSION, '');
   } else {
@@ -311,7 +313,6 @@ function parseListItem(child) {
 }
 
 /**
- *
  * @param {import('../types.d.ts').HierarchizedEntry} entry
  * @param {import('../types.d.ts').Section} parentSection
  */
