@@ -94,10 +94,12 @@ function parseSignature(textRaw, values) {
    * Extract a list of the signatures from the method's declaration
    * @example `[sources[, options]]`
    */
-  let [, declaredParameters] = textRaw.match(PARAM_EXPRESSION) || [];
+  let [, declaredParameters] = `\`${textRaw}\``.match(PARAM_EXPRESSION) || [];
 
   if (!declaredParameters) {
-    return;
+    signature.params = rawParameters;
+
+    return signature;
   }
 
   /**
@@ -175,8 +177,8 @@ function parseSignature(textRaw, values) {
       for (const otherParam of rawParameters) {
         if (declaredParameter === otherParam.name) {
           // Found a matching one
-          // TODO break?
           parameter = otherParam;
+          break;
         } else if (otherParam.options) {
           // Found a matching one in the parameter's options
           for (const option of otherParam.options) {
@@ -265,7 +267,7 @@ function parseListItem(child) {
   // Extract name
   if (RETURN_EXPRESSION.test(text)) {
     current.name = 'return';
-    // console.log(text)
+
     let matchResult = text.match(/`(.*?)`/);
     if (matchResult) {
       let returnType = matchResult[1];

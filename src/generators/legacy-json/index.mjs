@@ -49,17 +49,19 @@ export default {
       return section;
     };
 
-    await Promise.all(headNodes.map(async node => {
-      // Get the json for the node's section
-      const section = processModuleNodes(node);
-    
-      // Write it to the output file
-      await writeFile(
-        join(output, `${node.api}.json`),
-        JSON.stringify(section),
-        'utf8'
-      );
-    }));
+    await Promise.all(
+      headNodes.map(async node => {
+        // Get the json for the node's section
+        const section = processModuleNodes(node);
+
+        // Write it to the output file
+        await writeFile(
+          join(output, `${node.api}.json`),
+          JSON.stringify(section),
+          'utf8'
+        );
+      })
+    );
 
     return generatedValues;
   },
