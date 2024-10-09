@@ -1,14 +1,213 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "nodejs-api-doc@v0.0.0",
-  "type": "object",
-  "properties": {
-    "source": {
-      "type": "string",
-      "description": "The markdown source file used when generating this, relative to the Node.js repository root",
-      "examples": ["doc/api/net.md"]
+  "title": "Node.js API Doc",
+  "readOnly": true,
+
+  "allOf": [
+    { "$ref": "#/definitions/DocumentRoot" },
+    {
+      "oneOf": [{ "$ref": "#/definitions/Module" }]
     }
-  },
-  "required": ["source"],
-  "definitions": {}
+  ],
+
+  "definitions": {
+    "DocumentRoot": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "The markdown source file of this file. It is relative to the Node.js repository root.",
+          "examples": ["doc/api/net.md"]
+        },
+        "@module": {
+          "type": "string",
+          "description": "The module's import name (if applicable). TODO idk if this is accurate",
+          "examples": ["node:buffer"]
+        }
+      },
+      "required": ["source"]
+    },
+
+    "SectionBase": {
+      "type": "object",
+      "properties": {
+        "@name": {
+          "type": "string",
+          "description": "TODO idk if this is correct usage",
+          "examples": ["Buffer", "Addons"]
+        },
+        "@deprecated": {
+          "type": "array",
+          "description": "Versions that this is deprecated in",
+          "items": { "type": "string" }
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this"
+        },
+        "changes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Change" }
+        },
+        "addedIn": {
+          "type": "array",
+          "description": "Versions this was added in",
+          "items": { "type": "string" }
+        },
+        "napiVersion": {
+          "type": "array",
+          "description": "TODO",
+          "items": { "type": "string" }
+        },
+        "removedIn": {
+          "type": "array",
+          "description": "TODO",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["@name"]
+    },
+
+    "Module": {
+      "allOf": [
+        { "$ref": "#/definitions/SectionBase" },
+        {
+          "type": "object",
+          "properties": {
+            "@see": {
+              "type": "string",
+              "description": "Link to the HTML docs",
+              "examples": ["https://nodejs.org/api/buffer.html"]
+            },
+            "@since": {
+              "type": "string",
+              "description": "The version this was added",
+              "examples": ["v20.0.0"]
+            },
+            "stability": {
+              "type": "number"
+            },
+            "classes": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Class" }
+            },
+            "methods": {
+              "type": "array",
+              "items": { "$ref": "#/defintiions/Method" }
+            },
+            "modules": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Module" }
+            },
+            "globals": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Module" }
+            },
+            "properties": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Property" }
+            }
+          },
+          "required": ["@see"]
+        }
+      ]
+    },
+
+    "Class": {
+      "allOf": [
+        { "$ref": "#/definitions/SectionBase" },
+        {
+          "type": "object",
+          "description": "TODO",
+          "properties": {
+            "@constructor": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/MethodSignature" }
+            }
+          }
+        }
+      ]
+    },
+
+    "Method": {
+      "allOf": [
+        { "$ref": "#/definitions/SectionBase" },
+        {
+          "type": "object",
+          "properties": {
+            "stability": {
+              "type": "number"
+            },
+            "signatures": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/MethodSignature" }
+            }
+          },
+          "required": ["stability", "signatures"]
+        }
+      ]
+    },
+
+    "Property": {
+      "type": "object",
+      "description": "TODO"
+    },
+
+    "MethodSignature": {
+      "type": "object",
+      "properties": {
+        "@returns": {
+          "type": "string",
+          "description": "The method signature's return type.",
+          "examples": ["Promise<string> | string", "number", "undefined"]
+        },
+        "parameters": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/MethodParameter" }
+        }
+      }
+    },
+
+    "MethodParameter": {
+      "type": "object",
+      "properties": {
+        "@name": {
+          "type": "string",
+          "description": "Name of the parameter"
+        },
+        "@type": {
+          "type": "string",
+          "description": "Type of the parameter"
+        },
+        "@default": {
+          "type": "string",
+          "description": "The parameter's default value"
+        }
+      },
+      "required": ["@name", "@type"]
+    },
+
+    "Change": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": ["v20.0.0"]
+          }
+        },
+        "prUrl": {
+          "type": "string",
+          "description": "URL to the PR that introduced this change."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the change"
+        }
+      },
+      "required": ["version", "prUrl", "description"]
+    }
+  }
 }

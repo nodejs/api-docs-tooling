@@ -1,0 +1,33 @@
+{
+  "$schema": "./schema.json",
+  "@name": "Buffer",
+  "@see": "https://nodejs.org/api/buffer.html",
+  "@module": "node:buffer",
+  "@since": "v20.0.0",
+  "source": "doc/api/buffer.md",
+  "classes": [
+    {
+      "@name": "ByteLengthQueuingStrategy",
+      "@since": "v20.0.0",
+      "changes": [
+        {
+          "version": ["v20.1.1"],
+          "prUrl": "https://github.com/nodejs/node/pulls/12345",
+          "description": "a change"
+        }
+      ],
+      "stability": 1,
+      "description": "A browser-compatible implementation of {@see https://nodejs.org/api/webstreams.html#class-bytelengthqueuingstrategy}",
+      "methods": {}
+    }
+  ],
+  "methods": [
+    {
+      "@name": "atob",
+      "@since": "v20.0.0",
+      "@deprecated": true,
+      "description": "Global alias for {@link Buffer.atob}",
+      "stability": 3
+    }
+  ]
+}

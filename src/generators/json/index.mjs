@@ -14,7 +14,7 @@ export default {
   description: '',
 
   dependsOn: 'ast',
-
+  // todo add test w/ https://www.npmjs.com/package/jsonschema
   async generate(input, { output }) {
     // Current directory path relative to the `index.mjs` file
     const baseDir = import.meta.dirname;
