@@ -113,6 +113,7 @@ const createMetadata = slugger => {
 
       const {
         type,
+        introduced_in,
         added,
         deprecated,
         removed,
@@ -137,8 +138,10 @@ const createMetadata = slugger => {
       internalMetadata.stability.toJSON = () =>
         internalMetadata.stability.children.map(node => node.data);
 
-      // Returns the Metadata entry for the API doc
-      return {
+      /**
+       * @type {ApiDocMetadataEntry}
+       */
+      const value = {
         api: apiDoc.stem,
         slug: sectionSlug,
         source_link,
@@ -154,6 +157,13 @@ const createMetadata = slugger => {
         content: section,
         tags,
       };
+
+      if (introduced_in) {
+        value.introduced_in = introduced_in;
+      }
+
+      // Returns the Metadata entry for the API doc
+      return value;
     },
   };
 };
