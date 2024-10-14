@@ -7,7 +7,7 @@ import { createProgressBar } from '../progressBar.mjs';
 
 /**
  * Simple test to unsure that the progress bar is created
- * and we asume that it's work with ou style
+ * and we assume that it's work with ou style
  */
 test('createProgressBar returns an instance of SingleBar', () => {
   const bar = createProgressBar();
