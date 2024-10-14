@@ -17,27 +17,3 @@ export function createProgressBar(label = '') {
     hideCursor: true,
   });
 }
-
-/**
- *
- * @param {import('cli-progress').SingleBar} bar
- * @param {number} total
- */
-export function startProgressBar(bar, total) {
-  bar.start(total, 0);
-}
-
-/**
- * @param {import('cli-progress').SingleBar} bar
- * @param {number} value
- */
-export function updateProgressBar(bar, value = 1) {
-  bar.update(value);
-}
-
-/**
- * @param {import('cli-progress').SingleBar} bar
- */
-export function stopProgressBar(bar) {
-  bar.stop();
-}
