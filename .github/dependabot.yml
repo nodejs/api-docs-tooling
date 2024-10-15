@@ -1,5 +1,5 @@
 # We define the interval for the updates to be monthly
-# because we doesn't want to have too many updates
+# because we don't want to have too many updates
 # and the project is currently in a development stage
 
 version: 2
