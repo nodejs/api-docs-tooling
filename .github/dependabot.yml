@@ -1,9 +1,13 @@
+# We define the interval for the updates to be monthly
+# because we doesn't want to have too many updates
+# and the project is currently in a development stage
+
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: weekly
+      interval: monthly
     commit-message:
       prefix: meta
     open-pull-requests-limit: 10
@@ -11,7 +15,7 @@ updates:
     directory: '/'
     versioning-strategy: increase
     schedule:
-      interval: weekly
+      interval: monthly
     commit-message:
       prefix: meta
     groups:
