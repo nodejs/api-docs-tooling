@@ -20,7 +20,7 @@
     "@types/node": "^22.7.5",
     "eslint": "^9.12.0",
     "eslint-config-prettier": "^9.1.0",
-    "globals": "^15.10.0",
+    "globals": "^15.11.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "mdast": "^3.0.0",
