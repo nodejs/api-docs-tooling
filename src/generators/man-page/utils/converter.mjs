@@ -69,17 +69,32 @@ export function convertNodeToMandoc(node, isListItem = false) {
  * @returns {string} The Mandoc formatted representation of the flag and its value.
  */
 export function flagValueToMandoc(flag) {
-  // The seperator is '=' or ' '.
-  const sep = flag.match(/[= ]/)?.[0];
-  if (sep == null) return '';
-  // Split the flag into the name and value based on = or space delimiter.
+  // The separator is '=' or ' '.
+  let sep = flag.match(/[= ]/)?.[0];
+
+  if (sep == null) {
+    // This flag does not have a default value.
+    return '';
+  }
+
+  // Split the flag into the name and value based on the separator ('=' or space).
   const value = flag.split(sep)[1];
-  // Format the value using Ns and Ar macros for Mandoc, if present.
-  // If the seperator is ' ', it'll become ''.
-  return value
-    ? `${sep === ' ' ? '' : ' Ns = Ns'} Ar ${value.replace(/\]$/, '')}`
-    : '';
+
+  // If there is no value, return an empty string.
+  if (!value) {
+    return '';
+  }
+
+  // Determine the prefix based on the separator type.
+  const prefix = sep === ' ' ? '' : ' Ns = Ns';
+
+  // Combine prefix and formatted value.
+  return `${prefix} Ar ${value.replace(/\]$/, '')}`;
 }
+
+const formatFlag = flag =>
+  // 'Fl' denotes a flag, followed by an optional 'Ar' (argument).
+  `Fl ${flag.split(/[= ]/)[0].slice(1)}${flagValueToMandoc(flag)}`;
 
 /**
  * Converts an API option metadata entry into the Mandoc format.
@@ -94,17 +109,15 @@ export function convertOptionToMandoc(element) {
   const formattedFlags = element.heading.data.text
     .replace(/`/g, '')
     .split(', ')
-    .map(
-      // 'Fl' denotes a flag
-      flag => `Fl ${flag.split(/[= ]/)[0].slice(1)}${flagValueToMandoc(flag)}`
-    )
-    .join(' , ');
+    .map(formatFlag)
+    .join(' , ')
+    .trim();
 
   // Remove the header itself.
   element.content.children.shift();
 
   // Return the formatted flags and content, separated by Mandoc markers.
-  return `.It ${formattedFlags.trim()}\n${convertNodeToMandoc(element.content)}\n.\n`;
+  return `.It ${formattedFlags}\n${convertNodeToMandoc(element.content).trim()}\n.\n`;
 }
 
 /**
