@@ -8,6 +8,16 @@ import {
   convertEnvVarToMandoc,
 } from './utils/converter.mjs';
 
+// https://github.com/nodejs/node/blob/main/doc/api/cli.md#options
+// This slug should reference the section where the available
+// options are defined.
+const OPTIONS_SLUG = 'options';
+
+// https://github.com/nodejs/node/blob/main/doc/api/cli.md#environment-variables-1
+// This slug should reference the section where the available
+// environment variables are defined.
+const ENVIRONMENT_SLUG = 'evironment-options-1';
+
 /**
  * This generator generates a man page version of the CLI.md file.
  * See https://man.openbsd.org/mdoc.7 for the formatting.
@@ -29,13 +39,15 @@ export default {
     // Filter to only 'cli'.
     const components = input.filter(({ api }) => api === 'cli');
     if (!components.length) {
-      throw new Error('CLI.md not found');
+      throw new Error('Could not find any `cli` documentation.');
     }
 
     // Find the appropriate headers
-    const optionsStart = components.findIndex(({ slug }) => slug === 'options');
+    const optionsStart = components.findIndex(
+      ({ slug }) => slug === OPTIONS_SLUG
+    );
     const environmentStart = components.findIndex(
-      ({ slug }) => slug === 'environment-variables-1'
+      ({ slug }) => slug === ENVIRONMENT_SLUG
     );
     // The first header that is <3 in depth after environmentStart
     const environmentEnd = components.findIndex(
