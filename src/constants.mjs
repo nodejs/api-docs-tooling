@@ -102,6 +102,16 @@ export const DOC_TYPES_MAPPING_PRIMITIVES = {
   undefined: 'Undefined',
 };
 
+// https://github.com/nodejs/node/blob/main/doc/api/cli.md#options
+// This slug should reference the section where the available
+// options are defined.
+export const DOC_SLUG_OPTIONS = 'options';
+
+// https://github.com/nodejs/node/blob/main/doc/api/cli.md#environment-variables-1
+// This slug should reference the section where the available
+// environment variables are defined.
+export const DOC_SLUG_ENVIRONMENT = 'evironment-options-1';
+
 // This is a mapping for types within the Markdown content and their respective
 // JavaScript globals types within the MDN JavaScript docs
 // @see DOC_MDN_BASE_URL_JS_GLOBALS
