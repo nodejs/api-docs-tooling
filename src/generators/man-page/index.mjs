@@ -8,15 +8,7 @@ import {
   convertEnvVarToMandoc,
 } from './utils/converter.mjs';
 
-// https://github.com/nodejs/node/blob/main/doc/api/cli.md#options
-// This slug should reference the section where the available
-// options are defined.
-const OPTIONS_SLUG = 'options';
-
-// https://github.com/nodejs/node/blob/main/doc/api/cli.md#environment-variables-1
-// This slug should reference the section where the available
-// environment variables are defined.
-const ENVIRONMENT_SLUG = 'evironment-options-1';
+import { DOC_SLUG_ENVIRONMENT, DOC_SLUG_OPTIONS } from '../../constants.mjs';
 
 /**
  * This generator generates a man page version of the CLI.md file.
@@ -44,10 +36,10 @@ export default {
 
     // Find the appropriate headers
     const optionsStart = components.findIndex(
-      ({ slug }) => slug === OPTIONS_SLUG
+      ({ slug }) => slug === DOC_SLUG_OPTIONS
     );
     const environmentStart = components.findIndex(
-      ({ slug }) => slug === ENVIRONMENT_SLUG
+      ({ slug }) => slug === DOC_SLUG_ENVIRONMENT
     );
     // The first header that is <3 in depth after environmentStart
     const environmentEnd = components.findIndex(
