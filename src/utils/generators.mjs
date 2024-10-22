@@ -2,6 +2,8 @@
 
 import { coerce } from 'semver';
 
+import createProgressBar from './progressBar.mjs';
+
 /**
  * Groups all the API metadata nodes by module (`api` property) so that we can process each different file
  * based on the module it belongs to.
@@ -12,13 +14,19 @@ export const groupNodesByModule = nodes => {
   /** @type {Map<string, Array<ApiDocMetadataEntry>>} */
   const groupedNodes = new Map();
 
+  const progressBar = createProgressBar(groupNodesByModule.name);
+  progressBar.start(nodes.length, 0);
+
   for (const node of nodes) {
     if (!groupedNodes.has(node.api)) {
       groupedNodes.set(node.api, []);
     }
 
     groupedNodes.get(node.api).push(node);
+    progressBar.increment();
   }
+
+  progressBar.stop();
 
   return groupedNodes;
 };
