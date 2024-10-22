@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <code>api-docs-tooling</code> is a tool to generate API documentation of a Node.js project. <a href="https://github.com/nodejs/node/issues/52343">See this issue</a> for more information.
+  <code>api-docs-tooling</code> is a tool to generate API documentation of Node.js. <a href="https://github.com/nodejs/node/issues/52343">See this issue</a> for more information.
 </p>
 
 <p align="center">
@@ -38,9 +38,7 @@ Options:
   -i, --input [patterns...]  Specify input file patterns using glob syntax
   -o, --output <path>        Specify the relative or absolute output directory
   -v, --version <semver>     Specify the target version of Node.js, semver compliant (default: "v22.6.0")
-  -c, --changelog <url>      Specify the path (file: or https://) to the CHANGELOG.md file (default:
-                             "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
-  -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html",
-                             "legacy-html-all")
+  -c, --changelog <url>      Specify the path (file: or https://) to the CHANGELOG.md file (default: "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
+  -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html", "legacy-html-all", "man-page")
   -h, --help                 display help for command
 ```
