@@ -7,7 +7,6 @@ import { remove } from 'unist-util-remove';
 
 import createQueries from '../../queries.mjs';
 import { getRemark } from '../../utils/remark.mjs';
-import { createProgressBar } from '../../utils/progressBar.mjs';
 
 /**
  * This generator generates a simplified JSON version of the API docs and returns it as a string
@@ -34,10 +33,6 @@ export default {
     // Gets a remark processor for stringifying the AST tree into JSON
     const remarkProcessor = getRemark();
 
-    // Creates a progress bar for the JSON generation
-    const progressBar = createProgressBar('Generating JSON');
-    progressBar.start(input.length, 0);
-
     // Iterates the input (ApiDocMetadataEntry) and performs a few changes
     const mappedInput = input.map(node => {
       // Deep clones the content nodes to avoid affecting upstream nodes
@@ -53,12 +48,8 @@ export default {
       // For the JSON generate we want to transform the whole content into JSON
       content.toJSON = () => remarkProcessor.stringify(content);
 
-      progressBar.increment();
-
       return { ...node, content };
     });
-
-    progressBar.stop();
 
     // This simply grabs all the different files and stringifies them
     const stringifiedContent = JSON.stringify(mappedInput);
