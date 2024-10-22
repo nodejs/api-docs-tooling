@@ -4,10 +4,13 @@ import cliProgress from 'cli-progress';
 
 /**
  *
+ * Create a progress bar instance
+ * with our custom format
+ *
  * @param {string} label
  * @returns {import('cli-progress').SingleBar}
  */
-export function createProgressBar(label = '') {
+function createProgressBar(label = '') {
   const format = ` ${styleText(['bold', 'green'], '{bar}')} | ${label} {percentage}% | {value}/{total}`;
 
   return new cliProgress.SingleBar({
@@ -17,3 +20,5 @@ export function createProgressBar(label = '') {
     hideCursor: true,
   });
 }
+
+export default createProgressBar;

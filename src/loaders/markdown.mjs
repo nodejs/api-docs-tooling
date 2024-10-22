@@ -6,7 +6,7 @@ import { extname } from 'node:path';
 import { globSync } from 'glob';
 import { VFile } from 'vfile';
 
-import { createProgressBar } from './utils/progressBar.mjs';
+import createProgressBar from './utils/progressBar.mjs';
 
 /**
  * This method creates a simple abstract "Loader", which technically

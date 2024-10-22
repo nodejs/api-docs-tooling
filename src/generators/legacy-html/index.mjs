@@ -11,7 +11,6 @@ import tableOfContents from './utils/tableOfContents.mjs';
 
 import { groupNodesByModule } from '../../utils/generators.mjs';
 import { getRemarkRehype } from '../../utils/remark.mjs';
-import { createProgressBar } from '../../utils/progressBar.mjs';
 
 /**
  * @typedef {{
@@ -153,10 +152,6 @@ export default {
       return replaceTemplateValues(generatedTemplate);
     };
 
-    // Creates a progress bar to show the progress of the generation process
-    const progressBar = createProgressBar('Generating HTML files');
-    progressBar.start(headNodes.length, 0);
-
     for (const node of headNodes) {
       const result = processModuleNodes(node);
 
@@ -169,12 +164,8 @@ export default {
         });
 
         await writeFile(join(output, `${node.api}.html`), minified);
-        updateProgressBar(progressBar);
       }
     }
-
-    // Stops the progress bar and clears the line
-    progressBar.stop();
 
     if (output) {
       // Define the output folder for API docs assets

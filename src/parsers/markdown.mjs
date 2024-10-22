@@ -6,11 +6,12 @@ import { remove } from 'unist-util-remove';
 import { selectAll } from 'unist-util-select';
 import { SKIP, visit } from 'unist-util-visit';
 
-import createMetadata from '../metadata.mjs';
-import createQueries from '../queries.mjs';
+import createMetadata from './metadata.mjs';
+import createQueries from './queries.mjs';
 
-import { getRemark } from '../utils/remark.mjs';
-import { createNodeSlugger } from '../utils/slugger.mjs';
+import { getRemark } from './utils/remark.mjs';
+import { createNodeSlugger } from './utils/slugger.mjs';
+import createProgressBar from './utils/progressBar.mjs';
 
 /**
  * Creates an API doc parser for a given Markdown API doc file
@@ -140,8 +141,8 @@ const createParser = () => {
 
       // Visits all Text nodes from the current subtree and if there's any that matches
       // any API doc type reference and then updates the type reference to be a Markdown link
-      visit(subTree, createQueries.UNIST.isTextWithType, (node, _, parent) =>
-        updateTypeReference(node, parent)
+      visit(subTree, createQueries.UNIST.isTextWithType, node =>
+        updateTypeReference(node)
       );
 
       // Removes already parsed items from the subtree so that they aren't included in the final content
@@ -177,7 +178,18 @@ const createParser = () => {
   const parseApiDocs = async apiDocs => {
     // We do a Promise.all, to ensure that each API doc is resolved asynchronously
     // but all need to be resolved first before we return the result to the caller
-    const resolvedApiDocEntries = await Promise.all(apiDocs.map(parseApiDoc));
+
+    const progressBar = createProgressBar('Parsing API Docs');
+    progressBar.start(apiDocs.length, 0);
+
+    const resolvedApiDocEntries = await Promise.all(
+      apiDocs.map(async apiDoc => {
+        progressBar.increment();
+        return await parseApiDoc(apiDoc);
+      })
+    );
+
+    progressBar.stop();
 
     return resolvedApiDocEntries.flat();
   };
