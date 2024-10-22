@@ -110,7 +110,7 @@ export const DOC_SLUG_OPTIONS = 'options';
 // https://github.com/nodejs/node/blob/main/doc/api/cli.md#environment-variables-1
 // This slug should reference the section where the available
 // environment variables are defined.
-export const DOC_SLUG_ENVIRONMENT = 'evironment-options-1';
+export const DOC_SLUG_ENVIRONMENT = 'environment-variables-1';
 
 // This is a mapping for types within the Markdown content and their respective
 // JavaScript globals types within the MDN JavaScript docs
