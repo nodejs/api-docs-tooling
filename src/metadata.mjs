@@ -145,7 +145,7 @@ const createMetadata = slugger => {
         api: apiDoc.stem,
         slug: sectionSlug,
         source_link,
-        api_doc_source: apiDoc.basename,
+        api_doc_source: `doc/api/${apiDoc.basename}`,
         added_in: added,
         deprecated_in: deprecated,
         removed_in: removed,

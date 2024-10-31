@@ -1,9 +1,14 @@
-import { MiscSection, Section, SignatureSection } from '../legacy-json/types';
+import {
+  MiscSection,
+  Section,
+  SignatureSection,
+  ModuleSection,
+} from '../legacy-json/types';
 
 export interface Output {
-  miscs: MiscSection[];
-  modules: Section[];
-  classes: SignatureSection[];
-  globals: (ModuleSection | { type: 'global' })[];
-  methods: SignatureSection[];
+  miscs: Array<MiscSection>;
+  modules: Array<Section>;
+  classes: Array<SignatureSection>;
+  globals: Array<ModuleSection | { type: 'global' }>;
+  methods: Array<SignatureSection>;
 }

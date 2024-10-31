@@ -1,21 +1,15 @@
 import { ListItem } from 'mdast';
 
 export interface HierarchizedEntry extends ApiDocMetadataEntry {
-  hierarchyChildren: ApiDocMetadataEntry[];
+  hierarchyChildren: Array<ApiDocMetadataEntry>;
 }
 
-export type Section =
-  | SignatureSection
-  | PropertySection
-  | EventSection
-  | MiscSection;
-
 export interface Meta {
-  changes: ApiDocMetadataChange[];
-  added?: string[];
-  napiVersion?: string[];
-  deprecated?: string[];
-  removed?: string[];
+  changes: Array<ApiDocMetadataChange>;
+  added?: Array<string>;
+  napiVersion?: Array<string>;
+  deprecated?: Array<string>;
+  removed?: Array<string>;
 }
 
 export interface SectionBase {
@@ -33,19 +27,25 @@ export interface SectionBase {
 export interface ModuleSection extends SectionBase {
   type: 'module';
   source: string;
-  miscs?: MiscSection[];
-  modules?: ModuleSection[];
-  classes?: SignatureSection[];
-  methods?: MethodSignature[];
-  properties?: PropertySection[];
+  miscs?: Array<MiscSection>;
+  modules?: Array<ModuleSection>;
+  classes?: Array<SignatureSection>;
+  methods?: Array<MethodSignature>;
+  properties?: Array<PropertySection>;
   globals?: ModuleSection | { type: 'global' };
-  signatures?: SignatureSection[];
+  signatures?: Array<SignatureSection>;
 }
 
 export interface SignatureSection extends SectionBase {
   type: 'class' | 'ctor' | 'classMethod' | 'method';
-  signatures: MethodSignature[];
+  signatures: Array<MethodSignature>;
 }
+
+export type Section =
+  | SignatureSection
+  | PropertySection
+  | EventSection
+  | MiscSection;
 
 export interface Parameter {
   name: string;
@@ -54,7 +54,7 @@ export interface Parameter {
 }
 
 export interface MethodSignature {
-  params: Parameter[];
+  params: Array<Parameter>;
   return?: string;
 }
 
@@ -65,7 +65,7 @@ export interface PropertySection extends SectionBase {
 
 export interface EventSection extends SectionBase {
   type: 'event';
-  params: ListItem[];
+  params: Array<ListItem>;
 }
 
 export interface MiscSection extends SectionBase {

@@ -38,14 +38,14 @@ export default {
       'methods',
     ];
 
-    for (const section of input) {
+    input.forEach(section => {
       // Copy the relevant properties from each section into our output
-      for (const property of propertiesToCopy) {
+      propertiesToCopy.forEach(property => {
         if (section[property]) {
           generatedValue[property].push(...section[property]);
         }
-      }
-    }
+      });
+    });
 
     await writeFile(
       join(output, 'all.json'),

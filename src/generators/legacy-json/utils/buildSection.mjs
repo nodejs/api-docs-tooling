@@ -9,6 +9,7 @@ import {
   TYPE_EXPRESSION,
 } from '../constants.mjs';
 import { buildHierarchy } from './buildHierarchy.mjs';
+import parseSignature from './parseSignature.mjs';
 
 const sectionTypePlurals = {
   module: 'modules',
@@ -33,21 +34,17 @@ function createMeta(entry) {
   const makeArrayIfNotAlready = val => (Array.isArray(val) ? val : [val]);
 
   const { added_in, n_api_version, deprecated_in, removed_in, changes } = entry;
-  if (added_in || n_api_version || deprecated_in || removed_in) {
-    return {
-      changes,
-      added: added_in ? makeArrayIfNotAlready(added_in) : undefined,
-      napiVersion: n_api_version
-        ? makeArrayIfNotAlready(n_api_version)
-        : undefined,
-      deprecated: deprecated_in
-        ? makeArrayIfNotAlready(deprecated_in)
-        : undefined,
-      removed: removed_in ? makeArrayIfNotAlready(removed_in) : undefined,
-    };
-  }
-
-  return undefined;
+  return {
+    changes,
+    added: added_in ? makeArrayIfNotAlready(added_in) : undefined,
+    napiVersion: n_api_version
+      ? makeArrayIfNotAlready(n_api_version)
+      : undefined,
+    deprecated: deprecated_in
+      ? makeArrayIfNotAlready(deprecated_in)
+      : undefined,
+    removed: removed_in ? makeArrayIfNotAlready(removed_in) : undefined,
+  };
 }
 
 /**
@@ -66,154 +63,6 @@ function createSection(entry, head) {
     meta: createMeta(entry),
     introduced_in: entry.introduced_in,
   };
-}
-
-/**
- * @param {string} textRaw Something like `new buffer.Blob([sources[, options]])`
- * @param {Array<import('../types.d.ts').List} values
- * @returns {import('../types.d.ts').MethodSignature}
- */
-function parseSignature(textRaw, values) {
-  /**
-   * @type {import('../types.d.ts').MethodSignature}
-   */
-  const signature = {
-    params: [],
-  };
-
-  const rawParameters = values.filter(value => {
-    if (value.name === 'return') {
-      signature.return = value;
-      return false;
-    }
-
-    return true;
-  });
-
-  /**
-   * Extract a list of the signatures from the method's declaration
-   * @example `[sources[, options]]`
-   */
-  let [, declaredParameters] = `\`${textRaw}\``.match(PARAM_EXPRESSION) || [];
-
-  if (!declaredParameters) {
-    signature.params = rawParameters;
-
-    return signature;
-  }
-
-  /**
-   * @type {string[]}
-   * @example ['sources[,', 'options]]']
-   */
-  declaredParameters = declaredParameters.split(',');
-
-  let optionalDepth = 0;
-  const optionalCharDict = { '[': 1, ' ': 0, ']': -1 };
-
-  declaredParameters.forEach((declaredParameter, i) => {
-    /**
-     * @example 'length]]'
-     * @example 'arrayBuffer['
-     * @example '[sources['
-     * @example 'end'
-     */
-    declaredParameter = declaredParameter.trim();
-
-    if (!declaredParameter) {
-      throw new Error(`Empty parameter slot: ${textRaw}`);
-    }
-
-    // We need to find out if this parameter is optional or not. We can tell this
-    //  if we're wrapped in brackets, so let's look for them.
-
-    let pos;
-    for (pos = 0; pos < declaredParameter.length; pos++) {
-      const levelChange = optionalCharDict[declaredParameter[pos]];
-
-      if (levelChange === undefined) {
-        break;
-      }
-
-      optionalDepth += levelChange;
-    }
-
-    // Cut off any trailing brackets
-    declaredParameter = declaredParameter.substring(pos);
-
-    const isParameterOptional = optionalDepth > 0;
-
-    for (pos = declaredParameter.length - 1; pos >= 0; pos--) {
-      const levelChange = optionalCharDict[declaredParameter[pos]];
-
-      if (levelChange === undefined) {
-        break;
-      }
-
-      optionalDepth += levelChange;
-    }
-
-    // Cut off any leading brackets
-    declaredParameter = declaredParameter.substring(0, pos + 1);
-
-    // Default value of this parameter in the method's declaration
-    let defaultValue;
-
-    const equalSignPos = declaredParameter.indexOf('=');
-    if (equalSignPos !== -1) {
-      // We have a default value, save it and then cut it off of the signature
-      defaultValue = declaredParameter.substring(equalSignPos, 1).trim();
-      declaredParameter = declaredParameter.substring(0, equalSignPos);
-    }
-
-    let parameter = rawParameters[i];
-    if (!parameter || declaredParameter !== parameter.name) {
-      // If we're here then the method likely has shared signatures
-      //  Something like, `new Console(stdout[, stderr][, ignoreErrors])` and
-      //  `new Console(options)`
-      parameter = undefined;
-
-      // Try finding a parameter this is being shared with
-      for (const otherParam of rawParameters) {
-        if (declaredParameter === otherParam.name) {
-          // Found a matching one
-          parameter = otherParam;
-          break;
-        } else if (otherParam.options) {
-          // Found a matching one in the parameter's options
-          for (const option of otherParam.options) {
-            if (declaredParameter === option.name) {
-              parameter = Object.assign({}, option);
-              break;
-            }
-          }
-        }
-      }
-
-      if (!parameter) {
-        // Couldn't find the shared one
-        if (declaredParameter.startsWith('...')) {
-          parameter = { name: declaredParameter };
-        } else {
-          throw new Error(
-            `Invalid param "${declaredParameter}"\n` + ` > ${textRaw}`
-          );
-        }
-      }
-    }
-
-    if (isParameterOptional) {
-      parameter.optional = true;
-    }
-
-    if (defaultValue) {
-      parameter.default = defaultValue;
-    }
-
-    signature.params.push(parameter);
-  });
-
-  return signature;
 }
 
 /**
@@ -534,7 +383,7 @@ export default (head, entries) => {
    */
   const rootModule = {
     type: 'module',
-    source: `doc/api/${head.api_doc_source}`,
+    source: head.api_doc_source,
   };
 
   buildHierarchy(entries).forEach(entry => handleEntry(entry, rootModule));
