@@ -16,9 +16,9 @@
     "api-docs-tooling": "./bin/cli.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "^9.12.0",
+    "@eslint/js": "^9.13.0",
     "@types/node": "^22.7.5",
-    "eslint": "^9.12.0",
+    "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.11.0",
     "husky": "^9.1.6",
