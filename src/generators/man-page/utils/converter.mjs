@@ -78,7 +78,12 @@ export function flagValueToMandoc(flag) {
   }
 
   // Split the flag into the name and value based on the separator ('=' or space).
-  const value = flag.split(sep)[1];
+  let value = flag.split(sep)[1];
+
+  // If the value ends with ']', the flag's argument is optional.
+  if (value.endsWith(']')) {
+    value = '[' + value;
+  }
 
   // If there is no value, return an empty string.
   if (!value) {
@@ -89,12 +94,12 @@ export function flagValueToMandoc(flag) {
   const prefix = sep === ' ' ? '' : ' Ns = Ns';
 
   // Combine prefix and formatted value.
-  return `${prefix} Ar ${value.replace(/\]$/, '')}`;
+  return `${prefix} Ar ${value}`;
 }
 
 const formatFlag = flag =>
   // 'Fl' denotes a flag, followed by an optional 'Ar' (argument).
-  `Fl ${flag.split(/[= ]/)[0].slice(1)}${flagValueToMandoc(flag)}`;
+  `Fl ${flag.split(/\[?[= ]/)[0].slice(1)}${flagValueToMandoc(flag)}`;
 
 /**
  * Converts an API option metadata entry into the Mandoc format.
