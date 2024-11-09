@@ -53,7 +53,6 @@ describe('createQueries', () => {
             depth: 2,
             name: 'Test Heading',
             text: 'Test Heading',
-            type: 'module',
           },
           depth: 2,
         });
