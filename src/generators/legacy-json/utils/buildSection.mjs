@@ -335,7 +335,7 @@ function handleEntry(entry, parentSection) {
     }
 
     for (const key of Object.keys(section)) {
-      if (key in ['textRaw', 'name', 'type', 'desc', 'miscs']) {
+      if (['textRaw', 'name', 'type', 'desc', 'miscs'].includes(key)) {
         continue;
       }
 
