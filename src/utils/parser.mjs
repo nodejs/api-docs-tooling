@@ -130,5 +130,5 @@ export const parseHeadingIntoMetadata = (heading, depth) => {
     }
   }
 
-  return { text: heading, type: 'module', name: heading, depth };
+  return { text: heading, name: heading, depth };
 };
