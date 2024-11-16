@@ -150,30 +150,34 @@ export default {
     for (const node of headNodes) {
       const result = processModuleNodes(node);
 
-      // We minify the html result to reduce the file size and keep it "clean"
-      const minified = await minify(result, {
-        collapseWhitespace: true,
-        minifyJS: true,
-      });
+      if (output) {
+        // We minify the html result to reduce the file size and keep it "clean"
+        const minified = await minify(result, {
+          collapseWhitespace: true,
+          minifyJS: true,
+        });
 
-      await writeFile(join(output, `${node.api}.html`), minified);
+        await writeFile(join(output, `${node.api}.html`), minified);
+      }
     }
 
-    // Define the output folder for API docs assets
-    const assetsFolder = join(output, 'assets');
+    if (output) {
+      // Define the output folder for API docs assets
+      const assetsFolder = join(output, 'assets');
 
-    // Removes the current assets directory to copy the new assets
-    // and prevent stale assets from existing in the output directory
-    // If the path does not exists, it will simply ignore and continue
-    await rm(assetsFolder, { recursive: true, force: true });
+      // Removes the current assets directory to copy the new assets
+      // and prevent stale assets from existing in the output directory
+      // If the path does not exists, it will simply ignore and continue
+      await rm(assetsFolder, { recursive: true, force: true });
 
-    // We copy all the other assets to the output folder at the end of the process
-    // to ensure that all latest changes on the styles are applied to the output
-    // Note.: This is not meant to be used for DX/developer purposes.
-    await cp(join(baseDir, 'assets'), assetsFolder, {
-      recursive: true,
-      force: true,
-    });
+      // We copy all the other assets to the output folder at the end of the process
+      // to ensure that all latest changes on the styles are applied to the output
+      // Note.: This is not meant to be used for DX/developer purposes.
+      await cp(join(baseDir, 'assets'), assetsFolder, {
+        recursive: true,
+        force: true,
+      });
+    }
 
     return generatedValues;
   },
