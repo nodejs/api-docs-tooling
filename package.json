@@ -12,6 +12,7 @@
     "run": "node bin/cli.mjs",
     "watch": "node --watch bin/cli.mjs"
   },
+  "main": "./src/index.mjs",
   "bin": {
     "api-docs-tooling": "./bin/cli.mjs"
   },
