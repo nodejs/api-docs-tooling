@@ -12,13 +12,13 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
 
 /**
  * @typedef {{
- *  api: string;
- *  added: string;
- *  section: string;
- *  version: string;
- *  toc: string;
- *  nav: string;
- *  content: string;
+ * api: string;
+ * added: string;
+ * section: string;
+ * version: string;
+ * toc: string;
+ * nav: string;
+ * content: string;
  * }} TemplateValues
  *
  * This generator generates the legacy HTML pages of the legacy API docs
@@ -41,6 +41,11 @@ export default {
 
   dependsOn: 'legacy-html',
 
+  /**
+   * Generates the `all.html` file from the `legacy-html` generator
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
+   */
   async generate(input, { version, releases, output }) {
     const inputWithoutIndex = input.filter(entry => entry.api !== 'index');
 

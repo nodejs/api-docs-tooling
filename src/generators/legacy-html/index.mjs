@@ -14,13 +14,13 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
 
 /**
  * @typedef {{
- *  api: string;
- *  added: string;
- *  section: string;
- *  version: string;
- *  toc: string;
- *  nav: string;
- *  content: string;
+ * api: string;
+ * added: string;
+ * section: string;
+ * version: string;
+ * toc: string;
+ * nav: string;
+ * content: string;
  * }} TemplateValues
  *
  * This generator generates the legacy HTML pages of the legacy API docs
@@ -43,6 +43,11 @@ export default {
 
   dependsOn: 'ast',
 
+  /**
+   * Generates the legacy version of the API docs in HTML
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
+   */
   async generate(input, { releases, version, output }) {
     // This array holds all the generated values for each module
     const generatedValues = [];

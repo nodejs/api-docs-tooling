@@ -29,6 +29,11 @@ export default {
 
   dependsOn: 'ast',
 
+  /**
+   * Generates the simplified JSON version of the API docs
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
+   */
   async generate(input, options) {
     // Gets a remark processor for stringifying the AST tree into JSON
     const remarkProcessor = getRemark();
@@ -45,7 +50,10 @@ export default {
         createQueries.UNIST.isHeading,
       ]);
 
-      // For the JSON generate we want to transform the whole content into JSON
+      /**
+       * For the JSON generate we want to transform the whole content into JSON
+       * @returns {string} The stringified JSON version of the content
+       */
       content.toJSON = () => remarkProcessor.stringify(content);
 
       return { ...node, content };

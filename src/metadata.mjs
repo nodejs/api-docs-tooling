@@ -37,9 +37,9 @@ const createMetadata = slugger => {
    * transformed into NavigationEntries and MetadataEntries
    *
    * @type {{
-   *  heading: ApiDocMetadataEntry['heading'],
-   *  stability: ApiDocMetadataEntry['stability'],
-   *  properties: ApiDocRawMetadataEntry,
+   * heading: ApiDocMetadataEntry['heading'],
+   * stability: ApiDocMetadataEntry['stability'],
+   * properties: ApiDocRawMetadataEntry,
    * }}
    */
   const internalMetadata = {
@@ -130,10 +130,14 @@ const createMetadata = slugger => {
       internalMetadata.heading.data.type =
         type ?? internalMetadata.heading.data.type;
 
-      // Defines the toJSON method for the Heading AST node to be converted as JSON
+      /**
+       * Defines the toJSON method for the Heading AST node to be converted as JSON
+       */
       internalMetadata.heading.toJSON = () => internalMetadata.heading.data;
 
-      // Maps the Stability Index AST nodes into a JSON objects from their data properties
+      /**
+       * Maps the Stability Index AST nodes into a JSON objects from their data properties
+       */
       internalMetadata.stability.toJSON = () =>
         internalMetadata.stability.children.map(node => node.data);
 
