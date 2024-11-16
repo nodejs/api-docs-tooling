@@ -94,6 +94,10 @@ describe('Mandoc Conversion', () => {
           expected: ' Ns = Ns Ar value1,value2,value3',
         },
         { input: '-x', expected: '' },
+        {
+          input: '--flag[=optional value]',
+          expected: ' Ns = Ns Ar [optional value]',
+        },
       ];
       runTests(cases, flagValueToMandoc);
     });
