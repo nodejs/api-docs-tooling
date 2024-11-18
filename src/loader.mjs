@@ -29,11 +29,13 @@ const createLoader = () => {
     );
 
     const progressBar = createProgressBar('Loading files');
+
     progressBar.start(resolvedFiles.length, 0);
 
     return resolvedFiles.map(async filePath => {
       const fileContents = await readFile(filePath, 'utf-8');
       progressBar.increment();
+
       // normally we stop the progress bar when the loop is done
       // but here we return the loop so we need to stop it when the last file is loaded
       if (progressBar.value === progressBar.total) {
