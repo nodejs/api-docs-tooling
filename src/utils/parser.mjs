@@ -129,6 +129,7 @@ export const parseHeadingIntoMetadata = (heading, depth) => {
       return {
         text: heading,
         type,
+        // The highest match group should be used.
         name: matches.filter(Boolean).at(-1),
         depth,
       };

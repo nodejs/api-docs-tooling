@@ -138,10 +138,8 @@ const createMetadata = slugger => {
       internalMetadata.stability.toJSON = () =>
         internalMetadata.stability.children.map(node => node.data);
 
-      /**
-       * @type {ApiDocMetadataEntry}
-       */
-      const value = {
+      // Returns the Metadata entry for the API doc
+      return {
         api: apiDoc.stem,
         slug: sectionSlug,
         source_link,
@@ -156,15 +154,9 @@ const createMetadata = slugger => {
         stability: internalMetadata.stability,
         content: section,
         tags,
+        introduced_in,
         rawContent: apiDoc.toString(),
       };
-
-      if (introduced_in) {
-        value.introduced_in = introduced_in;
-      }
-
-      // Returns the Metadata entry for the API doc
-      return value;
     },
   };
 };

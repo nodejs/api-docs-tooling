@@ -134,6 +134,7 @@ function parseListItem(child, entry) {
 
   // Recursively parse nested options if a list is found within the list item
   const optionsNode = child.children.find(child => child.type === 'list');
+
   if (optionsNode) {
     current.options = optionsNode.children.map(child =>
       parseListItem(child, entry)
@@ -175,6 +176,7 @@ function parseStability(section, nodes) {
  */
 function parseList(section, nodes, entry) {
   const list = nodes[0]?.type === 'list' ? nodes.shift() : null;
+
   const values = list
     ? list.children.map(child => parseListItem(child, entry))
     : [];
@@ -188,7 +190,8 @@ function parseList(section, nodes, entry) {
     case 'property':
       if (values.length) {
         const { type, ...rest } = values[0];
-        if (type) section.propertySigType = type;
+
+        section.type = type;
         Object.assign(section, rest);
         section.textRaw = `\`${section.name}\` ${section.textRaw}`;
       }
@@ -197,9 +200,14 @@ function parseList(section, nodes, entry) {
       section.params = values;
       break;
     default:
-      if (list) nodes.unshift(list); // If the list wasn't processed, add it back for further processing
+      // If the list wasn't processed, add it back for further processing
+      if (list) {
+        nodes.unshift(list);
+      }
   }
 }
+
+let lazyHTML;
 
 /**
  * Adds a description to the section.
@@ -207,16 +215,20 @@ function parseList(section, nodes, entry) {
  * @param {Array} nodes - The AST nodes.
  */
 function addDescription(section, nodes) {
-  if (!nodes.length) return;
+  if (!nodes.length) {
+    return;
+  }
 
   if (section.desc) {
     section.shortDesc = section.desc;
   }
 
-  const html = getRemarkRehype();
-  const rendered = html.stringify(
-    html.runSync({ type: 'root', children: nodes })
+  lazyHTML ??= getRemarkRehype();
+
+  const rendered = lazyHTML.stringify(
+    lazyHTML.runSync({ type: 'root', children: nodes })
   );
+
   section.desc = rendered || undefined;
 }
 
@@ -241,32 +253,38 @@ function addAdditionalMetadata(section, parentSection, headingNode) {
  */
 function addToParent(section, parentSection) {
   const pluralType = sectionTypePlurals[section.type];
+
   parentSection[pluralType] = parentSection[pluralType] || [];
   parentSection[pluralType].push(section);
 }
 
+const notTransferredKeys = ['textRaw', 'name', 'type', 'desc', 'miscs'];
+
 /**
- * Promotes children to top-level if the section type is 'misc'.
+ * Promotes children properties to the parent level if the section type is 'misc'.
+ *
  * @param {import('../types.d.ts').Section} section - The section to promote.
  * @param {import('../types.d.ts').Section} parentSection - The parent section.
  */
 const makeChildrenTopLevelIfMisc = (section, parentSection) => {
-  if (section.type !== 'misc' || parentSection.type === 'misc') {
-    return;
-  }
+  // Only promote if the current section is of type 'misc' and the parent is not 'misc'
+  if (section.type === 'misc' && parentSection.type !== 'misc') {
+    Object.entries(section).forEach(([key, value]) => {
+      // Skip keys that should not be transferred
+      if (notTransferredKeys.includes(key)) return;
 
-  Object.keys(section).forEach(key => {
-    if (['textRaw', 'name', 'type', 'desc', 'miscs'].includes(key)) {
-      return;
-    }
-    if (parentSection[key]) {
-      parentSection[key] = Array.isArray(parentSection[key])
-        ? parentSection[key].concat(section[key])
-        : section[key];
-    } else {
-      parentSection[key] = section[key];
-    }
-  });
+      // Merge the section's properties into the parent section
+      parentSection[key] = parentSection[key]
+        ? // If the parent already has this key, concatenate the values
+          [].concat(parentSection[key], value)
+        : // Otherwise, directly assign the section's value to the parent
+          value;
+    });
+  }
+};
+
+const handleChildren = (entry, section) => {
+  entry.hierarchyChildren?.forEach(child => handleEntry(child, section));
 };
 
 /**
@@ -281,19 +299,10 @@ function handleEntry(entry, parentSection) {
   parseStability(section, nodes);
   parseList(section, nodes, entry);
   addDescription(section, nodes);
-  entry.hierarchyChildren?.forEach(child => handleEntry(child, section));
+  handleChildren(entry, section);
   addAdditionalMetadata(section, parentSection, headingNode);
   addToParent(section, parentSection);
   makeChildrenTopLevelIfMisc(section, parentSection);
-
-  if (section.type === 'property') {
-    if (section.propertySigType) {
-      section.type = section.propertySigType;
-      delete section.propertySigType;
-    } else {
-      delete section.type;
-    }
-  }
 }
 
 /**

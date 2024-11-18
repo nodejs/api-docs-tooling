@@ -72,6 +72,7 @@ describe('createMetadata', () => {
       deprecated_in: undefined,
       heading,
       n_api_version: undefined,
+      introduced_in: undefined,
       rawContent: '',
       removed_in: undefined,
       slug: 'test-heading',

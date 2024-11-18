@@ -81,6 +81,9 @@ const createQueries = () => {
       transformTypeToReferenceLink
     );
 
+    // This changes the type into a link by splitting it up
+    // into several nodes, and adding those nodes to the
+    // parent.
     const {
       children: [newNode],
     } = remark.parse(replacedTypes);

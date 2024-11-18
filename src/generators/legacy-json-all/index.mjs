@@ -4,6 +4,9 @@ import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /**
+ * This generator consolidates data from the `legacy-json` generator into a single
+ * JSON file (`all.json`).
+ *
  * @typedef {Array<import('../legacy-json/types.d.ts').Section>} Input
  *
  * @type {import('../types.d.ts').GeneratorMetadata<Input, import('./types.d.ts').Output>}
@@ -20,6 +23,9 @@ export default {
 
   async generate(input, { output }) {
     /**
+     * The consolidated output object that will contain
+     * combined data from all sections in the input.
+     *
      * @type {import('./types.d.ts').Output}
      */
     const generatedValue = {

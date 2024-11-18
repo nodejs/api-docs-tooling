@@ -5,6 +5,14 @@ import { PARAM_EXPRESSION } from '../constants.mjs';
 const OPTIONAL_LEVEL_CHANGES = { '[': 1, ']': -1, ' ': 0 };
 
 /**
+ * @param {String} char
+ * @param {Number} depth
+ * @returns {Number}
+ */
+const updateDepth = (char, depth) =>
+  depth + (OPTIONAL_LEVEL_CHANGES[char] || 0);
+
+/**
  * @param {string} parameterName
  * @param {number} optionalDepth
  * @returns {[string, number, boolean]}
@@ -14,36 +22,34 @@ function parseNameAndOptionalStatus(parameterName, optionalDepth) {
   //  We need to see if there's any leading brackets in front of the parameter
   //  name. While we're doing that, we can also get the index where the
   //  parameter's name actually starts at.
-  let startingIdx = 0;
-  for (; startingIdx < parameterName.length; startingIdx++) {
-    const levelChange = OPTIONAL_LEVEL_CHANGES[parameterName[startingIdx]];
 
-    if (!levelChange) {
-      break;
-    }
+  // Find the starting index where the name begins
+  const startingIdx = [...parameterName].findIndex(
+    char => !OPTIONAL_LEVEL_CHANGES[char]
+  );
 
-    optionalDepth += levelChange;
-  }
+  // Update optionalDepth based on leading brackets
+  optionalDepth = [...parameterName.slice(0, startingIdx)].reduce(
+    updateDepth,
+    optionalDepth
+  );
 
+  // Find the ending index where the name ends
+  const endingIdx = [...parameterName].findLastIndex(
+    char => !OPTIONAL_LEVEL_CHANGES[char]
+  );
+
+  // Update optionalDepth based on trailing brackets
+  optionalDepth = [...parameterName.slice(endingIdx + 1)].reduce(
+    updateDepth,
+    optionalDepth
+  );
+
+  // Extract the actual parameter name
+  const actualName = parameterName.slice(startingIdx, endingIdx + 1);
   const isParameterOptional = optionalDepth > 0;
 
-  // Now let's check for any trailing brackets at the end of the parameter's
-  //  name. This will tell us where the parameter's name ends.
-  let endingIdx = parameterName.length - 1;
-  for (; endingIdx >= 0; endingIdx--) {
-    const levelChange = OPTIONAL_LEVEL_CHANGES[parameterName[endingIdx]];
-    if (!levelChange) {
-      break;
-    }
-
-    optionalDepth += levelChange;
-  }
-
-  return [
-    parameterName.substring(startingIdx, endingIdx + 1),
-    optionalDepth,
-    isParameterOptional,
-  ];
+  return [actualName, optionalDepth, isParameterOptional];
 }
 
 /**
@@ -55,8 +61,8 @@ function parseDefaultValue(parameterName) {
    * @type {string | undefined}
    */
   let defaultValue;
-
   const equalSignPos = parameterName.indexOf('=');
+
   if (equalSignPos !== -1) {
     // We do have a default value, let's extract it
     defaultValue = parameterName.substring(equalSignPos).trim();
@@ -75,34 +81,29 @@ function parseDefaultValue(parameterName) {
  * @returns {import('../types.d.ts').Parameter}
  */
 function findParameter(parameterName, index, markdownParameters) {
-  let parameter = markdownParameters[index];
-  if (parameter && parameter.name === parameterName) {
+  const parameter = markdownParameters[index];
+  if (parameter?.name === parameterName) {
     return parameter;
   }
 
   // Method likely has multiple signatures, something like
   //  `new Console(stdout[, stderr][, ignoreErrors])` and `new Console(options)`
   // Try to find the parameter that this is being shared with
-  for (const markdownProperty of markdownParameters) {
-    if (markdownProperty.name === parameterName) {
-      // Found it
-      return markdownParameters;
-    } else if (markdownProperty.options) {
-      for (const option of markdownProperty.options) {
-        if (option.name === parameterName) {
-          // Found a matching one in the parameter's options
-          return Object.assign({}, option);
-        }
-      }
+  for (const property of markdownParameters) {
+    if (property.name === parameterName) {
+      return property;
+    }
+
+    const matchingOption = property.options?.find(
+      option => option.name === parameterName
+    );
+    if (matchingOption) {
+      return { ...matchingOption };
     }
   }
 
-  // At this point, we couldn't find a shared signature
-  if (parameterName.startsWith('...')) {
-    return { name: parameterName };
-  } else {
-    throw new Error(`Invalid param "${parameterName}"`);
-  }
+  // Default return if no matches are found
+  return { name: parameterName };
 }
 
 /**
