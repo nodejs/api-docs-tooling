@@ -183,9 +183,10 @@ const createParser = () => {
     progressBar.start(apiDocs.length, 0);
 
     const resolvedApiDocEntries = await Promise.all(
-      apiDocs.map(async apiDoc => {
+      apiDocs.map(apiDoc => {
         progressBar.increment();
-        return await parseApiDoc(apiDoc);
+
+        return parseApiDoc(apiDoc);
       })
     );
 
