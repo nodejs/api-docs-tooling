@@ -29,7 +29,7 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
  *
  * @typedef {Array<TemplateValues>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, void>}
+ * @type {import('../types.d.ts').GeneratorMetadata<Input, string>}
  */
 export default {
   name: 'legacy-html-all',
@@ -96,6 +96,10 @@ export default {
       minifyJS: true,
     });
 
-    await writeFile(join(output, 'all.html'), minified);
+    if (output) {
+      await writeFile(join(output, 'all.html'), minified);
+    }
+
+    return minified;
   },
 };
