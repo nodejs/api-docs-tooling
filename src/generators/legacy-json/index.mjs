@@ -55,10 +55,12 @@ export default {
         const section = processModuleNodes(node);
 
         // Write it to the output file
-        await writeFile(
-          join(output, `${node.api}.json`),
-          JSON.stringify(section)
-        );
+        if (output) {
+          await writeFile(
+            join(output, `${node.api}.json`),
+            JSON.stringify(section)
+          );
+        }
       })
     );
 

@@ -1,7 +1,7 @@
 'use strict';
 
 import { u as createTree } from 'unist-builder';
-import { SKIP, visit } from 'unist-util-visit';
+import { SKIP } from 'unist-util-visit';
 
 import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
 
@@ -76,23 +76,26 @@ const createQueries = () => {
    * @param {import('mdast').Parent} parent The parent node
    */
   const updateTypeReference = (node, parent) => {
-    const replacedTypes = node.value.replace(
-      createQueries.QUERIES.normalizeTypes,
-      transformTypeToReferenceLink
-    );
+    const replacedTypes = node.value
+      .replace(
+        createQueries.QUERIES.normalizeTypes,
+        transformTypeToReferenceLink
+      )
+      // Remark doesn't handle leading / trailing spaces, so replace them with
+      // HTML entities.
+      .replace(/^\s/, '&nbsp;')
+      .replace(/\s$/, '&nbsp;');
 
-    // This changes the type into a link by splitting it up
-    // into several nodes, and adding those nodes to the
-    // parent.
+    // This changes the type into a link by splitting it up into several nodes,
+    // and adding those nodes to the parent.
     const {
       children: [newNode],
     } = remark.parse(replacedTypes);
+
+    // Find the index of the original node in the parent
     const index = parent.children.indexOf(node);
-    const originalPosition = node.position;
-    visit(newNode, node => {
-      (node.position.start += originalPosition.start),
-        (node.position.end += originalPosition.end);
-    });
+
+    // Replace the original node with the new node(s)
     parent.children.splice(index, 1, ...newNode.children);
 
     return [SKIP];

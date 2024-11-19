@@ -98,8 +98,6 @@ declare global {
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
-    // The raw file content
-    rawContent: string;
   }
 
   export interface ApiDocReleaseEntry {

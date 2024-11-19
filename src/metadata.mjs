@@ -155,7 +155,6 @@ const createMetadata = slugger => {
         content: section,
         tags,
         introduced_in,
-        rawContent: apiDoc.toString(),
       };
     },
   };

@@ -72,24 +72,22 @@ function createSection(entry, head) {
 }
 
 /**
+ *
+ * @param {String} string
+ * @returns {String}
+ */
+function transformTypeReferences(string) {
+  // console.log(string)
+  return string.replaceAll(/`<([^>]+)>`/g, '{$1}').replaceAll('} | {', '|');
+}
+
+/**
  * Parses a list item to extract properties.
  * @param {import('mdast').ListItem} child - The list item node.
- * @param {import('../types.d.ts').HierarchizedEntry} entry - The entry containing raw content.
  * @returns {import('../types.d.ts').List} The parsed list.
  */
-function parseListItem(child, entry) {
+function parseListItem(child) {
   const current = {};
-
-  /**
-   * Extracts raw content from a node based on its position.
-   * @param {import('mdast').BlockContent} node
-   * @returns {string}
-   */
-  const getRawContent = node =>
-    entry.rawContent.slice(
-      node.position.start.offset,
-      node.position.end.offset
-    );
 
   /**
    * Extracts a pattern from text and assigns it to the current object.
@@ -108,12 +106,14 @@ function parseListItem(child, entry) {
   };
 
   // Combine and clean text from child nodes, excluding nested lists
-  current.textRaw = child.children
-    .filter(node => node.type !== 'list')
-    .map(getRawContent)
-    .join('')
-    .replace(/\s+/g, ' ')
-    .replace(/<!--.*?-->/gs, '');
+  current.textRaw = transformTypeReferences(
+    transformNodesToString(
+      child.children.filter(node => node.type !== 'list'),
+      true
+    )
+      .replace(/\s+/g, ' ')
+      .replace(/<!--.*?-->/gs, '')
+  );
 
   let text = current.textRaw;
 
@@ -136,9 +136,7 @@ function parseListItem(child, entry) {
   const optionsNode = child.children.find(child => child.type === 'list');
 
   if (optionsNode) {
-    current.options = optionsNode.children.map(child =>
-      parseListItem(child, entry)
-    );
+    current.options = optionsNode.children.map(parseListItem);
   }
 
   return current;
@@ -148,38 +146,26 @@ function parseListItem(child, entry) {
  * Parses stability metadata and adds it to the section.
  * @param {import('../types.d.ts').Section} section - The section to add stability to.
  * @param {Array} nodes - The AST nodes.
+ * @param {import('../types.d.ts').HierarchizedEntry} entry - The entry to handle.
  */
-function parseStability(section, nodes) {
-  nodes.forEach((node, i) => {
-    if (
-      node.type === 'blockquote' &&
-      node.children.length === 1 &&
-      node.children[0].type === 'paragraph' &&
-      nodes.slice(0, i).every(n => n.type === 'list')
-    ) {
-      const text = transformNodesToString(node.children[0].children);
-      const stabilityMatch = /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s.exec(text);
-      if (stabilityMatch) {
-        section.stability = Number(stabilityMatch[1]);
-        section.stabilityText = stabilityMatch[2].replace(/\n/g, ' ').trim();
-        nodes.splice(i, 1); // Remove the matched stability node to prevent further processing
-      }
-    }
-  });
+function parseStability(section, nodes, entry) {
+  const json = entry.stability.toJSON()[0];
+  if (json) {
+    section.stability = json.index;
+    section.stabilityText = json.description;
+    nodes.splice(0, 1);
+  }
 }
 
 /**
  * Parses a list and updates the section accordingly.
  * @param {import('../types.d.ts').Section} section - The section to update.
  * @param {Array} nodes - The AST nodes.
- * @param {import('../types.d.ts').HierarchizedEntry} entry - The associated entry.
  */
-function parseList(section, nodes, entry) {
+function parseList(section, nodes) {
   const list = nodes[0]?.type === 'list' ? nodes.shift() : null;
 
-  const values = list
-    ? list.children.map(child => parseListItem(child, entry))
-    : [];
+  const values = list ? list.children.map(parseListItem) : [];
 
   switch (section.type) {
     case 'ctor':
@@ -296,8 +282,8 @@ function handleEntry(entry, parentSection) {
   const [headingNode, ...nodes] = structuredClone(entry.content.children);
   const section = createSection(entry, headingNode);
 
-  parseStability(section, nodes);
-  parseList(section, nodes, entry);
+  parseStability(section, nodes, entry);
+  parseList(section, nodes);
   addDescription(section, nodes);
   handleChildren(entry, section);
   addAdditionalMetadata(section, parentSection, headingNode);

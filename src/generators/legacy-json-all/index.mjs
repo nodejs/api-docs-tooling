@@ -53,7 +53,9 @@ export default {
       });
     });
 
-    await writeFile(join(output, 'all.json'), JSON.stringify(generatedValue));
+    if (output) {
+      await writeFile(join(output, 'all.json'), JSON.stringify(generatedValue));
+    }
 
     return generatedValue;
   },
