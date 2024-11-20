@@ -3,7 +3,7 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { groupNodesByModule } from '../../utils/generators.mjs';
-import buildSection from './utils/buildSection.mjs';
+import { createSectionBuilder } from './utils/buildSection.mjs';
 
 /**
  * This generator is responsible for generating the legacy JSON files for the
@@ -28,6 +28,8 @@ export default {
   dependsOn: 'ast',
 
   async generate(input, { output }) {
+    const buildSection = createSectionBuilder();
+
     // This array holds all the generated values for each module
     const generatedValues = [];
 
