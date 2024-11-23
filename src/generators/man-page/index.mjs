@@ -72,7 +72,11 @@ export default {
       .replace('__OPTIONS__', output.options)
       .replace('__ENVIRONMENT__', output.env);
 
-    await writeFile(options.output, filledTemplate);
+    if (options.output) {
+      await writeFile(options.output, filledTemplate);
+    }
+
+    return filledTemplate;
   },
 };
 

@@ -54,8 +54,15 @@ export default {
     // This simply grabs all the different files and stringifies them
     const stringifiedContent = JSON.stringify(mappedInput);
 
-    // Writes all the API docs stringified content into one file
-    // Note: The full JSON generator in the future will create one JSON file per top-level API doc file
-    await writeFile(join(options.output, 'api-docs.json'), stringifiedContent);
+    if (options.output) {
+      // Writes all the API docs stringified content into one file
+      // Note: The full JSON generator in the future will create one JSON file per top-level API doc file
+      await writeFile(
+        join(options.output, 'api-docs.json'),
+        stringifiedContent
+      );
+    }
+
+    return mappedInput;
   },
 };
