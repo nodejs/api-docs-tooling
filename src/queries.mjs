@@ -186,19 +186,47 @@ createQueries.QUERIES = {
 };
 
 createQueries.UNIST = {
+  /**
+   * @param {import('mdast').Blockquote} blockquote
+   * @returns {boolean}
+   */
   isStabilityNode: ({ type, children }) =>
     type === 'blockquote' &&
     createQueries.QUERIES.stabilityIndex.test(transformNodesToString(children)),
+  /**
+   * @param {import('mdast').Html} html
+   * @returns {boolean}
+   */
   isYamlNode: ({ type, value }) =>
     type === 'html' && createQueries.QUERIES.yamlInnerContent.test(value),
+  /**
+   * @param {import('mdast').Text} text
+   * @returns {boolean}
+   */
   isTextWithType: ({ type, value }) =>
     type === 'text' && createQueries.QUERIES.normalizeTypes.test(value),
+  /**
+   * @param {import('mdast').Html} html
+   * @returns {boolean}
+   */
   isHtmlWithType: ({ type, value }) =>
     type === 'html' && createQueries.QUERIES.linksWithTypes.test(value),
+  /**
+   * @param {import('mdast').Link} link
+   * @returns {boolean}
+   */
   isMarkdownUrl: ({ type, url }) =>
     type === 'link' && createQueries.QUERIES.markdownUrl.test(url),
+  /**
+   * @param {import('mdast').Heading} heading
+   * @returns {boolean}
+   */
   isHeading: ({ type, depth }) =>
     type === 'heading' && depth >= 1 && depth <= 5,
+  /**
+   * @param {import('mdast').LinkReference} linkReference
+   * @returns {boolean}
+   */
   isLinkReference: ({ type, identifier }) =>
     type === 'linkReference' && !!identifier,
 };
