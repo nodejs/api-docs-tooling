@@ -30,7 +30,7 @@ export default {
   // Only register the languages that the API docs use
   // and override the JavaScript language with the aliases
   langs: [
-    { ...javaScriptLanguage[0], aliases: ['mjs', 'cjs', 'js'] },
+    ...httpLanguage,
     ...jsonLanguage,
     ...typeScriptLanguage,
     ...shellScriptLanguage,
@@ -40,7 +40,7 @@ export default {
     ...diffLanguage,
     ...cLanguage,
     ...cPlusPlusLanguage,
-    ...httpLanguage,
     ...coffeeScriptLanguage,
+    { ...javaScriptLanguage[0], aliases: ['mjs', 'cjs', 'js'] },
   ],
 };

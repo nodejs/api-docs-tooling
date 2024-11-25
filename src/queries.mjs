@@ -12,12 +12,14 @@ import {
   parseYAMLIntoMetadata,
   transformTypeToReferenceLink,
 } from './utils/parser.mjs';
+import { getRemark } from './utils/remark.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
  * of metadata and content metadata manipulation within an API Doc
  */
 const createQueries = () => {
+  const remark = getRemark();
   /**
    * Sanitizes the YAML source by returning the inner YAML content
    * and then parsing it into an API Metadata object and updating the current Metadata
@@ -71,15 +73,30 @@ const createQueries = () => {
    * into a Markdown link referencing to the correct API docs
    *
    * @param {import('mdast').Text} node A Markdown link node
+   * @param {import('mdast').Parent} parent The parent node
    */
-  const updateTypeReference = node => {
-    const replacedTypes = node.value.replace(
-      createQueries.QUERIES.normalizeTypes,
-      transformTypeToReferenceLink
-    );
+  const updateTypeReference = (node, parent) => {
+    const replacedTypes = node.value
+      .replace(
+        createQueries.QUERIES.normalizeTypes,
+        transformTypeToReferenceLink
+      )
+      // Remark doesn't handle leading / trailing spaces, so replace them with
+      // HTML entities.
+      .replace(/^\s/, '&nbsp;')
+      .replace(/\s$/, '&nbsp;');
 
-    node.type = 'html';
-    node.value = replacedTypes;
+    // This changes the type into a link by splitting it up into several nodes,
+    // and adding those nodes to the parent.
+    const {
+      children: [newNode],
+    } = remark.parse(replacedTypes);
+
+    // Find the index of the original node in the parent
+    const index = parent.children.indexOf(node);
+
+    // Replace the original node with the new node(s)
+    parent.children.splice(index, 1, ...newNode.children);
 
     return [SKIP];
   };

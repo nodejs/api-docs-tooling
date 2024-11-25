@@ -113,6 +113,7 @@ const createMetadata = slugger => {
 
       const {
         type,
+        introduced_in,
         added,
         deprecated,
         removed,
@@ -146,6 +147,7 @@ const createMetadata = slugger => {
         api: apiDoc.stem,
         slug: sectionSlug,
         source_link,
+        api_doc_source: `doc/api/${apiDoc.basename}`,
         added_in: added,
         deprecated_in: deprecated,
         removed_in: removed,
@@ -156,6 +158,7 @@ const createMetadata = slugger => {
         stability: internalMetadata.stability,
         content: section,
         tags,
+        introduced_in,
       };
     },
   };
