@@ -1,4 +1,4 @@
-import { ListItem } from 'mdast';
+import { ListItem } from '@types/mdast';
 
 /**
  * Represents an entry in a hierarchical structure, extending from ApiDocMetadataEntry.

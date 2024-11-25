@@ -46,7 +46,7 @@ const buildHeading = ({ data, children }, index, parent) => {
 /**
  * Builds an HTML Stability element
  *
- * @param {import('mdast').Blockquote} node The HTML AST tree of the Stability Index content
+ * @param {import('@types/mdast').Blockquote} node The HTML AST tree of the Stability Index content
  * @param {number} index The index of the current node
  * @param {import('unist').Parent} parent The parent node of the current node
  */
@@ -69,7 +69,7 @@ const buildStability = ({ children, data }, index, parent) => {
 /**
  * Transforms the node Markdown link into an HTML link
  *
- * @param {import('mdast').Html} node The node containing the HTML content
+ * @param {import('@types/mdast').Html} node The node containing the HTML content
  */
 const buildHtmlTypeLink = node => {
   node.value = node.value.replace(

@@ -24,7 +24,7 @@ const createQueries = () => {
    * Sanitizes the YAML source by returning the inner YAML content
    * and then parsing it into an API Metadata object and updating the current Metadata
    *
-   * @param {import('mdast').Html} node A HTML node containing the YAML content
+   * @param {import('@types/mdast').Html} node A HTML node containing the YAML content
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addYAMLMetadata = (node, apiEntryMetadata) => {
@@ -42,7 +42,7 @@ const createQueries = () => {
   /**
    * Parse a Heading node into metadata and updates the current metadata
    *
-   * @param {import('mdast').Heading} node A Markdown heading node
+   * @param {import('@types/mdast').Heading} node A Markdown heading node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const setHeadingMetadata = (node, apiEntryMetadata) => {
@@ -57,7 +57,7 @@ const createQueries = () => {
   /**
    * Updates a Markdown link into a HTML link for API docs
    *
-   * @param {import('mdast').Link} node A Markdown link node
+   * @param {import('@types/mdast').Link} node A Markdown link node
    */
   const updateMarkdownLink = node => {
     node.url = node.url.replace(
@@ -72,8 +72,8 @@ const createQueries = () => {
    * Updates a Markdown text containing an API type reference
    * into a Markdown link referencing to the correct API docs
    *
-   * @param {import('mdast').Text} node A Markdown link node
-   * @param {import('mdast').Parent} parent The parent node
+   * @param {import('@types/mdast').Text} node A Markdown link node
+   * @param {import('@types/mdast').Parent} parent The parent node
    */
   const updateTypeReference = (node, parent) => {
     const replacedTypes = node.value
@@ -104,8 +104,8 @@ const createQueries = () => {
   /**
    * Updates a Markdown Link Reference into an actual Link to the Definition
    *
-   * @param {import('mdast').LinkReference} node A link reference node
-   * @param {Array<import('mdast').Definition>} definitions The Definitions of the API Doc
+   * @param {import('@types/mdast').LinkReference} node A link reference node
+   * @param {Array<import('@types/mdast').Definition>} definitions The Definitions of the API Doc
    */
   const updateLinkReference = (node, definitions) => {
     const definition = definitions.find(
@@ -121,7 +121,7 @@ const createQueries = () => {
   /**
    * Parses a Stability Index Entry and updates the current Metadata
    *
-   * @param {import('mdast').Blockquote} node Thead Link Reference Node
+   * @param {import('@types/mdast').Blockquote} node Thead Link Reference Node
    * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addStabilityMetadata = (node, apiEntryMetadata) => {
@@ -204,44 +204,44 @@ createQueries.QUERIES = {
 
 createQueries.UNIST = {
   /**
-   * @param {import('mdast').Blockquote} blockquote
+   * @param {import('@types/mdast').Blockquote} blockquote
    * @returns {boolean}
    */
   isStabilityNode: ({ type, children }) =>
     type === 'blockquote' &&
     createQueries.QUERIES.stabilityIndex.test(transformNodesToString(children)),
   /**
-   * @param {import('mdast').Html} html
+   * @param {import('@types/mdast').Html} html
    * @returns {boolean}
    */
   isYamlNode: ({ type, value }) =>
     type === 'html' && createQueries.QUERIES.yamlInnerContent.test(value),
   /**
-   * @param {import('mdast').Text} text
+   * @param {import('@types/mdast').Text} text
    * @returns {boolean}
    */
   isTextWithType: ({ type, value }) =>
     type === 'text' && createQueries.QUERIES.normalizeTypes.test(value),
   /**
-   * @param {import('mdast').Html} html
+   * @param {import('@types/mdast').Html} html
    * @returns {boolean}
    */
   isHtmlWithType: ({ type, value }) =>
     type === 'html' && createQueries.QUERIES.linksWithTypes.test(value),
   /**
-   * @param {import('mdast').Link} link
+   * @param {import('@types/mdast').Link} link
    * @returns {boolean}
    */
   isMarkdownUrl: ({ type, url }) =>
     type === 'link' && createQueries.QUERIES.markdownUrl.test(url),
   /**
-   * @param {import('mdast').Heading} heading
+   * @param {import('@types/mdast').Heading} heading
    * @returns {boolean}
    */
   isHeading: ({ type, depth }) =>
     type === 'heading' && depth >= 1 && depth <= 5,
   /**
-   * @param {import('mdast').LinkReference} linkReference
+   * @param {import('@types/mdast').LinkReference} linkReference
    * @returns {boolean}
    */
   isLinkReference: ({ type, identifier }) =>

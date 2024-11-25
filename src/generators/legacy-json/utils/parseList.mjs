@@ -40,7 +40,7 @@ const extractPattern = (text, pattern, key, current) => {
 /**
  * Parses an individual list item node to extract its properties
  *
- * @param {import('mdast').ListItem} child
+ * @param {import('@types/mdast').ListItem} child
  * @returns {import('../types').ParameterList}
  */
 function parseListItem(child) {
@@ -82,7 +82,7 @@ function parseListItem(child) {
  * Parses a list of nodes and updates the corresponding section object with the extracted information.
  * Handles different section types such as methods, properties, and events differently.
  * @param {import('../types').Section} section
- * @param {import('mdast').RootContent[]} nodes
+ * @param {import('@types/mdast').RootContent[]} nodes
  */
 export function parseList(section, nodes) {
   const list = nodes[0]?.type === 'list' ? nodes.shift() : null;

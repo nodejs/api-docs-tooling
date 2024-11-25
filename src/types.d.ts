@@ -1,6 +1,6 @@
-import type { Heading, Root } from 'mdast';
+import type { Heading, Root } from '@types/mdast';
 import type { SemVer } from 'semver';
-import type { Parent, Node, Data } from 'unist';
+import type { Data, Node, Parent } from 'unist';
 
 // String serialization of the AST tree
 // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
