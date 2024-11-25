@@ -2,8 +2,7 @@
  * Recursively finds the most suitable parent entry for a given `entry` based on heading depth.
  *
  * @param {ApiDocMetadataEntry} entry
- * @param {ApiDocMetadataEntry[]} entry
- * @param entries
+ * @param {ApiDocMetadataEntry[]} entries
  * @param {number} startIdx
  * @returns {import('../types.d.ts').HierarchizedEntry}
  */
