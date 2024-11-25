@@ -3,7 +3,7 @@
  * This function processes the node recursively, converting each supported node type
  * to its corresponding Mandoc markup representation. Unsupported node types will be ignored.
  *
- * @param {import("mdast").Node} node - The AST node to be converted to Mandoc format.
+ * @param {import('@types/mdast').Node} node - The AST node to be converted to Mandoc format.
  * @param {boolean} [isListItem=false] - Indicates if the current node is a list item.
  * This parameter is used to correctly format list elements in Mandoc.
  * @returns {string} The Mandoc formatted string representing the given node and its children.
