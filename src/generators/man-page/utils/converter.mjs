@@ -9,8 +9,20 @@
  * @returns {string} The Mandoc formatted string representing the given node and its children.
  */
 export function convertNodeToMandoc(node, isListItem = false) {
-  const convertChildren = (sep = '', ili = false) =>
-    node.children.map(child => convertNodeToMandoc(child, ili)).join(sep);
+  /**
+   * Converts the children of a node to Mandoc format.
+   * @param {string} separator
+   * @param {boolean} isListItem
+   */
+  const convertChildren = (separator = '', isListItem = false) =>
+    node.children
+      .map(child => convertNodeToMandoc(child, isListItem))
+      .join(separator);
+
+  /**
+   * Escapes special characters in plain text content.
+   * @returns {string}
+   */
   const escapeText = () => node.value.replace(/\\/g, '\\\\');
 
   switch (node.type) {
@@ -97,6 +109,10 @@ export function flagValueToMandoc(flag) {
   return `${prefix} Ar ${value}`;
 }
 
+/**
+ * Formats a command-line flag for Mandoc representation.
+ * @param {string} flag
+ */
 const formatFlag = flag =>
   // 'Fl' denotes a flag, followed by an optional 'Ar' (argument).
   `Fl ${flag.split(/\[?[= ]/)[0].slice(1)}${flagValueToMandoc(flag)}`;
