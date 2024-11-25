@@ -21,6 +21,12 @@ export default {
 
   dependsOn: 'legacy-json',
 
+  /**
+   *
+   * @param input
+   * @param root0
+   * @param root0.output
+   */
   async generate(input, { output }) {
     /**
      * The consolidated output object that will contain

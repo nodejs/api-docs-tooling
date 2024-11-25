@@ -3,6 +3,7 @@
  *
  * @param {ApiDocMetadataEntry} entry
  * @param {ApiDocMetadataEntry[]} entry
+ * @param entries
  * @param {number} startIdx
  * @returns {import('../types.d.ts').HierarchizedEntry}
  */
@@ -29,19 +30,19 @@ function findParent(entry, entries, startIdx) {
 
 /**
  * We need the files to be in a hierarchy based off of depth, but they're
- *  given to us flattened. So, let's fix that.
+ * given to us flattened. So, let's fix that.
  *
  * Assuming that {@link entries} is in the same order as the elements are in
- *  the markdown, we can use the entry's depth property to reassemble the
- *  hierarchy.
+ * the markdown, we can use the entry's depth property to reassemble the
+ * hierarchy.
  *
  * If depth <= 1, it's a top-level element (aka a root).
  *
  * If it's depth is greater than the previous entry's depth, it's a child of
- *  the previous entry. Otherwise (if it's less than or equal to the previous
- *  entry's depth), we need to find the entry that it was the greater than. We
- *  can do this by just looping through entries in reverse starting at the
- *  current index - 1.
+ * the previous entry. Otherwise (if it's less than or equal to the previous
+ * entry's depth), we need to find the entry that it was the greater than. We
+ * can do this by just looping through entries in reverse starting at the
+ * current index - 1.
  *
  * @param {Array<ApiDocMetadataEntry>} entries
  * @returns {Array<import('../types.d.ts').HierarchizedEntry>}

@@ -109,6 +109,7 @@ function findParameter(parameterName, index, markdownParameters) {
 /**
  * @param {string[]} declaredParameters
  * @param {Array<import('../types.d.ts').ParameterList>} parameters
+ * @param markdownParameters
  */
 function parseParameters(declaredParameters, markdownParameters) {
   /**

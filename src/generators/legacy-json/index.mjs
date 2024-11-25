@@ -7,12 +7,12 @@ import { createSectionBuilder } from './utils/buildSection.mjs';
 
 /**
  * This generator is responsible for generating the legacy JSON files for the
- *  legacy API docs for retro-compatibility. It is to be replaced while we work
- *  on the new schema for this file.
+ * legacy API docs for retro-compatibility. It is to be replaced while we work
+ * on the new schema for this file.
  *
  * This is a top-level generator, intaking the raw AST tree of the api docs.
  * It generates JSON files to the specified output directory given by the
- *  config.
+ * config.
  *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
@@ -27,6 +27,12 @@ export default {
 
   dependsOn: 'ast',
 
+  /**
+   *
+   * @param input
+   * @param root0
+   * @param root0.output
+   */
   async generate(input, { output }) {
     const buildSection = createSectionBuilder();
 

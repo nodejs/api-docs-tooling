@@ -2,22 +2,7 @@ import { buildHierarchy } from './buildHierarchy.mjs';
 import { getRemarkRehype } from '../../../utils/remark.mjs';
 import { transformNodesToString } from '../../../utils/unist.mjs';
 import { parseList } from './parseList.mjs';
-
-const sectionTypePlurals = {
-  module: 'modules',
-  misc: 'miscs',
-  class: 'classes',
-  method: 'methods',
-  property: 'properties',
-  global: 'globals',
-  example: 'examples',
-  ctor: 'signatures',
-  classMethod: 'classMethods',
-  event: 'events',
-  var: 'vars',
-};
-
-const unpromotedKeys = ['textRaw', 'name', 'type', 'desc', 'miscs'];
+import { SECTION_TYPE_PLURALS, UNPROMOTED_KEYS } from '../constants.mjs';
 
 /**
  * Converts a value to an array.
@@ -27,6 +12,9 @@ const unpromotedKeys = ['textRaw', 'name', 'type', 'desc', 'miscs'];
  */
 const enforceArray = val => (Array.isArray(val) ? val : [val]);
 
+/**
+ *
+ */
 export const createSectionBuilder = () => {
   const html = getRemarkRehype();
 
@@ -117,7 +105,7 @@ export const createSectionBuilder = () => {
    * @param {import('../types.d.ts').Section} parent - The parent section.
    */
   const addToParent = (section, parent) => {
-    const key = sectionTypePlurals[section.type] || 'miscs';
+    const key = SECTION_TYPE_PLURALS[section.type] || 'miscs';
 
     parent[key] ??= [];
     parent[key].push(section);
@@ -133,7 +121,7 @@ export const createSectionBuilder = () => {
     if (section.type === 'misc' && parent.type !== 'misc') {
       Object.entries(section).forEach(([key, value]) => {
         // Only promote certain keys
-        if (!unpromotedKeys.includes(key)) {
+        if (!UNPROMOTED_KEYS.includes(key)) {
           // Merge the section's properties into the parent section
           parent[key] = parent[key]
             ? // If the parent already has this key, concatenate the values
