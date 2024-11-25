@@ -28,10 +28,10 @@ export default {
   dependsOn: 'ast',
 
   /**
+   * Generates a legacy JSON file.
    *
-   * @param input
-   * @param root0
-   * @param root0.output
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
    */
   async generate(input, { output }) {
     const buildSection = createSectionBuilder();

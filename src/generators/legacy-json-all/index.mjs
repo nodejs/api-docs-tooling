@@ -22,10 +22,10 @@ export default {
   dependsOn: 'legacy-json',
 
   /**
+   * Generates the legacy JSON `all.json` file.
    *
-   * @param input
-   * @param root0
-   * @param root0.output
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
    */
   async generate(input, { output }) {
     /**
