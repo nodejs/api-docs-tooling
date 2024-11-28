@@ -1,3 +1,4 @@
+// @ts-check
 'use strict';
 
 import { u as createTree } from 'unist-builder';
@@ -5,6 +6,7 @@ import { findAfter } from 'unist-util-find-after';
 import { remove } from 'unist-util-remove';
 import { selectAll } from 'unist-util-select';
 import { SKIP, visit } from 'unist-util-visit';
+import * as acorn from 'acorn';
 
 import createMetadata from './metadata.mjs';
 import createQueries from './queries.mjs';
@@ -182,7 +184,55 @@ const createParser = () => {
     return resolvedApiDocEntries.flat();
   };
 
-  return { parseApiDocs, parseApiDoc };
+  /**
+   * TODO
+   *
+   * @param {import('vfile').VFile | Promise<import('vfile').VFile>} apiDoc
+   * @returns {Promise<JsProgram>}
+   */
+  const parseJsSource = async apiDoc => {
+    // We allow the API doc VFile to be a Promise of a VFile also,
+    // hence we want to ensure that it first resolves before we pass it to the parser
+    const resolvedApiDoc = await Promise.resolve(apiDoc);
+
+    if (typeof resolvedApiDoc.value !== 'string') {
+      throw new TypeError(
+        `expected resolvedApiDoc.value to be string but got ${typeof resolvedApiDoc.value}`
+      );
+    }
+
+    try {
+      const res = acorn.parse(resolvedApiDoc.value, {
+        allowReturnOutsideFunction: true,
+        ecmaVersion: 'latest',
+        locations: true,
+      });
+
+      return {
+        ...res,
+        path: resolvedApiDoc.path,
+      };
+    } catch (err) {
+      console.log(`error parsing ${resolvedApiDoc.basename}`);
+      throw err;
+    }
+  };
+
+  /**
+   * TODO
+   *
+   * @param {Array<import('vfile').VFile | Promise<import('vfile').VFile>>} apiDocs List of API doc files to be parsed
+   * @returns {Promise<Array<JsProgram>>}
+   */
+  const parseJsSources = async apiDocs => {
+    // We do a Promise.all, to ensure that each API doc is resolved asynchronously
+    // but all need to be resolved first before we return the result to the caller
+    const resolvedApiDocEntries = await Promise.all(apiDocs.map(parseJsSource));
+
+    return resolvedApiDocEntries;
+  };
+
+  return { parseApiDocs, parseApiDoc, parseJsSources, parseJsSource };
 };
 
 export default createParser;
