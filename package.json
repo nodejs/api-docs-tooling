@@ -29,6 +29,7 @@
     "prettier": "3.4.2"
   },
   "dependencies": {
+    "acorn": "^8.14.0",
     "commander": "^13.1.0",
     "dedent": "^1.5.3",
     "github-slugger": "^2.0.0",

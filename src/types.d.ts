@@ -1,4 +1,5 @@
 import type { Heading, Root } from '@types/mdast';
+import type { Program } from 'acorn';
 import type { SemVer } from 'semver';
 import type { Data, Node, Parent } from 'unist';
 
@@ -70,6 +71,8 @@ declare global {
     slug: string;
     // The GitHub URL to the source of the API entry
     source_link: string | Array<string> | undefined;
+    // The path to the JavaScript source for the API entry relative to its location locally (ex. `../node/lib/zlib.js`)
+    source_link_local: string | undefined;
     // Path to the api doc file relative to the root of the nodejs repo root (ex/ `doc/api/addons.md`)
     api_doc_source: string;
     // When a said API section got added (in which version(s) of Node.js)
@@ -98,6 +101,11 @@ declare global {
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
+  }
+
+  export interface JsProgram extends Program {
+    // Path to the program's source (i.e. `../node/lib/zlib.js`)
+    path: string;
   }
 
   export interface ApiDocReleaseEntry {
