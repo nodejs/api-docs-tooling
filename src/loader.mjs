@@ -5,6 +5,7 @@ import { extname } from 'node:path';
 
 import { globSync } from 'glob';
 import { VFile } from 'vfile';
+import { existsSync } from 'node:fs';
 
 /**
  * This method creates a simple abstract "Loader", which technically
@@ -33,7 +34,22 @@ const createLoader = () => {
     });
   };
 
-  return { loadFiles };
+  /**
+   * Loads the JavaScript source files and transforms them into VFiles
+   *
+   * @param {Array<string>} filePaths
+   */
+  const loadJsFiles = filePaths => {
+    filePaths = filePaths.filter(filePath => existsSync(filePath));
+
+    return filePaths.map(async filePath => {
+      const fileContents = await readFile(filePath, 'utf-8');
+
+      return new VFile({ path: filePath, value: fileContents });
+    });
+  };
+
+  return { loadFiles, loadJsFiles };
 };
 
 export default createLoader;

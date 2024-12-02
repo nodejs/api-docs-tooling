@@ -19,8 +19,9 @@ import availableGenerators from './generators/index.mjs';
  * the final generators in the chain.
  *
  * @param {ApiDocMetadataEntry} input The parsed API doc metadata entries
+ * @param {Array<import('acorn').Program>} parsedJsFiles
  */
-const createGenerator = input => {
+const createGenerator = (input, parsedJsFiles) => {
   /**
    * We store all the registered generators to be processed
    * within a Record, so we can access their results at any time whenever needed
@@ -28,7 +29,10 @@ const createGenerator = input => {
    *
    * @type {{ [K in keyof AllGenerators]: ReturnType<AllGenerators[K]['generate']> }}
    */
-  const cachedGenerators = { ast: Promise.resolve(input) };
+  const cachedGenerators = {
+    ast: Promise.resolve(input),
+    'ast-js': Promise.resolve(parsedJsFiles),
+  };
 
   /**
    * Runs the Generator engine with the provided top-level input and the given generator options

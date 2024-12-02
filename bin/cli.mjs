@@ -68,14 +68,22 @@ program
  */
 const { input, output, target = [], version, changelog } = program.opts();
 
-const { loadFiles } = createLoader();
-const { parseApiDocs } = createParser();
+const { loadFiles, loadJsFiles } = createLoader();
+const { parseApiDocs, parseJsSources } = createParser();
 
 const apiDocFiles = loadFiles(input);
 
 const parsedApiDocs = await parseApiDocs(apiDocFiles);
 
-const { runGenerators } = createGenerator(parsedApiDocs);
+const sourceFiles = loadJsFiles(
+  parsedApiDocs
+    .map(apiDoc => apiDoc.source_link_local)
+    .filter(path => path !== undefined && path.endsWith('.js'))
+);
+
+const parsedJsFiles = await parseJsSources(sourceFiles);
+
+const { runGenerators } = createGenerator(parsedApiDocs, parsedJsFiles);
 
 // Retrieves Node.js release metadata from a given Node.js version and CHANGELOG.md file
 const { getAllMajors } = createNodeReleases(changelog);
