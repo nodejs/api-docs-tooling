@@ -27,7 +27,7 @@
     "prettier": "3.3.3"
   },
   "dependencies": {
-    "cli-progress": "^3.12.0",
+    "@clack/prompts": "^0.9.0",
     "commander": "^12.1.0",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.0",
