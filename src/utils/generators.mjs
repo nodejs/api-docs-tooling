@@ -2,7 +2,7 @@
 
 import { coerce } from 'semver';
 
-import createProgressBar from './progressBar.mjs';
+import { Spinner } from '../utils/spinner.mjs';
 
 /**
  * Groups all the API metadata nodes by module (`api` property) so that we can process each different file
@@ -14,8 +14,9 @@ export const groupNodesByModule = nodes => {
   /** @type {Map<string, Array<ApiDocMetadataEntry>>} */
   const groupedNodes = new Map();
 
-  const progressBar = createProgressBar(groupNodesByModule.name);
-  progressBar.start(nodes.length, 0);
+  const spinner = new Spinner();
+  spinner.total = nodes.length;
+  spinner.start();
 
   for (const node of nodes) {
     if (!groupedNodes.has(node.api)) {
@@ -23,10 +24,10 @@ export const groupNodesByModule = nodes => {
     }
 
     groupedNodes.get(node.api).push(node);
-    progressBar.increment();
+    spinner.update(1);
   }
 
-  progressBar.stop();
+  spinner.stop();
 
   return groupedNodes;
 };

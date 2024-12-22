@@ -11,7 +11,7 @@ import createQueries from './queries.mjs';
 
 import { getRemark } from './utils/remark.mjs';
 import { createNodeSlugger } from './utils/slugger.mjs';
-import createProgressBar from './utils/progressBar.mjs';
+import { Spinner } from './utils/spinner.mjs';
 
 /**
  * Creates an API doc parser for a given Markdown API doc file
@@ -179,18 +179,19 @@ const createParser = () => {
     // We do a Promise.all, to ensure that each API doc is resolved asynchronously
     // but all need to be resolved first before we return the result to the caller
 
-    const progressBar = createProgressBar('Parsing API Docs');
-    progressBar.start(apiDocs.length, 0);
+    const spinner = new Spinner();
+    spinner.start();
+    spinner.total = apiDocs.length;
 
     const resolvedApiDocEntries = await Promise.all(
       apiDocs.map(apiDoc => {
-        progressBar.increment();
+        spinner.update(1);
 
         return parseApiDoc(apiDoc);
       })
     );
 
-    progressBar.stop();
+    spinner.stop();
 
     return resolvedApiDocEntries.flat();
   };
