@@ -29,7 +29,7 @@
     "prettier": "3.4.2"
   },
   "dependencies": {
-    "commander": "^12.1.0",
+    "commander": "^13.0.0",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.0",
     "hast-util-to-string": "^3.0.1",
