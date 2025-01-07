@@ -77,8 +77,8 @@ const parsedApiDocs = await parseApiDocs(apiDocFiles);
 
 const sourceFiles = loadJsFiles(
   parsedApiDocs
-    .map(apiDoc => apiDoc.source_link_local)
-    .filter(path => path !== undefined && path.endsWith('.js'))
+    .map(({ source_link_local }) => source_link_local)
+    .filter(path => path?.endsWith('.js'))
 );
 
 const parsedJsFiles = await parseJsSources(sourceFiles);
