@@ -31,6 +31,8 @@
   "dependencies": {
     "acorn": "^8.14.0",
     "commander": "^13.1.0",
+    "estree-util-visit": "^2.0.0",
+    "gitconfiglocal": "^2.1.0",
     "dedent": "^1.5.3",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.1",

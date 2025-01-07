@@ -56,7 +56,7 @@ declare global {
      * The 'ast' generator is the top-level parser, and if 'ast' is passed to `dependsOn`, then the generator
      * will be marked as a top-level generator.
      */
-    dependsOn: keyof AvailableGenerators | 'ast';
+    dependsOn: keyof AvailableGenerators | 'ast' | 'ast-js';
 
     /**
      * Generators are abstract and the different generators have different sort of inputs and outputs.

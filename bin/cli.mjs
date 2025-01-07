@@ -68,18 +68,14 @@ program
  */
 const { input, output, target = [], version, changelog } = program.opts();
 
-const { loadFiles, loadJsFiles } = createLoader();
+const { loadMarkdownFiles, loadJsFiles } = createLoader();
 const { parseApiDocs, parseJsSources } = createParser();
 
-const apiDocFiles = loadFiles(input);
+const apiDocFiles = loadMarkdownFiles(input);
 
 const parsedApiDocs = await parseApiDocs(apiDocFiles);
 
-const sourceFiles = loadJsFiles(
-  parsedApiDocs
-    .map(({ source_link_local }) => source_link_local)
-    .filter(path => path?.endsWith('.js'))
-);
+const sourceFiles = loadJsFiles(input);
 
 const parsedJsFiles = await parseJsSources(sourceFiles);
 

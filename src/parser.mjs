@@ -185,7 +185,7 @@ const createParser = () => {
   };
 
   /**
-   * TODO
+   * Parses a given JavaScript file into an ESTree AST representation of it
    *
    * @param {import('vfile').VFile | Promise<import('vfile').VFile>} apiDoc
    * @returns {Promise<JsProgram>}
@@ -219,7 +219,7 @@ const createParser = () => {
   };
 
   /**
-   * TODO
+   * Parses multiple JavaScript files into ESTree ASTs by wrapping parseJsSource
    *
    * @param {Array<import('vfile').VFile | Promise<import('vfile').VFile>>} apiDocs List of API doc files to be parsed
    * @returns {Promise<Array<JsProgram>>}

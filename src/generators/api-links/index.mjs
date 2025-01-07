@@ -2,9 +2,13 @@
 
 import { basename, dirname, join } from 'node:path';
 import { writeFile } from 'node:fs/promises';
-import { getGitRepository, getGitTag } from '../../utils/git.mjs';
+import {
+  getBaseGitHubUrl,
+  getCurrentGitHash,
+} from './utils/getBaseGitHubUrl.mjs';
 import { extractExports } from './utils/extractExports.mjs';
 import { findDefinitions } from './utils/findDefinitions.mjs';
+import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
 
 /**
  * This generator is responsible for mapping publicly accessible functions in
@@ -36,7 +40,7 @@ export default {
    */
   async generate(input, { output }) {
     /**
-     * @type {Record<string, string>}
+     * @type Record<string, string>
      */
     const definitions = {};
 
@@ -45,14 +49,25 @@ export default {
      */
     let baseGithubLink;
 
+    if (input.length > 0) {
+      const repositoryDirectory = dirname(input[0].path);
+
+      const repository = getBaseGitHubUrl(repositoryDirectory);
+
+      const tag = getCurrentGitHash(repositoryDirectory);
+
+      baseGithubLink = `${repository}/blob/${tag}`;
+    }
+
     input.forEach(program => {
       /**
        * Mapping of definitions to their line number
        * @type {Record<string, number>}
-       * @example { 'someclass.foo', 10 }
+       * @example { 'someclass.foo': 10 }
        */
       const nameToLineNumberMap = {};
 
+      // `http.js` -> `http`
       const programBasename = basename(program.path, '.js');
 
       const exports = extractExports(
@@ -63,19 +78,12 @@ export default {
 
       findDefinitions(program, programBasename, nameToLineNumberMap, exports);
 
-      if (!baseGithubLink) {
-        const directory = dirname(program.path);
-
-        const repository = getGitRepository(directory);
-
-        const tag = getGitTag(directory);
-
-        baseGithubLink = `https://github.com/${repository}/blob/${tag}`;
-      }
+      checkIndirectReferences(program, exports, nameToLineNumberMap);
 
       const githubLink =
         `${baseGithubLink}/lib/${programBasename}.js`.replaceAll('\\', '/');
 
+      // Add the exports we found in this program to our output
       Object.keys(nameToLineNumberMap).forEach(key => {
         const lineNumber = nameToLineNumberMap[key];
 

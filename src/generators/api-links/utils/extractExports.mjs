@@ -1,18 +1,25 @@
-// @ts-check
 'use strict';
 
+import { visit } from 'estree-util-visit';
+import { CONSTRUCTOR_EXPRESSION } from '../constants.mjs';
+
 /**
- * @param {import('acorn').AssignmentExpression} expression
- * @param {import('acorn').SourceLocation} loc
+ * @see https://github.com/estree/estree/blob/master/es5.md#assignmentexpression
+ *
+ * @param {import('acorn').ExpressionStatement} node
  * @param {string} basename
  * @param {Record<string, number>} nameToLineNumberMap
  * @returns {import('../types').ProgramExports | undefined}
  */
-function extractExpression(expression, loc, basename, nameToLineNumberMap) {
-  /**
-   * @example `a=b`, lhs=`a` and rhs=`b`
-   */
-  let { left: lhs, right: rhs } = expression;
+function handleExpression(node, basename, nameToLineNumberMap) {
+  const { expression } = node;
+
+  if (expression.type !== 'AssignmentExpression') {
+    return;
+  }
+
+  // `a=b`, lhs=`a` and rhs=`b`
+  let { left: lhs, right: rhs, loc } = expression;
 
   if (lhs.type !== 'MemberExpression') {
     return undefined;
@@ -28,62 +35,110 @@ function extractExpression(expression, loc, basename, nameToLineNumberMap) {
   const exports = {
     ctors: [],
     identifiers: [],
+    indirects: {},
   };
 
   if (lhs.object.name === 'exports') {
-    // Assigning a property in `module.exports` (i.e. `module.exports.asd = ...`)
-    const { name } = lhs.property;
+    // This is an assignment to a property in `module.exports` or `exports`
+    //  (i.e. `module.exports.asd = ...`)
 
     switch (rhs.type) {
-      case 'FunctionExpression':
+      /** @see https://github.com/estree/estree/blob/master/es5.md#functionexpression */
+      case 'FunctionExpression': {
         // module.exports.something = () => {}
-        nameToLineNumberMap[`${basename}.${name}`] = loc.start.line;
-        break;
+        nameToLineNumberMap[`${basename}.${lhs.property.name}`] =
+          loc.start.line;
 
-      case 'Identifier':
+        break;
+      }
+      /** @see https://github.com/estree/estree/blob/master/es5.md#identifier */
+      case 'Identifier': {
+        // Save this for later in case it's referenced
         // module.exports.asd = something
-        // TODO indirects?
-        console.log('indir', name);
-        break;
+        if (rhs.name === lhs.property.name) {
+          exports.indirects[lhs.property.name] =
+            `${basename}.${lhs.property.name}`;
+        }
 
-      default:
-        exports.identifiers.push(name);
         break;
+      }
+      default: {
+        if (lhs.property.name !== undefined) {
+          // Something else, let's save it for when we're searching for
+          //  declarations
+          exports.identifiers.push(lhs.property.name);
+        }
+
+        break;
+      }
     }
   } else if (lhs.object.name === 'module' && lhs.property.name === 'exports') {
-    // Assigning `module.exports` as a whole, (i.e. `module.exports = {}`)
+    // This is an assignment to `module.exports` as a whole
+    //  (i.e. `module.exports = {}`)
+
+    // We need to move right until we find the value of the assignment.
+    //  (if `a=b`, we want `b`)
     while (rhs.type === 'AssignmentExpression') {
-      // Move right until we find the value of the assignment
-      //  (i.e. `a=b`, we want `b`).
       rhs = rhs.right;
     }
 
     switch (rhs.type) {
-      case 'NewExpression':
+      /** @see https://github.com/estree/estree/blob/master/es5.md#newexpression */
+      case 'NewExpression': {
         // module.exports = new Asd()
         exports.ctors.push(rhs.callee.name);
         break;
-
-      case 'ObjectExpression':
+      }
+      /** @see https://github.com/estree/estree/blob/master/es5.md#objectexpression */
+      case 'ObjectExpression': {
         // module.exports = {}
-        // We need to go through all of the properties and add register them
+        // we need to go through all of the properties and register them
         rhs.properties.forEach(({ value }) => {
-          if (value.type !== 'Identifier') {
-            return;
-          }
+          switch (value.type) {
+            case 'Identifier': {
+              exports.identifiers.push(value.name);
 
-          exports.identifiers.push(value.name);
+              if (CONSTRUCTOR_EXPRESSION.test(value.name[0])) {
+                exports.ctors.push(value.name);
+              }
 
-          if (/^[A-Z]/.test(value.name[0])) {
-            exports.ctors.push(value.name);
+              break;
+            }
+            case 'CallExpression': {
+              if (value.callee.name !== 'deprecate') {
+                break;
+              }
+
+              // Handle exports wrapped in the `deprecate` function
+              //  Ex/ https://github.com/nodejs/node/blob/e96072ad57348ce423a8dd7639dcc3d1c34e847d/lib/buffer.js#L1334
+
+              exports.identifiers.push(value.arguments[0].name);
+
+              break;
+            }
+            default: {
+              // Not relevant
+            }
           }
         });
 
         break;
+      }
+      /** @see https://github.com/estree/estree/blob/master/es5.md#identifier */
+      case 'Identifier': {
+        // Something else, let's save it for when we're searching for
+        //  declarations
 
-      default:
-        exports.identifiers.push(rhs.name);
+        if (rhs.name !== undefined) {
+          exports.identifiers.push(rhs.name);
+        }
+
         break;
+      }
+      default: {
+        // Not relevant
+        break;
+      }
     }
   }
 
@@ -91,49 +146,59 @@ function extractExpression(expression, loc, basename, nameToLineNumberMap) {
 }
 
 /**
- * @param {import('acorn').VariableDeclarator} declaration
- * @param {import('acorn').SourceLocation} loc
+ * @see https://github.com/estree/estree/blob/master/es5.md#variabledeclaration
+ *
+ * @param {import('acorn').VariableDeclaration} node
  * @param {string} basename
  * @param {Record<string, number>} nameToLineNumberMap
  * @returns {import('../types').ProgramExports | undefined}
  */
-function extractVariableDeclaration(
-  { id, init },
-  loc,
-  basename,
-  nameToLineNumberMap
-) {
-  while (init && init.type === 'AssignmentExpression') {
-    // Move left until we get to what we're assigning to
-    //  (i.e. `a=b`, we want `a`)
-    init = init.left;
-  }
-
-  if (!init || init.type !== 'MemberExpression') {
-    // Doesn't exist or we're not writing to a member (probably a normal var,
-    //  like `const a = 123`)
-    return undefined;
-  }
-
+function handleVariableDeclaration(node, basename, nameToLineNumberMap) {
   /**
    * @type {import('../types').ProgramExports}
    */
   const exports = {
     ctors: [],
     identifiers: [],
+    indirects: {},
   };
 
-  if (init.object.name === 'exports') {
-    // Assigning a property in `module.exports` (i.e. `module.exports.asd = ...`)
-    nameToLineNumberMap[`${basename}.${init.property.name}`] = loc.start.line;
-  } else if (
-    init.object.name === 'module' &&
-    init.property.name === 'exports'
-  ) {
-    // Assigning `module.exports` as a whole, (i.e. `module.exports = {}`)
-    exports.ctors.push(id.name);
-    nameToLineNumberMap[id.name] = loc.start.line;
-  }
+  node.declarations.forEach(({ init: lhs, id }) => {
+    while (lhs && lhs.type === 'AssignmentExpression') {
+      // Move left until we get to what we're assigning to
+      //  (if `a=b`, we want `a`)
+      lhs = lhs.left;
+    }
+
+    if (!lhs || lhs.type !== 'MemberExpression') {
+      // Doesn't exist or we're not writing to an object
+      //  (aka it's just a regular variable like `const a = 123`)
+      return;
+    }
+
+    switch (lhs.object.name) {
+      case 'exports': {
+        nameToLineNumberMap[`${basename}.${lhs.property.name}`] =
+          node.start.line;
+
+        break;
+      }
+      case 'module': {
+        if (lhs.property.name !== 'exports') {
+          break;
+        }
+
+        exports.ctors.push(id.name);
+        nameToLineNumberMap[id.name] = node.loc.start.line;
+
+        break;
+      }
+      default: {
+        // Not relevant to us
+        break;
+      }
+    }
+  });
 
   return exports;
 }
@@ -158,56 +223,43 @@ export function extractExports(program, basename, nameToLineNumberMap) {
   const exports = {
     ctors: [],
     identifiers: [],
+    indirects: {},
   };
 
-  program.body.forEach(statement => {
-    const { loc } = statement;
-    if (!loc) {
+  const TYPE_TO_HANDLER_MAP = {
+    /**
+     *
+     * @param node
+     */
+    ExpressionStatement: node =>
+      handleExpression(node, basename, nameToLineNumberMap),
+
+    /**
+     *
+     * @param node
+     */
+    VariableDeclaration: node =>
+      handleVariableDeclaration(node, basename, nameToLineNumberMap),
+  };
+
+  visit(program, node => {
+    if (!node.loc) {
       return;
     }
 
-    switch (statement.type) {
-      case 'ExpressionStatement': {
-        const { expression } = statement;
-        if (expression.type !== 'AssignmentExpression' || !loc) {
-          break;
-        }
+    if (node.type in TYPE_TO_HANDLER_MAP) {
+      const handler = TYPE_TO_HANDLER_MAP[node.type];
 
-        const expressionExports = extractExpression(
-          expression,
-          loc,
-          basename,
-          nameToLineNumberMap
-        );
+      const output = handler(node);
 
-        if (expressionExports) {
-          exports.ctors.push(...expressionExports.ctors);
-          exports.identifiers.push(...expressionExports.identifiers);
-        }
+      if (output) {
+        exports.ctors.push(...output.ctors);
+        exports.identifiers.push(...output.identifiers);
 
-        break;
-      }
-
-      case 'VariableDeclaration': {
-        statement.declarations.forEach(declaration => {
-          const variableExports = extractVariableDeclaration(
-            declaration,
-            loc,
-            basename,
-            nameToLineNumberMap
-          );
-
-          if (variableExports) {
-            exports.ctors.push(...variableExports.ctors);
-            exports.identifiers.push(...variableExports.identifiers);
-          }
+        Object.keys(output.indirects).forEach(key => {
+          exports.indirects[key] = output.indirects[key];
         });
-
-        break;
       }
-
-      default:
-        break;
     }
   });
 
