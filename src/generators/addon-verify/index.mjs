@@ -1,8 +1,10 @@
 'use strict';
 
-import { visit } from 'unist-util-visit';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { visit } from 'unist-util-visit';
+
 import { updateFilesForBuild } from './utils/updateFilesForBuild.mjs';
 import { EXTRACT_CODE_FILENAME_COMMENT } from './constants.mjs';
 
@@ -30,7 +32,8 @@ export default {
 
   version: '1.0.0',
 
-  description: '',
+  description:
+    'Generates a file list from code blocks extracted from `doc/api/addons.md` to facilitate C++ compilation and JavaScript runtime validations',
 
   dependsOn: 'ast',
 
