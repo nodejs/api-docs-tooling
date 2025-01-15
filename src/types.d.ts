@@ -71,8 +71,6 @@ declare global {
     slug: string;
     // The GitHub URL to the source of the API entry
     source_link: string | Array<string> | undefined;
-    // The path to the JavaScript source for the API entry relative to its location locally (ex. `../node/lib/zlib.js`)
-    source_link_local: string | undefined;
     // Path to the api doc file relative to the root of the nodejs repo root (ex/ `doc/api/addons.md`)
     api_doc_source: string;
     // When a said API section got added (in which version(s) of Node.js)

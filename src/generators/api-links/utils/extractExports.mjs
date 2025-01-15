@@ -228,15 +228,13 @@ export function extractExports(program, basename, nameToLineNumberMap) {
 
   const TYPE_TO_HANDLER_MAP = {
     /**
-     *
-     * @param node
+     * @param {import('acorn').Node} node
      */
     ExpressionStatement: node =>
       handleExpression(node, basename, nameToLineNumberMap),
 
     /**
-     *
-     * @param node
+     * @param {import('acorn').Node} node
      */
     VariableDeclaration: node =>
       handleVariableDeclaration(node, basename, nameToLineNumberMap),

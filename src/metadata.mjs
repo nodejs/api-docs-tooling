@@ -1,7 +1,5 @@
 'use strict';
 
-import { join } from 'node:path';
-
 import { u as createTree } from 'unist-builder';
 
 import { compare } from 'semver';
@@ -149,9 +147,6 @@ const createMetadata = slugger => {
         api: apiDoc.stem,
         slug: sectionSlug,
         source_link,
-        source_link_local: source_link
-          ? join(apiDoc.history[0], '..', '..', '..', source_link)
-          : undefined,
         api_doc_source: `doc/api/${apiDoc.basename}`,
         added_in: added,
         deprecated_in: deprecated,

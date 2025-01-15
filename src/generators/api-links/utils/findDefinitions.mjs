@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 import { visit } from 'estree-util-visit';
@@ -153,22 +152,19 @@ export function findDefinitions(
 ) {
   const TYPE_TO_HANDLER_MAP = {
     /**
-     *
-     * @param node
+     * @param {import('acorn').Node} node
      */
     ExpressionStatement: node =>
       handleAssignmentExpression(node, nameToLineNumberMap, exports),
 
     /**
-     *
-     * @param node
+     * @param {import('acorn').Node} node
      */
     FunctionDeclaration: node =>
       handleFunctionDeclaration(node, basename, nameToLineNumberMap, exports),
 
     /**
-     *
-     * @param node
+     * @param {import('acorn').Node} node
      */
     ClassDeclaration: node =>
       handleClassDeclaration(node, nameToLineNumberMap, exports),

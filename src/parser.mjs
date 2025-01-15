@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 import { u as createTree } from 'unist-builder';
