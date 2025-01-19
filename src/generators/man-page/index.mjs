@@ -27,6 +27,11 @@ export default {
 
   dependsOn: 'ast',
 
+  /**
+   * Generates the Node.js man-page
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
+   */
   async generate(input, options) {
     // Filter to only 'cli'.
     const components = input.filter(({ api }) => api === 'cli');
@@ -72,10 +77,21 @@ export default {
       .replace('__OPTIONS__', output.options)
       .replace('__ENVIRONMENT__', output.env);
 
-    await writeFile(options.output, filledTemplate);
+    if (options.output) {
+      await writeFile(options.output, filledTemplate);
+    }
+
+    return filledTemplate;
   },
 };
 
+/**
+ * @param {Array<ApiDocMetadataEntry>} components
+ * @param {number} start
+ * @param {number} end
+ * @param {(element: ApiDocMetadataEntry) => string} convert
+ * @returns {string}
+ */
 function extractMandoc(components, start, end, convert) {
   return components
     .slice(start, end)

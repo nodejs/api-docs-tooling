@@ -12,13 +12,13 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
 
 /**
  * @typedef {{
- *  api: string;
- *  added: string;
- *  section: string;
- *  version: string;
- *  toc: string;
- *  nav: string;
- *  content: string;
+ * api: string;
+ * added: string;
+ * section: string;
+ * version: string;
+ * toc: string;
+ * nav: string;
+ * content: string;
  * }} TemplateValues
  *
  * This generator generates the legacy HTML pages of the legacy API docs
@@ -29,7 +29,7 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
  *
  * @typedef {Array<TemplateValues>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, void>}
+ * @type {import('../types.d.ts').GeneratorMetadata<Input, string>}
  */
 export default {
   name: 'legacy-html-all',
@@ -41,6 +41,11 @@ export default {
 
   dependsOn: 'legacy-html',
 
+  /**
+   * Generates the `all.html` file from the `legacy-html` generator
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
+   */
   async generate(input, { version, releases, output }) {
     const inputWithoutIndex = input.filter(entry => entry.api !== 'index');
 
@@ -96,6 +101,10 @@ export default {
       minifyJS: true,
     });
 
-    await writeFile(join(output, 'all.html'), minified);
+    if (output) {
+      await writeFile(join(output, 'all.html'), minified);
+    }
+
+    return minified;
   },
 };

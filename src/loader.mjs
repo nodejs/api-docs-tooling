@@ -18,8 +18,8 @@ const createLoader = () => {
    * Loads API Doc files and transforms it into VFiles
    *
    * @param {string} searchPath A glob/path for API docs to be loaded
-   *  The input string can be a simple path (relative or absolute)
-   *  The input string can also be any allowed glob string
+   * The input string can be a simple path (relative or absolute)
+   * The input string can also be any allowed glob string
    *
    * @see https://code.visualstudio.com/docs/editor/glob-patterns
    */

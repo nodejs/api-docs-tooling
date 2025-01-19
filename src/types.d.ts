@@ -1,6 +1,6 @@
-import type { Heading, Root } from 'mdast';
+import type { Heading, Root } from '@types/mdast';
 import type { SemVer } from 'semver';
-import type { Parent, Node, Data } from 'unist';
+import type { Data, Node, Parent } from 'unist';
 
 // String serialization of the AST tree
 // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
@@ -70,6 +70,8 @@ declare global {
     slug: string;
     // The GitHub URL to the source of the API entry
     source_link: string | Array<string> | undefined;
+    // Path to the api doc file relative to the root of the nodejs repo root (ex/ `doc/api/addons.md`)
+    api_doc_source: string;
     // When a said API section got added (in which version(s) of Node.js)
     added_in: string | Array<string> | undefined;
     // When a said API section got removed (in which version(s) of Node.js)

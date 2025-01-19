@@ -37,9 +37,9 @@ const createMetadata = slugger => {
    * transformed into NavigationEntries and MetadataEntries
    *
    * @type {{
-   *  heading: ApiDocMetadataEntry['heading'],
-   *  stability: ApiDocMetadataEntry['stability'],
-   *  properties: ApiDocRawMetadataEntry,
+   * heading: ApiDocMetadataEntry['heading'],
+   * stability: ApiDocMetadataEntry['stability'],
+   * properties: ApiDocRawMetadataEntry,
    * }}
    */
   const internalMetadata = {
@@ -113,6 +113,7 @@ const createMetadata = slugger => {
 
       const {
         type,
+        introduced_in,
         added,
         deprecated,
         removed,
@@ -130,10 +131,14 @@ const createMetadata = slugger => {
       internalMetadata.heading.data.type =
         type ?? internalMetadata.heading.data.type;
 
-      // Defines the toJSON method for the Heading AST node to be converted as JSON
+      /**
+       * Defines the toJSON method for the Heading AST node to be converted as JSON
+       */
       internalMetadata.heading.toJSON = () => internalMetadata.heading.data;
 
-      // Maps the Stability Index AST nodes into a JSON objects from their data properties
+      /**
+       * Maps the Stability Index AST nodes into a JSON objects from their data properties
+       */
       internalMetadata.stability.toJSON = () =>
         internalMetadata.stability.children.map(node => node.data);
 
@@ -142,6 +147,7 @@ const createMetadata = slugger => {
         api: apiDoc.stem,
         slug: sectionSlug,
         source_link,
+        api_doc_source: `doc/api/${apiDoc.basename}`,
         added_in: added,
         deprecated_in: deprecated,
         removed_in: removed,
@@ -152,6 +158,7 @@ const createMetadata = slugger => {
         stability: internalMetadata.stability,
         content: section,
         tags,
+        introduced_in,
       };
     },
   };

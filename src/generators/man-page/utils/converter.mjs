@@ -3,14 +3,26 @@
  * This function processes the node recursively, converting each supported node type
  * to its corresponding Mandoc markup representation. Unsupported node types will be ignored.
  *
- * @param {import("mdast").Node} node - The AST node to be converted to Mandoc format.
+ * @param {import('@types/mdast').Node} node - The AST node to be converted to Mandoc format.
  * @param {boolean} [isListItem=false] - Indicates if the current node is a list item.
  * This parameter is used to correctly format list elements in Mandoc.
  * @returns {string} The Mandoc formatted string representing the given node and its children.
  */
 export function convertNodeToMandoc(node, isListItem = false) {
-  const convertChildren = (sep = '', ili = false) =>
-    node.children.map(child => convertNodeToMandoc(child, ili)).join(sep);
+  /**
+   * Converts the children of a node to Mandoc format.
+   * @param {string} separator
+   * @param {boolean} isListItem
+   */
+  const convertChildren = (separator = '', isListItem = false) =>
+    node.children
+      .map(child => convertNodeToMandoc(child, isListItem))
+      .join(separator);
+
+  /**
+   * Escapes special characters in plain text content.
+   * @returns {string}
+   */
   const escapeText = () => node.value.replace(/\\/g, '\\\\');
 
   switch (node.type) {
@@ -78,7 +90,12 @@ export function flagValueToMandoc(flag) {
   }
 
   // Split the flag into the name and value based on the separator ('=' or space).
-  const value = flag.split(sep)[1];
+  let value = flag.split(sep)[1];
+
+  // If the value ends with ']', the flag's argument is optional.
+  if (value.endsWith(']')) {
+    value = '[' + value;
+  }
 
   // If there is no value, return an empty string.
   if (!value) {
@@ -89,12 +106,16 @@ export function flagValueToMandoc(flag) {
   const prefix = sep === ' ' ? '' : ' Ns = Ns';
 
   // Combine prefix and formatted value.
-  return `${prefix} Ar ${value.replace(/\]$/, '')}`;
+  return `${prefix} Ar ${value}`;
 }
 
+/**
+ * Formats a command-line flag for Mandoc representation.
+ * @param {string} flag
+ */
 const formatFlag = flag =>
   // 'Fl' denotes a flag, followed by an optional 'Ar' (argument).
-  `Fl ${flag.split(/[= ]/)[0].slice(1)}${flagValueToMandoc(flag)}`;
+  `Fl ${flag.split(/\[?[= ]/)[0].slice(1)}${flagValueToMandoc(flag)}`;
 
 /**
  * Converts an API option metadata entry into the Mandoc format.

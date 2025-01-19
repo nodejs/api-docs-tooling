@@ -60,7 +60,6 @@ describe('parseYAMLIntoMetadata', () => {
     const input = '## test';
     const expectedOutput = {
       text: '## test',
-      type: 'module',
       name: '## test',
       depth: 2,
     };

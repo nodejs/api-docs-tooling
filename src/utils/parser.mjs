@@ -123,12 +123,18 @@ export const parseHeadingIntoMetadata = (heading, depth) => {
     // Attempts to get a match from one of the heading types, if a match is found
     // we use that type as the heading type, and extract the regex expression match group
     // which should be the inner "plain" heading content (or the title of the heading for navigation)
-    const [, innerHeading] = heading.match(regex) ?? [];
+    const [, ...matches] = heading.match(regex) ?? [];
 
-    if (innerHeading && innerHeading.length) {
-      return { text: heading, type, name: innerHeading, depth };
+    if (matches?.length) {
+      return {
+        text: heading,
+        type,
+        // The highest match group should be used.
+        name: matches.filter(Boolean).at(-1),
+        depth,
+      };
     }
   }
 
-  return { text: heading, type: 'module', name: heading, depth };
+  return { text: heading, name: heading, depth };
 };

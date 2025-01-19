@@ -66,11 +66,13 @@ describe('createMetadata', () => {
     const expected = {
       added_in: undefined,
       api: 'test',
+      api_doc_source: 'doc/api/test.md',
       changes: [],
       content: section,
       deprecated_in: undefined,
       heading,
       n_api_version: undefined,
+      introduced_in: undefined,
       removed_in: undefined,
       slug: 'test-heading',
       source_link: 'test.com',

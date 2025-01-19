@@ -12,23 +12,25 @@
     "run": "node bin/cli.mjs",
     "watch": "node --watch bin/cli.mjs"
   },
+  "main": "./src/index.mjs",
   "bin": {
     "api-docs-tooling": "./bin/cli.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "^9.12.0",
-    "@types/node": "^22.7.5",
-    "eslint": "^9.12.0",
+    "@eslint/js": "^9.17.0",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^22.10.3",
+    "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
-    "globals": "^15.11.0",
-    "husky": "^9.1.6",
-    "lint-staged": "^15.2.10",
-    "mdast": "^3.0.0",
-    "prettier": "3.3.3"
+    "eslint-plugin-jsdoc": "^50.6.1",
+    "globals": "^15.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "3.4.2"
   },
   "dependencies": {
-    "@clack/prompts": "^0.9.0",
-    "commander": "^12.1.0",
+    "@clack/prompts": "^0.9.1",
+    "commander": "^13.0.0",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.0",
     "hast-util-to-string": "^3.0.1",
@@ -40,7 +42,7 @@
     "remark-rehype": "^11.1.1",
     "remark-stringify": "^11.0.0",
     "semver": "^7.6.3",
-    "shiki": "^1.22.0",
+    "shiki": "^1.24.4",
     "unified": "^11.0.5",
     "unist-builder": "^4.0.0",
     "unist-util-find-after": "^5.0.0",
@@ -49,6 +51,6 @@
     "unist-util-select": "^5.1.0",
     "unist-util-visit": "^5.0.0",
     "vfile": "^6.0.3",
-    "yaml": "^2.6.0"
+    "yaml": "^2.7.0"
   }
 }

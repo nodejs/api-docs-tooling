@@ -29,6 +29,11 @@ export default {
 
   dependsOn: 'ast',
 
+  /**
+   * Generates the simplified JSON version of the API docs
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
+   */
   async generate(input, options) {
     // Gets a remark processor for stringifying the AST tree into JSON
     const remarkProcessor = getRemark();
@@ -45,7 +50,10 @@ export default {
         createQueries.UNIST.isHeading,
       ]);
 
-      // For the JSON generate we want to transform the whole content into JSON
+      /**
+       * For the JSON generate we want to transform the whole content into JSON
+       * @returns {string} The stringified JSON version of the content
+       */
       content.toJSON = () => remarkProcessor.stringify(content);
 
       return { ...node, content };
@@ -54,8 +62,15 @@ export default {
     // This simply grabs all the different files and stringifies them
     const stringifiedContent = JSON.stringify(mappedInput);
 
-    // Writes all the API docs stringified content into one file
-    // Note: The full JSON generator in the future will create one JSON file per top-level API doc file
-    await writeFile(join(options.output, 'api-docs.json'), stringifiedContent);
+    if (options.output) {
+      // Writes all the API docs stringified content into one file
+      // Note: The full JSON generator in the future will create one JSON file per top-level API doc file
+      await writeFile(
+        join(options.output, 'api-docs.json'),
+        stringifiedContent
+      );
+    }
+
+    return mappedInput;
   },
 };

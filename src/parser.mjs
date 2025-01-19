@@ -141,8 +141,8 @@ const createParser = () => {
 
       // Visits all Text nodes from the current subtree and if there's any that matches
       // any API doc type reference and then updates the type reference to be a Markdown link
-      visit(subTree, createQueries.UNIST.isTextWithType, node =>
-        updateTypeReference(node)
+      visit(subTree, createQueries.UNIST.isTextWithType, (node, _, parent) =>
+        updateTypeReference(node, parent)
       );
 
       // Removes already parsed items from the subtree so that they aren't included in the final content

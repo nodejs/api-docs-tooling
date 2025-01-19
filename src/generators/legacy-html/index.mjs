@@ -14,13 +14,13 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
 
 /**
  * @typedef {{
- *  api: string;
- *  added: string;
- *  section: string;
- *  version: string;
- *  toc: string;
- *  nav: string;
- *  content: string;
+ * api: string;
+ * added: string;
+ * section: string;
+ * version: string;
+ * toc: string;
+ * nav: string;
+ * content: string;
  * }} TemplateValues
  *
  * This generator generates the legacy HTML pages of the legacy API docs
@@ -43,6 +43,11 @@ export default {
 
   dependsOn: 'ast',
 
+  /**
+   * Generates the legacy version of the API docs in HTML
+   * @param {Input} input
+   * @param {Partial<GeneratorOptions>} options
+   */
   async generate(input, { releases, version, output }) {
     // This array holds all the generated values for each module
     const generatedValues = [];
@@ -150,30 +155,34 @@ export default {
     for (const node of headNodes) {
       const result = processModuleNodes(node);
 
-      // We minify the html result to reduce the file size and keep it "clean"
-      const minified = await minify(result, {
-        collapseWhitespace: true,
-        minifyJS: true,
-      });
+      if (output) {
+        // We minify the html result to reduce the file size and keep it "clean"
+        const minified = await minify(result, {
+          collapseWhitespace: true,
+          minifyJS: true,
+        });
 
-      await writeFile(join(output, `${node.api}.html`), minified);
+        await writeFile(join(output, `${node.api}.html`), minified);
+      }
     }
 
-    // Define the output folder for API docs assets
-    const assetsFolder = join(output, 'assets');
+    if (output) {
+      // Define the output folder for API docs assets
+      const assetsFolder = join(output, 'assets');
 
-    // Removes the current assets directory to copy the new assets
-    // and prevent stale assets from existing in the output directory
-    // If the path does not exists, it will simply ignore and continue
-    await rm(assetsFolder, { recursive: true, force: true });
+      // Removes the current assets directory to copy the new assets
+      // and prevent stale assets from existing in the output directory
+      // If the path does not exists, it will simply ignore and continue
+      await rm(assetsFolder, { recursive: true, force: true });
 
-    // We copy all the other assets to the output folder at the end of the process
-    // to ensure that all latest changes on the styles are applied to the output
-    // Note.: This is not meant to be used for DX/developer purposes.
-    await cp(join(baseDir, 'assets'), assetsFolder, {
-      recursive: true,
-      force: true,
-    });
+      // We copy all the other assets to the output folder at the end of the process
+      // to ensure that all latest changes on the styles are applied to the output
+      // Note.: This is not meant to be used for DX/developer purposes.
+      await cp(join(baseDir, 'assets'), assetsFolder, {
+        recursive: true,
+        force: true,
+      });
+    }
 
     return generatedValues;
   },
