@@ -1,3 +1,5 @@
+import dedent from 'dedent';
+
 /**
  * Updates JavaScript files with correct require paths for the build tree.
  *
@@ -5,7 +7,7 @@
  * @returns {string}
  */
 const updateJsRequirePaths = content => {
-  return `'use strict';
+  return dedent`'use strict';
 const common = require('../../common');
 ${content.replace(
   "'./build/Release/addon'",
