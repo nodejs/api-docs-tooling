@@ -1,5 +1,6 @@
-# Commonly ignored Node.js files
+# Vendor Folders
 node_modules
 npm-debug.log
-.npm
-.env.*
+
+# Default Output Directory
+out

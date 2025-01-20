@@ -99,6 +99,7 @@ export default {
     const minified = await minify(generatedAllTemplate, {
       collapseWhitespace: true,
       minifyJS: true,
+      minifyCSS: true,
     });
 
     if (output) {
