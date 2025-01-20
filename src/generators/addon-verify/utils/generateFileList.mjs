@@ -7,13 +7,13 @@ import dedent from 'dedent';
  * @returns {string}
  */
 const updateJsRequirePaths = content => {
-  return dedent`'use strict';
-const common = require('../../common');
-${content.replace(
-  "'./build/Release/addon'",
-  '`./build/${common.buildType}/addon`'
-)}
-   `;
+  return dedent`
+    'use strict';
+    const common = require('../../common');
+    ${content.replace(
+      "'./build/Release/addon'",
+      '`./build/${common.buildType}/addon`'
+    )}`;
 };
 
 /**
