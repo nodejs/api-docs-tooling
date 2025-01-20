@@ -1,8 +1,11 @@
 'use strict';
 
-import { coerce, major } from 'semver';
+import { major } from 'semver';
 
-import { getVersionFromSemVer } from '../../../utils/generators.mjs';
+import {
+  coerceSemVer,
+  getVersionFromSemVer,
+} from '../../../utils/generators.mjs';
 
 import {
   DOC_API_BASE_URL_VERSION,
@@ -58,7 +61,7 @@ const buildVersions = (api, added, versions) => {
   // All Node.js versions that support the current API; If there's no "introduced_at" field,
   // we simply show all versions, as we cannot pinpoint the exact version
   const compatibleVersions = versions.filter(({ version }) =>
-    added ? major(version) >= major(coerce(added)) : true
+    added ? major(version) >= major(coerceSemVer(added)) : true
   );
 
   // Parses the SemVer version into something we use for URLs and to display the Node.js version

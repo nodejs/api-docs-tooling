@@ -160,6 +160,7 @@ export default {
         const minified = await minify(result, {
           collapseWhitespace: true,
           minifyJS: true,
+          minifyCSS: true,
         });
 
         await writeFile(join(output, `${node.api}.html`), minified);
