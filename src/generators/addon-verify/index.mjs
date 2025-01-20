@@ -5,18 +5,13 @@ import { join } from 'node:path';
 
 import { visit } from 'unist-util-visit';
 
-import { updateFilesForBuild } from './utils/updateFilesForBuild.mjs';
+import { generateFileList } from './utils/generateFileList.mjs';
 import { EXTRACT_CODE_FILENAME_COMMENT } from './constants.mjs';
-
-/**
- * Normalizes a section name.
- *
- * @param {string} sectionName Section name
- * @returns {string}
- */
-export function normalizeSectionName(sectionName) {
-  return sectionName.toLowerCase().replace(/\s/g, '_').replace(/\W/g, '');
-}
+import {
+  generateSectionFolderName,
+  isBuildableSection,
+  normalizeSectionName,
+} from './utils/section.mjs';
 
 /**
  * This generator generates a file list from code blocks extracted from
@@ -73,31 +68,26 @@ export default {
 
     const files = await Promise.all(
       Object.entries(sectionsCodeBlocks)
-        .filter(([, files]) => {
-          // Must have a .cc and a .js to be a valid test.
-          return (
-            files.some(file => file.name.endsWith('.cc')) &&
-            files.some(file => file.name.endsWith('.js'))
-          );
-        })
-        .flatMap(async ([sectionName, files], index) => {
-          const newFiles = updateFilesForBuild(files);
+        .filter(([, codeBlocks]) => isBuildableSection(codeBlocks))
+        .flatMap(async ([sectionName, codeBlocks], index) => {
+          const files = generateFileList(codeBlocks);
 
           if (output) {
             const normalizedSectionName = normalizeSectionName(sectionName);
 
-            const identifier = String(index + 1).padStart(2, '0');
+            const folderName = generateSectionFolderName(
+              normalizedSectionName,
+              index
+            );
 
-            const folder = `${identifier}_${normalizedSectionName}`;
+            await mkdir(join(output, folderName), { recursive: true });
 
-            await mkdir(join(output, folder), { recursive: true });
-
-            newFiles.forEach(async ({ name, content }) => {
-              await writeFile(join(output, folder, name), content);
+            files.forEach(async ({ name, content }) => {
+              await writeFile(join(output, folderName, name), content);
             });
           }
 
-          return newFiles;
+          return files;
         })
     );
 
