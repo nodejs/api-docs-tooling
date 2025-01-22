@@ -2,6 +2,8 @@
 
 import { coerce } from 'semver';
 
+import { Spinner } from '../utils/spinner.mjs';
+
 /**
  * Groups all the API metadata nodes by module (`api` property) so that we can process each different file
  * based on the module it belongs to.
@@ -12,13 +14,20 @@ export const groupNodesByModule = nodes => {
   /** @type {Map<string, Array<ApiDocMetadataEntry>>} */
   const groupedNodes = new Map();
 
+  const spinner = new Spinner();
+  spinner.total = nodes.length;
+  spinner.start();
+
   for (const node of nodes) {
     if (!groupedNodes.has(node.api)) {
       groupedNodes.set(node.api, []);
     }
 
     groupedNodes.get(node.api).push(node);
+    spinner.update(1);
   }
+
+  spinner.stop();
 
   return groupedNodes;
 };

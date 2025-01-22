@@ -29,6 +29,7 @@
     "prettier": "3.4.2"
   },
   "dependencies": {
+    "@clack/prompts": "^0.9.1",
     "commander": "^13.0.0",
     "dedent": "^1.5.3",
     "github-slugger": "^2.0.0",
