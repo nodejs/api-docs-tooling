@@ -142,6 +142,20 @@ a.type {
   font-size: 0.9em;
 }
 
+.skip-to-content {
+  position: fixed;
+  top: -300%;
+}
+
+.skip-to-content:focus {
+  display: block;
+  top: 0;
+  left: 0;
+  background-color: var(--green1);
+  padding: 1rem;
+  z-index: 999999;
+}
+
 #content {
   position: relative;
 }
