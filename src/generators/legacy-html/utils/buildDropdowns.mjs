@@ -23,10 +23,10 @@ import {
 const buildToC = tableOfContents => {
   if (tableOfContents.length) {
     return (
-      `<li class="picker-header"><a href="#">` +
+      `<li class="picker-header"><a href="#toc-picker" aria-controls="toc-picker">` +
       `<span class="picker-arrow"></span>` +
       `Table of contents</a><div class="picker">` +
-      `<div class="toc">${tableOfContents}</div></div></li>`
+      `<div class="toc" tabindex="-1">${tableOfContents.replace('<ul', '<ul id="toc-picker"')}</div></div></li>`
     );
   }
 
@@ -42,9 +42,9 @@ const buildToC = tableOfContents => {
  * @param {string} navigationContents The stringified Navigation
  */
 const buildNavigation = navigationContents =>
-  `<li class="picker-header"><a href="#">` +
+  `<li class="picker-header"><a href="#gtoc-picker" aria-controls="gtoc-picker">` +
   `<span class="picker-arrow"></span>Index</a>` +
-  `<div class="picker"><ul><li><a href="index.html">Index</a>` +
+  `<div class="picker" tabindex="-1" id="gtoc-picker"><ul><li><a href="index.html">Index</a>` +
   `</li></ul><hr class="line" />${navigationContents}</div></li>`;
 
 /**
@@ -76,9 +76,9 @@ const buildVersions = (api, added, versions) => {
   });
 
   return (
-    `<li class="picker-header"><a href="#">` +
+    `<li class="picker-header"><a href="#alt-docs" aria-controls="alt-docs">` +
     `<span class="picker-arrow"></span>Other versions</a>` +
-    `<div class="picker"><ol id="alt-docs">${versionsAsList.join('')}</ol></div></li>`
+    `<div class="picker" tabindex="-1"><ol id="alt-docs">${versionsAsList.join('')}</ol></div></li>`
   );
 };
 
