@@ -23,7 +23,7 @@ import availableGenerators from './generators/index.mjs';
  * @param {ApiDocMetadataEntry} markdownInput The parsed API doc metadata entries
  * @param {Array<import('acorn').Program>} parsedJsFiles
  */
-const createGenerator = (markdownInput, jsInput) => {
+const createGenerator = markdownInput => {
   /**
    * We store all the registered generators to be processed
    * within a Record, so we can access their results at any time whenever needed
@@ -33,7 +33,6 @@ const createGenerator = (markdownInput, jsInput) => {
    */
   const cachedGenerators = {
     ast: Promise.resolve(markdownInput),
-    'ast-js': Promise.resolve(jsInput),
   };
 
   /**
