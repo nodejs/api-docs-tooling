@@ -11,7 +11,7 @@ import { VFile } from 'vfile';
  * could be used for different things, but here we want to use it to load
  * Markdown files and transform them into VFiles
  */
-const createLoader = () => {
+export const createMarkdownLoader = () => {
   /**
    * Loads API Doc files and transforms it into VFiles
    *
@@ -36,4 +36,26 @@ const createLoader = () => {
   return { loadFiles };
 };
 
-export default createLoader;
+/**
+ * This creates a "loader" for loading Javascript source files into VFiles.
+ */
+export const createJsLoader = () => {
+  /**
+   * Loads the JavaScript source files and transforms them into VFiles
+   *
+   * @param {string | Array<string>} searchPath
+   */
+  const loadFiles = searchPath => {
+    const resolvedFiles = globSync(searchPath).filter(
+      filePath => extname(filePath) === '.js'
+    );
+
+    return resolvedFiles.map(async filePath => {
+      const fileContents = await readFile(filePath, 'utf-8');
+
+      return new VFile({ path: filePath, value: fileContents });
+    });
+  };
+
+  return { loadFiles };
+};

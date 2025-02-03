@@ -9,6 +9,10 @@ declare global {
 
   // This is the runtime config passed to the API doc generators
   export interface GeneratorOptions {
+    // The path to the input source files. This parameter accepts globs and can
+    // be a glob when passed to a generator.
+    input: string | string[];
+
     // The path used to output generated files, this is to be considered
     // the base path that any generator will use for generating files
     // This parameter accepts globs but when passed to generators will contain
@@ -56,7 +60,7 @@ declare global {
      * The 'ast' generator is the top-level parser, and if 'ast' is passed to `dependsOn`, then the generator
      * will be marked as a top-level generator.
      */
-    dependsOn: keyof AvailableGenerators | 'ast';
+    dependsOn: keyof AvailableGenerators | 'ast' | 'ast-js';
 
     /**
      * Generators are abstract and the different generators have different sort of inputs and outputs.

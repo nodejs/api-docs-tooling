@@ -5,6 +5,8 @@ import availableGenerators from './generators/index.mjs';
 /**
  * @typedef {{ ast: import('./generators/types.d.ts').GeneratorMetadata<ApiDocMetadataEntry, ApiDocMetadataEntry>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
  * @typedef {import('./generators/types.d.ts').AvailableGenerators & AstGenerator} AllGenerators A complete set of the available generators, including the AST one
+ * @param markdownInput
+ * @param jsInput
  *
  * This method creates a system that allows you to register generators
  * and then execute them in a specific order, keeping track of the
@@ -18,9 +20,10 @@ import availableGenerators from './generators/index.mjs';
  * Generators can also write to files. These would usually be considered
  * the final generators in the chain.
  *
- * @param {ApiDocMetadataEntry} input The parsed API doc metadata entries
+ * @param {ApiDocMetadataEntry} markdownInput The parsed API doc metadata entries
+ * @param {Array<import('acorn').Program>} parsedJsFiles
  */
-const createGenerator = input => {
+const createGenerator = markdownInput => {
   /**
    * We store all the registered generators to be processed
    * within a Record, so we can access their results at any time whenever needed
@@ -28,7 +31,9 @@ const createGenerator = input => {
    *
    * @type {{ [K in keyof AllGenerators]: ReturnType<AllGenerators[K]['generate']> }}
    */
-  const cachedGenerators = { ast: Promise.resolve(input) };
+  const cachedGenerators = {
+    ast: Promise.resolve(markdownInput),
+  };
 
   /**
    * Runs the Generator engine with the provided top-level input and the given generator options
