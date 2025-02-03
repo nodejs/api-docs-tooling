@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { resolve } from 'node:path';
-import { argv } from 'node:process';
+import { argv, exit } from 'node:process';
 
 import { Command, Option } from 'commander';
 
@@ -12,6 +12,8 @@ import generators from '../src/generators/index.mjs';
 import createMarkdownLoader from '../src/loaders/markdown.mjs';
 import createMarkdownParser from '../src/parsers/markdown.mjs';
 import createNodeReleases from '../src/releases.mjs';
+import { Linter } from '../src/linter/index.mjs';
+import reporters from '../src/linter/reporters/index.mjs';
 
 const availableGenerators = Object.keys(generators);
 
@@ -50,6 +52,12 @@ program
       'Set the processing target modes'
     ).choices(availableGenerators)
   )
+  .addOption(new Option('--skip-validation', 'TODO').default(false))
+  .addOption(
+    new Option('--reporter', 'TODO')
+      .choices(Object.keys(reporters))
+      .default('console')
+  )
   .parse(argv);
 
 /**
@@ -66,7 +74,17 @@ program
  * @type {Options}
  * @description The return type for values sent to the program from the CLI.
  */
-const { input, output, target = [], version, changelog } = program.opts();
+const {
+  input,
+  output,
+  target = [],
+  version,
+  changelog,
+  skipValidation,
+  reporter,
+} = program.opts();
+
+const linter = skipValidation ? undefined : new Linter();
 
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();
@@ -91,4 +109,13 @@ await runGenerators({
   version: coerce(version),
   // A list of all Node.js major versions with LTS status
   releases: await getAllMajors(),
+  linter,
 });
+
+if (linter) {
+  linter.report(reporter);
+
+  if (linter.hasError) {
+    exit(1);
+  }
+}

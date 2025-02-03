@@ -14,12 +14,14 @@ import { createNodeSlugger } from '../utils/slugger.mjs';
 
 /**
  * Creates an API doc parser for a given Markdown API doc file
+ *
+ * @param {import('./linter/index.mjs').Linter | undefined} linter
  */
-const createParser = () => {
+const createParser = linter => {
   // Creates an instance of the Remark processor with GFM support
   // which is used for stringifying the AST tree back to Markdown
   const remarkProcessor = getRemark();
-
+  linter?.info('asd123');
   const {
     setHeadingMetadata,
     addYAMLMetadata,
