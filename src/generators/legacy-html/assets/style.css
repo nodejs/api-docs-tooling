@@ -137,8 +137,8 @@ code,
 .pre,
 span.type,
 a.type {
-  font-family: SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+  font-family: SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
   font-size: 0.9em;
 }
 
