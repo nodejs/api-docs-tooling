@@ -9,8 +9,8 @@ import { coerce } from 'semver';
 import { DOC_NODE_CHANGELOG_URL, DOC_NODE_VERSION } from '../src/constants.mjs';
 import createGenerator from '../src/generators.mjs';
 import generators from '../src/generators/index.mjs';
-import createLoader from '../src/loader.mjs';
-import createParser from '../src/parser.mjs';
+import { createMarkdownLoader } from '../src/loader.mjs';
+import { createMarkdownParser } from '../src/parser.mjs';
 import createNodeReleases from '../src/releases.mjs';
 
 const availableGenerators = Object.keys(generators);
@@ -68,18 +68,14 @@ program
  */
 const { input, output, target = [], version, changelog } = program.opts();
 
-const { loadMarkdownFiles, loadJsFiles } = createLoader();
-const { parseApiDocs, parseJsSources } = createParser();
+const { loadFiles } = createMarkdownLoader();
+const { parseApiDocs } = createMarkdownParser();
 
-const apiDocFiles = loadMarkdownFiles(input);
+const apiDocFiles = loadFiles(input);
 
 const parsedApiDocs = await parseApiDocs(apiDocFiles);
 
-const sourceFiles = loadJsFiles(input);
-
-const parsedJsFiles = await parseJsSources(sourceFiles);
-
-const { runGenerators } = createGenerator(parsedApiDocs, parsedJsFiles);
+const { runGenerators } = createGenerator(parsedApiDocs);
 
 // Retrieves Node.js release metadata from a given Node.js version and CHANGELOG.md file
 const { getAllMajors } = createNodeReleases(changelog);
@@ -87,6 +83,8 @@ const { getAllMajors } = createNodeReleases(changelog);
 await runGenerators({
   // A list of target modes for the API docs parser
   generators: target,
+  // Resolved `input` to be used
+  input: input,
   // Resolved `output` path to be used
   output: resolve(output),
   // Resolved SemVer of current Node.js version

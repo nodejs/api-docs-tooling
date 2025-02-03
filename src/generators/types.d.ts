@@ -9,6 +9,10 @@ declare global {
 
   // This is the runtime config passed to the API doc generators
   export interface GeneratorOptions {
+    // The path to the input source files. This parameter accepts globs and can
+    // be a glob when passed to a generator.
+    input: string | string[];
+
     // The path used to output generated files, this is to be considered
     // the base path that any generator will use for generating files
     // This parameter accepts globs but when passed to generators will contain

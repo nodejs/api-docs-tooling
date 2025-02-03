@@ -13,12 +13,12 @@ export function getBaseGitHubUrl(cwd) {
     //  Ex/ git@github.com:nodejs/node.git -> https://github.com/nodejs/node.git
     let [, repository] = url.split(':');
 
-    // Trim off the trailing .git if it exists
-    if (repository.endsWith('.git')) {
-      repository = repository.substring(0, repository.length - 4);
-    }
-
     url = `https://github.com/${repository}`;
+  }
+
+  // https://github.com/nodejs/node.git -> https://github.com/nodejs/node
+  if (url.endsWith('.git')) {
+    url = url.substring(0, url.length - 4);
   }
 
   return url;

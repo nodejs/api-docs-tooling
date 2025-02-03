@@ -16,7 +16,7 @@ import { createNodeSlugger } from './utils/slugger.mjs';
 /**
  * Creates an API doc parser for a given Markdown API doc file
  */
-const createParser = () => {
+export const createMarkdownParser = () => {
   // Creates an instance of the Remark processor with GFM support
   // which is used for stringifying the AST tree back to Markdown
   const remarkProcessor = getRemark();
@@ -183,38 +183,40 @@ const createParser = () => {
     return resolvedApiDocEntries.flat();
   };
 
+  return { parseApiDocs, parseApiDoc };
+};
+
+/**
+ * Creates a Javascript source parser for a given source file
+ */
+export const createJsParser = () => {
   /**
    * Parses a given JavaScript file into an ESTree AST representation of it
    *
-   * @param {import('vfile').VFile | Promise<import('vfile').VFile>} apiDoc
+   * @param {import('vfile').VFile | Promise<import('vfile').VFile>} sourceFile
    * @returns {Promise<JsProgram>}
    */
-  const parseJsSource = async apiDoc => {
+  const parseJsSource = async sourceFile => {
     // We allow the API doc VFile to be a Promise of a VFile also,
     // hence we want to ensure that it first resolves before we pass it to the parser
-    const resolvedApiDoc = await Promise.resolve(apiDoc);
+    const resolvedSourceFile = await Promise.resolve(sourceFile);
 
-    if (typeof resolvedApiDoc.value !== 'string') {
+    if (typeof resolvedSourceFile.value !== 'string') {
       throw new TypeError(
-        `expected resolvedApiDoc.value to be string but got ${typeof resolvedApiDoc.value}`
+        `expected resolvedSourceFile.value to be string but got ${typeof resolvedSourceFile.value}`
       );
     }
 
-    try {
-      const res = acorn.parse(resolvedApiDoc.value, {
-        allowReturnOutsideFunction: true,
-        ecmaVersion: 'latest',
-        locations: true,
-      });
+    const res = acorn.parse(resolvedSourceFile.value, {
+      allowReturnOutsideFunction: true,
+      ecmaVersion: 'latest',
+      locations: true,
+    });
 
-      return {
-        ...res,
-        path: resolvedApiDoc.path,
-      };
-    } catch (err) {
-      console.log(`error parsing ${resolvedApiDoc.basename}`);
-      throw err;
-    }
+    return {
+      ...res,
+      path: resolvedSourceFile.path,
+    };
   };
 
   /**
@@ -231,7 +233,5 @@ const createParser = () => {
     return resolvedApiDocEntries;
   };
 
-  return { parseApiDocs, parseApiDoc, parseJsSources, parseJsSource };
+  return { parseJsSource, parseJsSources };
 };
-
-export default createParser;

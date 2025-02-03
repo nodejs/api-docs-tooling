@@ -30,6 +30,8 @@ export default {
   description:
     'Creates a mapping of publicly accessible functions to their source locations in the Node.js repository.',
 
+  // Unlike the rest of the generators, this utilizes Javascript sources being
+  // passed into the input field rather than Markdown.
   dependsOn: 'ast-js',
 
   /**

@@ -11,7 +11,7 @@ import { VFile } from 'vfile';
  * could be used for different things, but here we want to use it to load
  * Markdown files and transform them into VFiles
  */
-const createLoader = () => {
+export const createMarkdownLoader = () => {
   /**
    * Loads API Doc files and transforms it into VFiles
    *
@@ -21,7 +21,7 @@ const createLoader = () => {
    *
    * @see https://code.visualstudio.com/docs/editor/glob-patterns
    */
-  const loadMarkdownFiles = searchPath => {
+  const loadFiles = searchPath => {
     const resolvedFiles = globSync(searchPath).filter(
       filePath => extname(filePath) === '.md'
     );
@@ -33,12 +33,19 @@ const createLoader = () => {
     });
   };
 
+  return { loadFiles };
+};
+
+/**
+ * This creates a "loader" for loading Javascript source files into VFiles.
+ */
+export const createJsLoader = () => {
   /**
    * Loads the JavaScript source files and transforms them into VFiles
    *
-   * @param {Array<string>} searchPath
+   * @param {string | Array<string>} searchPath
    */
-  const loadJsFiles = searchPath => {
+  const loadFiles = searchPath => {
     const resolvedFiles = globSync(searchPath).filter(
       filePath => extname(filePath) === '.js'
     );
@@ -50,7 +57,5 @@ const createLoader = () => {
     });
   };
 
-  return { loadMarkdownFiles, loadJsFiles };
+  return { loadFiles };
 };
-
-export default createLoader;
