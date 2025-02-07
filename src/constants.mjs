@@ -125,27 +125,17 @@ export const DOC_SLUG_ENVIRONMENT = 'environment-variables-1';
 // JavaScript globals types within the MDN JavaScript docs
 // @see DOC_MDN_BASE_URL_JS_GLOBALS
 export const DOC_TYPES_MAPPING_GLOBALS = {
-  AggregateError: 'AggregateError',
-  Array: 'Array',
-  ArrayBuffer: 'ArrayBuffer',
-  DataView: 'DataView',
-  Date: 'Date',
-  Error: 'Error',
-  EvalError: 'EvalError',
-  Function: 'Function',
-  Map: 'Map',
-  Object: 'Object',
-  Promise: 'Promise',
-  RangeError: 'RangeError',
-  ReferenceError: 'ReferenceError',
-  RegExp: 'RegExp',
-  Set: 'Set',
-  SharedArrayBuffer: 'SharedArrayBuffer',
-  SyntaxError: 'SyntaxError',
-  TypeError: 'TypeError',
-  TypedArray: 'TypedArray',
-  URIError: 'URIError',
-  Uint8Array: 'Uint8Array',
+  ...Object.fromEntries([
+    'AggregateError', 'Array', 'ArrayBuffer', 'DataView', 'Date', 'Error',
+    'EvalError', 'Function', 'Map', 'NaN', 'Object', 'Promise', 'Proxy', 'RangeError',
+    'ReferenceError', 'RegExp', 'Set', 'SharedArrayBuffer', 'SyntaxError', 'Symbol',
+    'TypeError', 'URIError', 'WeakMap', 'WeakSet',
+
+    'TypedArray',
+    'Float32Array', 'Float64Array',
+    'Int8Array', 'Int16Array', 'Int32Array',
+    'Uint8Array', 'Uint8ClampedArray', 'Uint16Array', 'Uint32Array',
+  ].map(e => [e, e])),
   bigint: 'BigInt',
   'WebAssembly.Instance': 'WebAssembly/Instance',
 };
