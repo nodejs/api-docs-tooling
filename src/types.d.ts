@@ -1,4 +1,5 @@
 import type { Heading, Root } from '@types/mdast';
+import type { Program } from 'acorn';
 import type { SemVer } from 'semver';
 import type { Data, Node, Parent } from 'unist';
 
@@ -98,6 +99,11 @@ declare global {
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
+  }
+
+  export interface JsProgram extends Program {
+    // Path to the program's source (i.e. `../node/lib/zlib.js`)
+    path: string;
   }
 
   export interface ApiDocReleaseEntry {
