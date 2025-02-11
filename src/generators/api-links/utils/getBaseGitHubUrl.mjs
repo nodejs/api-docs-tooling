@@ -25,7 +25,7 @@ export function getBaseGitHubUrl(cwd) {
 }
 
 /**
- *
+ * Grabs the current Git commit hash within a directory
  * @param cwd
  */
 export function getCurrentGitHash(cwd) {
