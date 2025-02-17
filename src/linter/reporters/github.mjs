@@ -18,7 +18,7 @@ export default issue => {
 
   (actions[issue.level] || core.notice)(issue.message, {
     file: issue.location.path,
-    startLine: issue.location.position.start.line,
-    endLine: issue.location.position.end.line,
+    startLine: issue.location.position?.start.line,
+    endLine: issue.location.position?.end.line,
   });
 };
