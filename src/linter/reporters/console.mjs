@@ -5,8 +5,7 @@
 import { styleText } from 'node:util';
 
 /**
- * TODO is there a way to grab the parameter type for styleText since the types aren't exported
- * @type {Record<import('../types.d.ts').LintLevel, string>}
+ * @type {Record<import('../types.d.ts').IssueLevel, string>}
  */
 const levelToColorMap = {
   info: 'gray',
@@ -17,6 +16,12 @@ const levelToColorMap = {
 /**
  * @type {import('../types.d.ts').Reporter}
  */
-export default msg => {
-  console.log(styleText(levelToColorMap[msg.level], msg.msg));
+export default issue => {
+  console.log(
+    styleText(
+      // @ts-expect-error ForegroundColors is not exported
+      levelToColorMap[issue.level],
+      `${issue.message} at ${issue.location.path} (${issue.location.position.start}:${issue.location.position.end})`
+    )
+  );
 };

@@ -52,9 +52,9 @@ program
       'Set the processing target modes'
     ).choices(availableGenerators)
   )
-  .addOption(new Option('--skip-validation', 'TODO').default(false))
+  .addOption(new Option('--skip-linting', 'Skip linting').default(false))
   .addOption(
-    new Option('--reporter', 'TODO')
+    new Option('--reporter', 'Specify the linter reporter')
       .choices(Object.keys(reporters))
       .default('console')
   )
@@ -98,6 +98,8 @@ const { runGenerators } = createGenerator(parsedApiDocs);
 // Retrieves Node.js release metadata from a given Node.js version and CHANGELOG.md file
 const { getAllMajors } = createNodeReleases(changelog);
 
+linter?.lintAll(parsedApiDocs);
+
 await runGenerators({
   // A list of target modes for the API docs parser
   generators: target,
@@ -109,7 +111,6 @@ await runGenerators({
   version: coerce(version),
   // A list of all Node.js major versions with LTS status
   releases: await getAllMajors(),
-  linter,
 });
 
 if (linter) {

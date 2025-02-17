@@ -2,34 +2,46 @@
 'use strict';
 
 import reporters from './reporters/index.mjs';
+import { invalidChangeVersion } from './rules/invalid-change-version.mjs';
+import { missingChangeVersion } from './rules/missing-change-version.mjs';
+import { missingIntroducedIn } from './rules/missing-introduced-in.mjs';
 
 /**
- *
+ * Lint issues in ApiDocMetadataEntry entries
  */
 export class Linter {
-  #_hasError = false;
+  /**
+   * @type {Array<import('./types.d.ts').LintIssue>}
+   */
+  #issues = [];
 
   /**
-   * @type {Array<import('./types.d.ts').LintMessage>}
+   * @type {Array<import('./types.d.ts').LintRule>}
    */
-  #messages = [];
+  #rules = [missingIntroducedIn, missingChangeVersion, invalidChangeVersion];
 
   /**
-   *
+   * @param {ApiDocMetadataEntry} entry
+   * @returns {void}
    */
-  get hasError() {
-    return this.#_hasError;
+  lint(entry) {
+    for (const rule of this.#rules) {
+      const issues = rule(entry);
+
+      if (issues.length > 0) {
+        this.#issues.push(...issues);
+      }
+    }
   }
 
   /**
-   * @param {import('./types.d.ts').LintMessage} msg
+   * @param {ApiDocMetadataEntry[]} entries
+   * @returns {void}
    */
-  log(msg) {
-    if (msg.level === 'error') {
-      this.#_hasError = true;
+  lintAll(entries) {
+    for (const entry of entries) {
+      this.lint(entry);
     }
-
-    this.#messages.push(msg);
   }
 
   /**
@@ -38,44 +50,8 @@ export class Linter {
   report(reporterName) {
     const reporter = reporters[reporterName];
 
-    for (const message of this.#messages) {
-      reporter(message);
+    for (const issue of this.#issues) {
+      reporter(issue);
     }
-  }
-
-  /**
-   * @param {string} msg
-   * @param {import('./types.d.ts').LintMessageLocation | undefined} location
-   */
-  info(msg, location) {
-    this.log({
-      level: 'info',
-      msg,
-      location,
-    });
-  }
-
-  /**
-   * @param {string} msg
-   * @param {import('./types.d.ts').LintMessageLocation | undefined} location
-   */
-  warn(msg, location) {
-    this.log({
-      level: 'warn',
-      msg,
-      location,
-    });
-  }
-
-  /**
-   * @param {string} msg
-   * @param {import('./types.d.ts').LintMessageLocation | undefined} location
-   */
-  error(msg, location) {
-    this.log({
-      level: 'error',
-      msg,
-      location,
-    });
   }
 }

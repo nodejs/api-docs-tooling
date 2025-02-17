@@ -17,11 +17,11 @@ import { createNodeSlugger } from '../utils/slugger.mjs';
  *
  * @param {import('./linter/index.mjs').Linter | undefined} linter
  */
-const createParser = linter => {
+const createParser = () => {
   // Creates an instance of the Remark processor with GFM support
   // which is used for stringifying the AST tree back to Markdown
   const remarkProcessor = getRemark();
-  linter?.info('asd123');
+
   const {
     setHeadingMetadata,
     addYAMLMetadata,
@@ -136,9 +136,11 @@ const createParser = linter => {
       // Visits all HTML nodes from the current subtree and if there's any that matches
       // our YAML metadata structure, it transforms into YAML metadata
       // and then apply the YAML Metadata to the current Metadata entry
-      visit(subTree, createQueries.UNIST.isYamlNode, node =>
-        addYAMLMetadata(node, apiEntryMetadata)
-      );
+      visit(subTree, createQueries.UNIST.isYamlNode, node => {
+        // TODO: Is there always only one YAML node?
+        apiEntryMetadata.setYamlPosition(node.position);
+        addYAMLMetadata(node, apiEntryMetadata);
+      });
 
       // Visits all Text nodes from the current subtree and if there's any that matches
       // any API doc type reference and then updates the type reference to be a Markdown link

@@ -1,16 +1,18 @@
-export type LintLevel = 'info' | 'warn' | 'error';
+import { Position } from 'unist';
 
-export interface LintMessageLocation {
-  // The absolute path to the file
-  path: string;
-  line: number;
-  column: number;
+export type IssueLevel = 'info' | 'warn' | 'error';
+
+export interface LintIssueLocation {
+  path: string; // The absolute path to the file
+  position: Position;
 }
 
-export interface LintMessage {
-  level: LintLevel;
-  msg: string;
-  location?: LintMessageLocation;
+export interface LintIssue {
+  level: IssueLevel;
+  message: string;
+  location: LintIssueLocation;
 }
 
-export type Reporter = (msg: LintMessage) => void;
+type LintRule = (input: ApiDocMetadataEntry) => LintIssue[];
+
+export type Reporter = (msg: LintIssue) => void;
