@@ -54,4 +54,13 @@ export class Linter {
       reporter(issue);
     }
   }
+
+  /**
+   * Returns whether there are any issues with a level of 'error'
+   *
+   * @returns {boolean}
+   */
+  get hasError() {
+    return this.#issues.some(issue => issue.level === 'error');
+  }
 }
