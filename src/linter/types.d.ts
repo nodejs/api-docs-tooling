@@ -4,7 +4,7 @@ export type IssueLevel = 'info' | 'warn' | 'error';
 
 export interface LintIssueLocation {
   path: string; // The absolute path to the file
-  position: Position;
+  position?: Position;
 }
 
 export interface LintIssue {

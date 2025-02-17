@@ -17,11 +17,15 @@ const levelToColorMap = {
  * @type {import('../types.d.ts').Reporter}
  */
 export default issue => {
+  const position = issue.location.position
+    ? ` (${issue.location.position.start}:${issue.location.position.end})`
+    : '';
+
   console.log(
     styleText(
       // @ts-expect-error ForegroundColors is not exported
       levelToColorMap[issue.level],
-      `${issue.message} at ${issue.location.path} (${issue.location.position.start}:${issue.location.position.end})`
+      `${issue.message} at ${issue.location.path}${position}`
     )
   );
 };
