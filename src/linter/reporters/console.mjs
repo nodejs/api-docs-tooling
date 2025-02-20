@@ -16,7 +16,7 @@ const levelToColorMap = {
  */
 export default issue => {
   const position = issue.location.position
-    ? ` (${issue.location.position.start}:${issue.location.position.end})`
+    ? ` (${issue.location.position.start.line}:${issue.location.position.end.line})`
     : '';
 
   console.log(
