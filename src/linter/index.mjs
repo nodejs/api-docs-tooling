@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 import reporters from './reporters/index.mjs';

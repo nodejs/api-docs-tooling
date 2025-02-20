@@ -69,6 +69,8 @@ program
  * @property {Target[]} target Specifies the generator target mode.
  * @property {string} version Specifies the target Node.js version.
  * @property {string} changelog Specifies the path to the Node.js CHANGELOG.md file
+ * @property {boolean} skipLinting Specifies whether to skip linting
+ * @property {keyof reporters} reporter Specifies the linter reporter
  *
  * @name ProgramOptions
  * @type {Options}
@@ -80,11 +82,11 @@ const {
   target = [],
   version,
   changelog,
-  skipValidation,
+  skipLinting,
   reporter,
 } = program.opts();
 
-const linter = skipValidation ? undefined : new Linter();
+const linter = skipLinting ? undefined : new Linter();
 
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();

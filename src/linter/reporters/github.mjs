@@ -1,8 +1,12 @@
-// @ts-check
-
 'use strict';
 
 import * as core from '@actions/core';
+
+const actions = {
+  warn: core.warning,
+  error: core.error,
+  info: core.notice,
+};
 
 /**
  * GitHub action reporter for
@@ -10,13 +14,9 @@ import * as core from '@actions/core';
  * @type {import('../types.d.ts').Reporter}
  */
 export default issue => {
-  const actions = {
-    warn: core.warning,
-    error: core.error,
-    info: core.notice,
-  };
+  const logFn = actions[issue.level] || core.notice;
 
-  (actions[issue.level] || core.notice)(issue.message, {
+  logFn(issue.message, {
     file: issue.location.path,
     startLine: issue.location.position?.start.line,
     endLine: issue.location.position?.end.line,
