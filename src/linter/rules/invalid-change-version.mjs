@@ -1,3 +1,4 @@
+import { LINT_MESSAGES } from '../../constants.mjs';
 import { validateVersion } from '../utils/semver.mjs';
 
 /**
@@ -23,7 +24,7 @@ export const invalidChangeVersion = entry => {
 
   return invalidVersions.map(version => ({
     level: 'warn',
-    message: `Invalid version number: ${version}`,
+    message: LINT_MESSAGES.invalidChangeVersion.replace('{{version}}', version),
     location: {
       path: entry.api_doc_source,
       line: entry.yaml_position.start.line,

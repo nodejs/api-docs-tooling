@@ -1,3 +1,5 @@
+import { LINT_MESSAGES } from '../../constants.mjs';
+
 /**
  * Checks if `introduced_in` field is missing in the API doc entry.
  *
@@ -13,11 +15,9 @@ export const missingIntroducedIn = entry => {
   return [
     {
       level: 'info',
-      message: 'Missing `introduced_in` field in the API doc entry',
+      message: LINT_MESSAGES.missingIntroducedIn,
       location: {
         path: entry.api_doc_source,
-        // line: entry.yaml_position.start,
-        // column: entry.yaml_position.end,
       },
     },
   ];

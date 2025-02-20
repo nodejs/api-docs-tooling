@@ -125,17 +125,45 @@ export const DOC_SLUG_ENVIRONMENT = 'environment-variables-1';
 // JavaScript globals types within the MDN JavaScript docs
 // @see DOC_MDN_BASE_URL_JS_GLOBALS
 export const DOC_TYPES_MAPPING_GLOBALS = {
-  ...Object.fromEntries([
-    'AggregateError', 'Array', 'ArrayBuffer', 'DataView', 'Date', 'Error',
-    'EvalError', 'Function', 'Map', 'NaN', 'Object', 'Promise', 'Proxy', 'RangeError',
-    'ReferenceError', 'RegExp', 'Set', 'SharedArrayBuffer', 'SyntaxError', 'Symbol',
-    'TypeError', 'URIError', 'WeakMap', 'WeakSet',
+  ...Object.fromEntries(
+    [
+      'AggregateError',
+      'Array',
+      'ArrayBuffer',
+      'DataView',
+      'Date',
+      'Error',
+      'EvalError',
+      'Function',
+      'Map',
+      'NaN',
+      'Object',
+      'Promise',
+      'Proxy',
+      'RangeError',
+      'ReferenceError',
+      'RegExp',
+      'Set',
+      'SharedArrayBuffer',
+      'SyntaxError',
+      'Symbol',
+      'TypeError',
+      'URIError',
+      'WeakMap',
+      'WeakSet',
 
-    'TypedArray',
-    'Float32Array', 'Float64Array',
-    'Int8Array', 'Int16Array', 'Int32Array',
-    'Uint8Array', 'Uint8ClampedArray', 'Uint16Array', 'Uint32Array',
-  ].map(e => [e, e])),
+      'TypedArray',
+      'Float32Array',
+      'Float64Array',
+      'Int8Array',
+      'Int16Array',
+      'Int32Array',
+      'Uint8Array',
+      'Uint8ClampedArray',
+      'Uint16Array',
+      'Uint32Array',
+    ].map(e => [e, e])
+  ),
   bigint: 'BigInt',
   'WebAssembly.Instance': 'WebAssembly/Instance',
 };
@@ -391,4 +419,10 @@ export const DOC_TYPES_MAPPING_OTHER = {
   Headers: `${DOC_MDN_BASE_URL}/API/Headers`,
   Response: `${DOC_MDN_BASE_URL}/API/Response`,
   Request: `${DOC_MDN_BASE_URL}/API/Request`,
+};
+
+export const LINT_MESSAGES = {
+  missingIntroducedIn: "Missing 'introduced_in' field in the API doc entry",
+  missingChangeVersion: 'Missing version field in the API doc entry',
+  invalidChangeVersion: 'Invalid version number: {{version}}',
 };

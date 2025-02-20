@@ -3,7 +3,7 @@
 import console from './console.mjs';
 import github from './github.mjs';
 
-export default /** @type {const} */ ({
-  console,
-  github,
-});
+export default {
+  console: console,
+  github: github,
+};

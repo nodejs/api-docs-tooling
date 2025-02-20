@@ -54,7 +54,7 @@ program
   )
   .addOption(new Option('--skip-linting', 'Skip linting').default(false))
   .addOption(
-    new Option('--reporter', 'Specify the linter reporter')
+    new Option('-r, --reporter [reporter]', 'Specify the linter reporter')
       .choices(Object.keys(reporters))
       .default('console')
   )
