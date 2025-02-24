@@ -119,6 +119,4 @@ await runGenerators({
 
 linter.report(reporter);
 
-if (linter.hasError()) {
-  exit(1);
-}
+exit(Number(linter.hasError()));

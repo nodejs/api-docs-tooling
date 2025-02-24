@@ -2,6 +2,7 @@
  * Validates a semver version string
  *
  * @param {string} version
+ * @returns {boolean}
  */
 export const validateVersion = version => {
   // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string

@@ -2,7 +2,7 @@ import { LINT_MESSAGES } from '../../constants.mjs';
 import { validateVersion } from '../utils/semver.mjs';
 
 /**
- * Checks if any change version is invalid.
+ * Checks if any change version is invalid
  *
  * @param {ApiDocMetadataEntry} entry
  * @returns {Array<import('../types').LintIssue>}

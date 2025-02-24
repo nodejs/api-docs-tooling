@@ -12,6 +12,8 @@ const levelToColorMap = {
 };
 
 /**
+ * Console reporter
+ *
  * @type {import('../types.d.ts').Reporter}
  */
 export default issue => {

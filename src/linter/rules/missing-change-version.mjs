@@ -1,5 +1,5 @@
 /**
- * Checks if any change version is missing.
+ * Checks if any change version is missing
  *
  * @param {ApiDocMetadataEntry} entry
  * @returns {Array<import('../types').LintIssue>}

@@ -6,17 +6,21 @@ import { missingChangeVersion } from './rules/missing-change-version.mjs';
 import { missingIntroducedIn } from './rules/missing-introduced-in.mjs';
 
 /**
- * Lint issues in ApiDocMetadataEntry entries
+ * Creates a linter instance to validate ApiDocMetadataEntry entries
  *
  * @param {boolean} dryRun Whether to run the linter in dry-run mode
  */
 const createLinter = dryRun => {
   /**
+   * Lint issues found during validations
+   *
    * @type {Array<import('./types.d.ts').LintIssue>}
    */
   const issues = [];
 
   /**
+   * Lint rules to validate the entries against
+   *
    * @type {Array<import('./types.d.ts').LintRule>}
    */
   const rules = [
@@ -26,6 +30,8 @@ const createLinter = dryRun => {
   ];
 
   /**
+   * Validates a ApiDocMetadataEntry entry against all defined rules
+   *
    * @param {ApiDocMetadataEntry} entry
    * @returns {void}
    */
@@ -40,6 +46,8 @@ const createLinter = dryRun => {
   };
 
   /**
+   * Validates an array of ApiDocMetadataEntry entries against all defined rules
+   *
    * @param {ApiDocMetadataEntry[]} entries
    * @returns {void}
    */
@@ -50,7 +58,10 @@ const createLinter = dryRun => {
   };
 
   /**
-   * @param {keyof reporters} reporterName
+   * Reports found issues using the specified reporter
+   *
+   * @param {keyof typeof reporters} reporterName Reporter name
+   * @returns {void}
    */
   const report = reporterName => {
     if (dryRun) {
@@ -65,7 +76,7 @@ const createLinter = dryRun => {
   };
 
   /**
-   * Returns whether there are any issues with a level of 'error'
+   * Checks if any error-level issues were found during linting
    *
    * @returns {boolean}
    */

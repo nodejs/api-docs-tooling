@@ -9,7 +9,7 @@ const actions = {
 };
 
 /**
- * GitHub action reporter for
+ * GitHub actions reporter
  *
  * @type {import('../types.d.ts').Reporter}
  */

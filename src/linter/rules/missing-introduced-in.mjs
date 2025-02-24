@@ -1,7 +1,7 @@
 import { LINT_MESSAGES } from '../../constants.mjs';
 
 /**
- * Checks if `introduced_in` field is missing in the API doc entry.
+ * Checks if `introduced_in` field is missing
  *
  * @param {ApiDocMetadataEntry} entry
  * @returns {Array<import('../types.d.ts').LintIssue>}
