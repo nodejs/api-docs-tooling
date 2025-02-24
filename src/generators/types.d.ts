@@ -1,7 +1,6 @@
 import type { SemVer } from 'semver';
 import type availableGenerators from './index.mjs';
 import type { ApiDocReleaseEntry } from '../types';
-import type { Linter } from '../linter/index.mjs';
 
 declare global {
   // All available generators as an inferable type, to allow Generator interfaces
@@ -31,8 +30,6 @@ declare global {
 
     // A list of all Node.js major versions and their respective release information
     releases: Array<ApiDocReleaseEntry>;
-
-    linter: Linter | undefined;
   }
 
   export interface GeneratorMetadata<I extends any, O extends any> {

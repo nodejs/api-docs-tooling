@@ -12,7 +12,7 @@ import generators from '../src/generators/index.mjs';
 import createMarkdownLoader from '../src/loaders/markdown.mjs';
 import createMarkdownParser from '../src/parsers/markdown.mjs';
 import createNodeReleases from '../src/releases.mjs';
-import { Linter } from '../src/linter/index.mjs';
+import createLinter from '../src/linter/index.mjs';
 import reporters from '../src/linter/reporters/index.mjs';
 
 const availableGenerators = Object.keys(generators);
@@ -52,7 +52,9 @@ program
       'Set the processing target modes'
     ).choices(availableGenerators)
   )
-  .addOption(new Option('--skip-linting', 'Skip linting').default(false))
+  .addOption(
+    new Option('--lint-dry-run', 'Run linter in dry-run mode').default(false)
+  )
   .addOption(
     new Option('-r, --reporter [reporter]', 'Specify the linter reporter')
       .choices(Object.keys(reporters))
@@ -68,9 +70,9 @@ program
  * @property {string} output Specifies the directory where output files will be saved.
  * @property {Target[]} target Specifies the generator target mode.
  * @property {string} version Specifies the target Node.js version.
- * @property {string} changelog Specifies the path to the Node.js CHANGELOG.md file
- * @property {boolean} skipLinting Specifies whether to skip linting
- * @property {keyof reporters} reporter Specifies the linter reporter
+ * @property {string} changelog Specifies the path to the Node.js CHANGELOG.md file.
+ * @property {boolean} lintDryRun Specifies whether the linter should run in dry-run mode.
+ * @property {keyof reporters} reporter Specifies the linter reporter.
  *
  * @name ProgramOptions
  * @type {Options}
@@ -82,11 +84,11 @@ const {
   target = [],
   version,
   changelog,
-  skipLinting,
+  lintDryRun,
   reporter,
 } = program.opts();
 
-const linter = skipLinting ? undefined : new Linter();
+const linter = createLinter(lintDryRun);
 
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();
@@ -100,7 +102,7 @@ const { runGenerators } = createGenerator(parsedApiDocs);
 // Retrieves Node.js release metadata from a given Node.js version and CHANGELOG.md file
 const { getAllMajors } = createNodeReleases(changelog);
 
-linter?.lintAll(parsedApiDocs);
+linter.lintAll(parsedApiDocs);
 
 await runGenerators({
   // A list of target modes for the API docs parser
@@ -115,10 +117,8 @@ await runGenerators({
   releases: await getAllMajors(),
 });
 
-if (linter) {
-  linter.report(reporter);
+linter.report(reporter);
 
-  if (linter.hasError) {
-    exit(1);
-  }
+if (linter.hasError()) {
+  exit(1);
 }
