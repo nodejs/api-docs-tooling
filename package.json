@@ -17,13 +17,13 @@
     "api-docs-tooling": "./bin/cli.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
+    "@eslint/js": "^9.21.0",
     "@types/mdast": "^4.0.4",
     "@types/node": "^22.13.8",
-    "eslint": "^9.19.0",
-    "eslint-config-prettier": "^10.0.1",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-jsdoc": "^50.6.3",
-    "globals": "^15.14.0",
+    "globals": "^16.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
     "prettier": "3.4.2"
