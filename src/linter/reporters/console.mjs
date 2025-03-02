@@ -23,7 +23,6 @@ export default issue => {
 
   console.log(
     styleText(
-      // @ts-expect-error ForegroundColors is not exported
       levelToColorMap[issue.level],
       `${issue.message} at ${issue.location.path}${position}`
     )
