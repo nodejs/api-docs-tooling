@@ -1,5 +1,5 @@
 import { LINT_MESSAGES } from '../../constants.mjs';
-import { validateVersion } from '../utils/semver.mjs';
+import { valid } from 'semver';
 
 /**
  * Checks if any change version is invalid
@@ -19,7 +19,7 @@ export const invalidChangeVersion = entry => {
     );
 
   const invalidVersions = allVersions.filter(
-    version => !validateVersion(version.substring(1)) // Trim the leading 'v' from the version string
+    version => valid(version) === null
   );
 
   return invalidVersions.map(version => ({
