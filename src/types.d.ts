@@ -99,6 +99,7 @@ declare global {
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
+    // The postion of the YAML of the API doc entry
     yaml_position: Position;
   }
 
