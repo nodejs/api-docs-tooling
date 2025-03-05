@@ -20,9 +20,11 @@ describe('missingChangeVersion', () => {
       {
         level: 'warn',
         location: {
-          column: 1,
-          line: 7,
           path: 'doc/api/assert.md',
+          position: {
+            end: { column: 35, line: 7, offset: 137 },
+            start: { column: 1, line: 7, offset: 103 },
+          },
         },
         message: 'Missing change version',
       },

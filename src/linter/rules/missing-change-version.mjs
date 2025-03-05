@@ -16,8 +16,7 @@ export const missingChangeVersion = entry => {
       message: 'Missing change version',
       location: {
         path: entry.api_doc_source,
-        line: entry.yaml_position.start.line,
-        column: entry.yaml_position.start.column,
+        position: entry.yaml_position,
       },
     }));
 };
