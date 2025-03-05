@@ -1,7 +1,5 @@
 'use strict';
 
-import { getWasmInstance } from '@shikijs/core/wasm-inlined';
-
 import cLanguage from 'shiki/langs/c.mjs';
 import coffeeScriptLanguage from 'shiki/langs/coffeescript.mjs';
 import cPlusPlusLanguage from 'shiki/langs/cpp.mjs';
@@ -24,7 +22,6 @@ import darkTheme from 'shiki/themes/catppuccin-mocha.mjs';
  * @type {import('@shikijs/core').HighlighterCoreOptions}
  */
 export default {
-  loadWasm: getWasmInstance,
   // Only register the themes we need, to support light/dark theme
   themes: [lightTheme, darkTheme],
   // Only register the languages that the API docs use
