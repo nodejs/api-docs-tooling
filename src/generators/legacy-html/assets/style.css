@@ -75,8 +75,9 @@ html {
 }
 
 body {
-  font-family: Lato, 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans',
-    Verdana, Tahoma, sans-serif;
+  font-family:
+    Lato, 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Verdana,
+    Tahoma, sans-serif;
   margin: 0;
   padding: 0;
   color: var(--color-text-primary);
@@ -137,8 +138,8 @@ code,
 .pre,
 span.type,
 a.type {
-  font-family: SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  font-family:
+    SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 0.9em;
 }
 
@@ -1031,7 +1032,8 @@ kbd {
   margin-right: 10px;
   margin-top: -2px;
   height: 1.5rem;
-  transition-property: background-color, border-color, color, box-shadow, filter;
+  transition-property:
+    background-color, border-color, color, box-shadow, filter;
   transition-duration: 0.3s;
   cursor: pointer;
 }

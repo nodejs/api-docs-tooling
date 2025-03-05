@@ -5,7 +5,8 @@ import { h as createElement } from 'hastscript';
 import { toString } from 'hast-util-to-string';
 import { SKIP, visit } from 'unist-util-visit';
 
-import { getSingletonHighlighterCore } from '@shikijs/core';
+import { createHighlighterCoreSync } from '@shikijs/core';
+import { createJavaScriptRegexEngine } from '@shikijs/engine-javascript';
 
 import shikiConfig from '../../shiki.config.mjs';
 
@@ -14,7 +15,10 @@ import shikiConfig from '../../shiki.config.mjs';
 const languagePrefix = 'language-';
 
 // Creates a Singleton instance for Shiki's syntax highlighter using WASM
-const shikiHighlighter = await getSingletonHighlighterCore(shikiConfig);
+const shikiHighlighter = createHighlighterCoreSync({
+  ...shikiConfig,
+  engine: createJavaScriptRegexEngine(),
+});
 
 // Creates a static button element which is used for the "copy" button
 // within codeboxes for copying the code to the clipboard
