@@ -28,7 +28,7 @@ describe('createLinterEngine', () => {
 
     const issues = engine.lint(assertEntry);
 
-    assert.equal(issues.length, 2);
+    assert.equal(issues.length, 3);
     assert.deepEqual(issues, [infoIssue, warnIssue, errorIssue]);
   });
 
