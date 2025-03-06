@@ -1,60 +1,32 @@
 'use strict';
 
+import createLinterEngine from './engine.mjs';
 import reporters from './reporters/index.mjs';
-import { invalidChangeVersion } from './rules/invalid-change-version.mjs';
-import { missingChangeVersion } from './rules/missing-change-version.mjs';
-import { missingIntroducedIn } from './rules/missing-introduced-in.mjs';
+import rules from './rules/index.mjs';
 
 /**
  * Creates a linter instance to validate ApiDocMetadataEntry entries
  *
- * @param {boolean} dryRun Whether to run the linter in dry-run mode
+ * @param {boolean} dryRun Whether to run the engine in dry-run mode
+ * @param {string[]} disabledRules List of disabled rules names
  */
-const createLinter = dryRun => {
+const createLinter = (dryRun, disabledRules) => {
+  const engine = createLinterEngine(getEnabledRules(disabledRules));
+
   /**
    * Lint issues found during validations
    *
-   * @type {Array<import('./types.d.ts').LintIssue>}
+   * @type {Array<import('./types').LintIssue>}
    */
   const issues = [];
 
   /**
-   * Lint rules to validate the entries against
+   * Lints all entries using the linter engine
    *
-   * @type {Array<import('./types.d.ts').LintRule>}
-   */
-  const rules = [
-    missingIntroducedIn,
-    missingChangeVersion,
-    invalidChangeVersion,
-  ];
-
-  /**
-   * Validates a ApiDocMetadataEntry entry against all defined rules
-   *
-   * @param {ApiDocMetadataEntry} entry
-   * @returns {void}
-   */
-  const lint = entry => {
-    for (const rule of rules) {
-      const ruleIssues = rule(entry);
-
-      if (ruleIssues.length > 0) {
-        issues.push(...ruleIssues);
-      }
-    }
-  };
-
-  /**
-   * Validates an array of ApiDocMetadataEntry entries against all defined rules
-   *
-   * @param {ApiDocMetadataEntry[]} entries
-   * @returns {void}
+   * @param entries
    */
   const lintAll = entries => {
-    for (const entry of entries) {
-      lint(entry);
-    }
+    issues.push(...engine.lintAll(entries));
   };
 
   /**
@@ -82,6 +54,17 @@ const createLinter = dryRun => {
    */
   const hasError = () => {
     return issues.some(issue => issue.level === 'error');
+  };
+
+  /**
+   * Retrieves all enabled rules
+   *
+   * @returns {import('./types').LintRule[]}
+   */
+  const getEnabledRules = () => {
+    return Object.entries(rules)
+      .filter(([ruleName]) => !disabledRules.includes(ruleName))
+      .map(([, rule]) => rule);
   };
 
   return {
