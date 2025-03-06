@@ -14,6 +14,7 @@ import createMarkdownParser from '../src/parsers/markdown.mjs';
 import createNodeReleases from '../src/releases.mjs';
 import createLinter from '../src/linter/index.mjs';
 import reporters from '../src/linter/reporters/index.mjs';
+import rules from '../src/linter/rules/index.mjs';
 
 const availableGenerators = Object.keys(generators);
 
@@ -53,6 +54,11 @@ program
     ).choices(availableGenerators)
   )
   .addOption(
+    new Option('--disable-rule [rule...]', 'Disable a specific linter rule')
+      .choices(Object.keys(rules))
+      .default([])
+  )
+  .addOption(
     new Option('--lint-dry-run', 'Run linter in dry-run mode').default(false)
   )
   .addOption(
@@ -71,6 +77,7 @@ program
  * @property {Target[]} target Specifies the generator target mode.
  * @property {string} version Specifies the target Node.js version.
  * @property {string} changelog Specifies the path to the Node.js CHANGELOG.md file.
+ * @property {string[]} disableRule Specifies the linter rules to disable.
  * @property {boolean} lintDryRun Specifies whether the linter should run in dry-run mode.
  * @property {keyof reporters} reporter Specifies the linter reporter.
  *
@@ -84,11 +91,12 @@ const {
   target = [],
   version,
   changelog,
+  disableRule,
   lintDryRun,
   reporter,
 } = program.opts();
 
-const linter = createLinter(lintDryRun);
+const linter = createLinter(lintDryRun, disableRule);
 
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();
