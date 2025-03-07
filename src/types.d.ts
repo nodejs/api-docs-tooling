@@ -1,7 +1,7 @@
 import type { Heading, Root } from '@types/mdast';
 import type { Program } from 'acorn';
 import type { SemVer } from 'semver';
-import type { Data, Node, Parent } from 'unist';
+import type { Data, Node, Parent, Position } from 'unist';
 
 // String serialization of the AST tree
 // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
@@ -99,6 +99,8 @@ declare global {
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
+    // The postion of the YAML of the API doc entry
+    yaml_position: Position;
   }
 
   export interface JsProgram extends Program {

@@ -420,3 +420,9 @@ export const DOC_TYPES_MAPPING_OTHER = {
   Response: `${DOC_MDN_BASE_URL}/API/Response`,
   Request: `${DOC_MDN_BASE_URL}/API/Request`,
 };
+
+export const LINT_MESSAGES = {
+  missingIntroducedIn: "Missing 'introduced_in' field in the API doc entry",
+  missingChangeVersion: 'Missing version field in the API doc entry',
+  invalidChangeVersion: 'Invalid version number: {{version}}',
+};

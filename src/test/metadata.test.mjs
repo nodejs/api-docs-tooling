@@ -79,6 +79,7 @@ describe('createMetadata', () => {
       stability: { type: 'root', children: [stability] },
       tags: [],
       updates: [],
+      yaml_position: {},
     };
     const actual = metadata.create(apiDoc, section);
     delete actual.stability.toJSON;

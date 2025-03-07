@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { resolve } from 'node:path';
-import { argv } from 'node:process';
+import { argv, exit } from 'node:process';
 
 import { Command, Option } from 'commander';
 
@@ -12,6 +12,9 @@ import generators from '../src/generators/index.mjs';
 import createMarkdownLoader from '../src/loaders/markdown.mjs';
 import createMarkdownParser from '../src/parsers/markdown.mjs';
 import createNodeReleases from '../src/releases.mjs';
+import createLinter from '../src/linter/index.mjs';
+import reporters from '../src/linter/reporters/index.mjs';
+import rules from '../src/linter/rules/index.mjs';
 
 const availableGenerators = Object.keys(generators);
 
@@ -50,6 +53,19 @@ program
       'Set the processing target modes'
     ).choices(availableGenerators)
   )
+  .addOption(
+    new Option('--disable-rule [rule...]', 'Disable a specific linter rule')
+      .choices(Object.keys(rules))
+      .default([])
+  )
+  .addOption(
+    new Option('--lint-dry-run', 'Run linter in dry-run mode').default(false)
+  )
+  .addOption(
+    new Option('-r, --reporter [reporter]', 'Specify the linter reporter')
+      .choices(Object.keys(reporters))
+      .default('console')
+  )
   .parse(argv);
 
 /**
@@ -60,13 +76,27 @@ program
  * @property {string} output Specifies the directory where output files will be saved.
  * @property {Target[]} target Specifies the generator target mode.
  * @property {string} version Specifies the target Node.js version.
- * @property {string} changelog Specifies the path to the Node.js CHANGELOG.md file
+ * @property {string} changelog Specifies the path to the Node.js CHANGELOG.md file.
+ * @property {string[]} disableRule Specifies the linter rules to disable.
+ * @property {boolean} lintDryRun Specifies whether the linter should run in dry-run mode.
+ * @property {keyof reporters} reporter Specifies the linter reporter.
  *
  * @name ProgramOptions
  * @type {Options}
  * @description The return type for values sent to the program from the CLI.
  */
-const { input, output, target = [], version, changelog } = program.opts();
+const {
+  input,
+  output,
+  target = [],
+  version,
+  changelog,
+  disableRule,
+  lintDryRun,
+  reporter,
+} = program.opts();
+
+const linter = createLinter(lintDryRun, disableRule);
 
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();
@@ -80,6 +110,8 @@ const { runGenerators } = createGenerator(parsedApiDocs);
 // Retrieves Node.js release metadata from a given Node.js version and CHANGELOG.md file
 const { getAllMajors } = createNodeReleases(changelog);
 
+linter.lintAll(parsedApiDocs);
+
 await runGenerators({
   // A list of target modes for the API docs parser
   generators: target,
@@ -92,3 +124,7 @@ await runGenerators({
   // A list of all Node.js major versions with LTS status
   releases: await getAllMajors(),
 });
+
+linter.report(reporter);
+
+exit(Number(linter.hasError()));

@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "acorn": "^8.14.0",
+    "@actions/core": "^1.11.1",
     "commander": "^13.1.0",
     "estree-util-visit": "^2.0.0",
     "dedent": "^1.5.3",

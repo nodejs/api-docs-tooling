@@ -45,6 +45,7 @@ const createMetadata = slugger => {
   const internalMetadata = {
     heading: createTree('root', { data: {} }),
     stability: createTree('root', []),
+    yaml_position: {},
     properties: { type: undefined, changes: [], tags: [] },
   };
 
@@ -91,6 +92,14 @@ const createMetadata = slugger => {
 
         internalMetadata.properties[key] = value;
       });
+    },
+    /**
+     * Set the YAML position of the current Metadata entry
+     *
+     * @param {import('unist').Position} yaml_position
+     */
+    setYamlPosition: yaml_position => {
+      internalMetadata.yaml_position = yaml_position;
     },
     /**
      * Generates a new Navigation entry and pushes them to the internal collection
@@ -159,6 +168,7 @@ const createMetadata = slugger => {
         content: section,
         tags,
         introduced_in,
+        yaml_position: internalMetadata.yaml_position,
       };
     },
   };
