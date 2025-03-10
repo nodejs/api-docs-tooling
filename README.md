@@ -36,6 +36,7 @@ CLI tool to generate API documentation of a Node.js project.
 
 Options:
   -i, --input [patterns...]  Specify input file patterns using glob syntax
+  --ignore [patterns...]     Specify files to be ignored from the input using glob syntax
   -o, --output <path>        Specify the relative or absolute output directory
   -v, --version <semver>     Specify the target version of Node.js, semver compliant (default: "v22.6.0")
   -c, --changelog <url>      Specify the path (file: or https://) to the CHANGELOG.md file (default: "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")

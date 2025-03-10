@@ -31,6 +31,12 @@ program
   )
   .addOption(
     new Option(
+      '--ignore [patterns...]',
+      'Specify which input files to ignore using glob syntax'
+    )
+  )
+  .addOption(
+    new Option(
       '-o, --output <path>',
       'Specify the relative or absolute output directory'
     )
@@ -87,6 +93,7 @@ program
  */
 const {
   input,
+  ignore,
   output,
   target = [],
   version,
@@ -101,7 +108,7 @@ const linter = createLinter(lintDryRun, disableRule);
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();
 
-const apiDocFiles = loadFiles(input);
+const apiDocFiles = loadFiles(input, ignore);
 
 const parsedApiDocs = await parseApiDocs(apiDocFiles);
 
