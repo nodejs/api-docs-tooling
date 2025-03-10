@@ -33,7 +33,7 @@ program
     new Option(
       '-o, --output <path>',
       'Specify the relative or absolute output directory'
-    ).makeOptionMandatory()
+    )
   )
   .addOption(
     new Option(
@@ -112,18 +112,20 @@ const { getAllMajors } = createNodeReleases(changelog);
 
 linter.lintAll(parsedApiDocs);
 
-await runGenerators({
-  // A list of target modes for the API docs parser
-  generators: target,
-  // Resolved `input` to be used
-  input: input,
-  // Resolved `output` path to be used
-  output: resolve(output),
-  // Resolved SemVer of current Node.js version
-  version: coerce(version),
-  // A list of all Node.js major versions with LTS status
-  releases: await getAllMajors(),
-});
+if (target && output) {
+  await runGenerators({
+    // A list of target modes for the API docs parser
+    generators: target,
+    // Resolved `input` to be used
+    input: input,
+    // Resolved `output` path to be used
+    output: resolve(output),
+    // Resolved SemVer of current Node.js version
+    version: coerce(version),
+    // A list of all Node.js major versions with LTS status
+    releases: await getAllMajors(),
+  });
+}
 
 linter.report(reporter);
 

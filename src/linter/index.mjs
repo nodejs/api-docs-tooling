@@ -11,6 +11,17 @@ import rules from './rules/index.mjs';
  * @param {string[]} disabledRules List of disabled rules names
  */
 const createLinter = (dryRun, disabledRules) => {
+  /**
+   * Retrieves all enabled rules
+   *
+   * @returns {import('./types').LintRule[]}
+   */
+  const getEnabledRules = () => {
+    return Object.entries(rules)
+      .filter(([ruleName]) => !disabledRules.includes(ruleName))
+      .map(([, rule]) => rule);
+  };
+
   const engine = createLinterEngine(getEnabledRules(disabledRules));
 
   /**
@@ -54,17 +65,6 @@ const createLinter = (dryRun, disabledRules) => {
    */
   const hasError = () => {
     return issues.some(issue => issue.level === 'error');
-  };
-
-  /**
-   * Retrieves all enabled rules
-   *
-   * @returns {import('./types').LintRule[]}
-   */
-  const getEnabledRules = () => {
-    return Object.entries(rules)
-      .filter(([ruleName]) => !disabledRules.includes(ruleName))
-      .map(([, rule]) => rule);
   };
 
   return {
