@@ -16,14 +16,20 @@ const createLoader = () => {
    * Loads API Doc files and transforms it into VFiles
    *
    * @param {string} searchPath A glob/path for API docs to be loaded
+   * @param {string | undefined} ignorePath A glob/path of files to ignore
    * The input string can be a simple path (relative or absolute)
    * The input string can also be any allowed glob string
    *
    * @see https://code.visualstudio.com/docs/editor/glob-patterns
    */
-  const loadFiles = searchPath => {
+  const loadFiles = (searchPath, ignorePath) => {
+    const ignoredFiles = ignorePath
+      ? globSync(ignorePath).filter(filePath => extname(filePath) === '.md')
+      : [];
+
     const resolvedFiles = globSync(searchPath).filter(
-      filePath => extname(filePath) === '.md'
+      filePath =>
+        extname(filePath) === '.md' && !ignoredFiles.includes(filePath)
     );
 
     return resolvedFiles.map(async filePath => {
