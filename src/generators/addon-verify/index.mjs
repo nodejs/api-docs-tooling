@@ -82,9 +82,12 @@ export default {
 
             await mkdir(join(output, folderName), { recursive: true });
 
-            files.forEach(async ({ name, content }) => {
-              await writeFile(join(output, folderName, name), content);
-            });
+            for (const file of files) {
+              await writeFile(
+                join(output, folderName, file.name),
+                file.content
+              );
+            }
           }
 
           return files;
