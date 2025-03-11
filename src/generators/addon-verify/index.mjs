@@ -82,7 +82,7 @@ export default {
 
             await mkdir(join(output, folderName), { recursive: true });
 
-            for await (const file of files) {
+            for (const file of files) {
               await writeFile(
                 join(output, folderName, file.name),
                 file.content
