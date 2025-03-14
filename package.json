@@ -1,5 +1,9 @@
 {
   "name": "@node-core/api-docs-tooling",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodejs/api-docs-tooling.git"
+  },
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
