@@ -22,7 +22,7 @@ const createLoader = () => {
    *
    * @see https://code.visualstudio.com/docs/editor/glob-patterns
    */
-  const loadFiles = (searchPath, ignorePath) => {
+  const loadFiles = async (searchPath, ignorePath) => {
     const ignoredFiles = ignorePath
       ? globSync(ignorePath).filter(filePath => extname(filePath) === '.md')
       : [];
@@ -32,11 +32,13 @@ const createLoader = () => {
         extname(filePath) === '.md' && !ignoredFiles.includes(filePath)
     );
 
-    return resolvedFiles.map(async filePath => {
-      const fileContents = await readFile(filePath, 'utf-8');
+    return Promise.all(
+      resolvedFiles.map(async filePath => {
+        const fileContents = await readFile(filePath, 'utf-8');
 
-      return new VFile({ path: filePath, value: fileContents });
-    });
+        return new VFile({ path: filePath, value: fileContents });
+      })
+    );
   };
 
   return { loadFiles };
