@@ -2,10 +2,6 @@
 
 import { basename, dirname, join } from 'node:path';
 import { writeFile } from 'node:fs/promises';
-import {
-  getBaseGitHubUrl,
-  getCurrentGitHash,
-} from './utils/getBaseGitHubUrl.mjs';
 import { extractExports } from './utils/extractExports.mjs';
 import { findDefinitions } from './utils/findDefinitions.mjs';
 import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
@@ -56,7 +52,7 @@ export default {
 
       const repository = 'https://github.com/nodejs/node';
 
-      const tag = getCurrentGitHash(repositoryDirectory);
+      const tag = 'HEAD';
 
       baseGithubLink = `${repository}/blob/${tag}`;
     }
