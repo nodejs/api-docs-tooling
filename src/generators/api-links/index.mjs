@@ -54,7 +54,7 @@ export default {
     if (input.length > 0) {
       const repositoryDirectory = dirname(input[0].path);
 
-      const repository = getBaseGitHubUrl(repositoryDirectory);
+      const repository = 'https://github.com/nodejs/node';
 
       const tag = getCurrentGitHash(repositoryDirectory);
 
