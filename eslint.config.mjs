@@ -47,4 +47,7 @@ export default [
   // @see https://eslint.org/docs/latest/rules to learn more about these rules
   pluginJs.configs.recommended,
   eslintConfigPrettier,
+  {
+    ignores: ['src/generators/api-links/test/fixtures/**'],
+  },
 ];

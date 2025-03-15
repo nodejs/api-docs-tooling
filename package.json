@@ -5,8 +5,8 @@
     "url": "git+https://github.com/nodejs/api-docs-tooling.git"
   },
   "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "eslint . --no-warn-ignored",
+    "lint:fix": "eslint --fix . --no-warn-ignored",
     "format": "prettier .",
     "format:write": "prettier --write .",
     "test": "node --test",
