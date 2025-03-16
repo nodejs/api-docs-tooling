@@ -200,6 +200,8 @@ createQueries.QUERIES = {
   stabilityIndexPrefix: /Stability: ([0-5])/,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/,
+  // ReGeX for retrieiving inline linting directives
+  linterComment: /^<!--[ ]?md-lint (.+?)[ ]?-->$/,
 };
 
 createQueries.UNIST = {
@@ -216,6 +218,12 @@ createQueries.UNIST = {
    */
   isYamlNode: ({ type, value }) =>
     type === 'html' && createQueries.QUERIES.yamlInnerContent.test(value),
+  /**
+   * @param {import('@types/mdast').Html} html
+   * @returns {boolean}
+   */
+  isLinterComment: ({ type, value }) =>
+    type === 'html' && createQueries.QUERIES.linterComment.test(value),
   /**
    * @param {import('@types/mdast').Text} text
    * @returns {boolean}

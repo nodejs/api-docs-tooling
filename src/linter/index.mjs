@@ -1,5 +1,6 @@
 'use strict';
 
+import { LINT_MESSAGES } from '../constants.mjs';
 import createLinterEngine from './engine.mjs';
 import reporters from './reporters/index.mjs';
 import rules from './rules/index.mjs';
@@ -22,6 +23,13 @@ const createLinter = (dryRun, disabledRules) => {
       .map(([, rule]) => rule);
   };
 
+  /**
+   * @type {import('./types').LintDeclarations}
+   */
+  const declarations = {
+    skipDeprecation: [],
+  };
+
   const engine = createLinterEngine(getEnabledRules(disabledRules));
 
   /**
@@ -37,7 +45,7 @@ const createLinter = (dryRun, disabledRules) => {
    * @param entries
    */
   const lintAll = entries => {
-    issues.push(...engine.lintAll(entries));
+    issues.push(...engine.lintAll(entries, declarations));
   };
 
   /**
@@ -59,6 +67,87 @@ const createLinter = (dryRun, disabledRules) => {
   };
 
   /**
+   * Parse an inline-declaration found in the markdown input
+   *
+   * @param {string} declaration
+   */
+  const parseLinterDeclaration = declaration => {
+    // Trim off any excess spaces from the beginning & end
+    declaration = declaration.trim();
+
+    // Extract the name for the declaration
+    const [name, ...value] = declaration.split(' ');
+
+    switch (name) {
+      case 'skip-deprecation': {
+        if (value.length !== 1) {
+          issues.push({
+            level: 'error',
+            location: {
+              // TODO,
+              path: '',
+              position: 0,
+            },
+            message: LINT_MESSAGES.malformedLinterDeclaration.replace(
+              '{{message}}',
+              `Expected 1 argument, got ${value.length}`
+            ),
+          });
+
+          break;
+        }
+
+        // Get the deprecation code. This should be something like DEP0001.
+        const deprecation = value[0];
+
+        // Extract the number from the code
+        const deprecationCode = Number(deprecation.substring('DEP'.length));
+
+        // Make sure this is a valid deprecation code, output an error otherwise
+        if (
+          deprecation.length !== 7 ||
+          !deprecation.startsWith('DEP') ||
+          isNaN(deprecationCode)
+        ) {
+          issues.push({
+            level: 'error',
+            location: {
+              // TODO,
+              path: '',
+              position: 0,
+            },
+            message: LINT_MESSAGES.malformedLinterDeclaration.replace(
+              '{{message}}',
+              `Invalid deprecation code ${deprecation}`
+            ),
+          });
+
+          break;
+        }
+
+        declarations.skipDeprecation.push(deprecationCode);
+
+        break;
+      }
+      default: {
+        issues.push({
+          level: 'error',
+          location: {
+            // TODO
+            path: '',
+            position: 0,
+          },
+          message: LINT_MESSAGES.invalidLinterDeclaration.replace(
+            '{{declaration}}',
+            name
+          ),
+        });
+        break;
+      }
+    }
+  };
+
+  /**
    * Checks if any error-level issues were found during linting
    *
    * @returns {boolean}
@@ -70,6 +159,7 @@ const createLinter = (dryRun, disabledRules) => {
   return {
     lintAll,
     report,
+    parseLinterDeclaration,
     hasError,
   };
 };

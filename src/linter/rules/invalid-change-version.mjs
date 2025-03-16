@@ -1,3 +1,5 @@
+'use strict';
+
 import { LINT_MESSAGES } from '../../constants.mjs';
 import { valid } from 'semver';
 

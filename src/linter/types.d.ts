@@ -13,6 +13,13 @@ export interface LintIssue {
   location: LintIssueLocation;
 }
 
-type LintRule = (input: ApiDocMetadataEntry) => LintIssue[];
+export interface LintDeclarations {
+  skipDeprecation: Array<number>;
+}
+
+type LintRule = (
+  input: Array<ApiDocMetadataEntry>,
+  declarations: LintDeclarations
+) => LintIssue[];
 
 export type Reporter = (msg: LintIssue) => void;

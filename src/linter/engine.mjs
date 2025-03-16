@@ -10,13 +10,15 @@ const createLinterEngine = rules => {
    * Validates a ApiDocMetadataEntry entry against all defined rules
    *
    * @param {ApiDocMetadataEntry} entry
+   * @param {import('./types').LintDeclarations}
+   * @param declarations
    * @returns {import('./types').LintIssue[]}
    */
-  const lint = entry => {
+  const lint = (entry, declarations) => {
     const issues = [];
 
     for (const rule of rules) {
-      const ruleIssues = rule(entry);
+      const ruleIssues = rule([entry], declarations);
 
       if (ruleIssues.length > 0) {
         issues.push(...ruleIssues);
@@ -30,13 +32,19 @@ const createLinterEngine = rules => {
    * Validates an array of ApiDocMetadataEntry entries against all defined rules
    *
    * @param {ApiDocMetadataEntry[]} entries
+   * @param {import('./types').LintDeclarations}
+   * @param declarations
    * @returns {import('./types').LintIssue[]}
    */
-  const lintAll = entries => {
+  const lintAll = (entries, declarations) => {
     const issues = [];
 
-    for (const entry of entries) {
-      issues.push(...lint(entry));
+    for (const rule of rules) {
+      const ruleIssues = rule(entries, declarations);
+
+      if (ruleIssues.length > 0) {
+        issues.push(...ruleIssues);
+      }
     }
 
     return issues;

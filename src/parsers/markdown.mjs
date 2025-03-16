@@ -15,9 +15,9 @@ import { createNodeSlugger } from '../utils/slugger.mjs';
 /**
  * Creates an API doc parser for a given Markdown API doc file
  *
- * @param {import('./linter/index.mjs').Linter | undefined} linter
+ * @param {ReturnType<import('../linter/index.mjs').default> | undefined} linter
  */
-const createParser = () => {
+const createParser = linter => {
   // Creates an instance of the Remark processor with GFM support
   // which is used for stringifying the AST tree back to Markdown
   const remarkProcessor = getRemark();
@@ -142,6 +142,16 @@ const createParser = () => {
         addYAMLMetadata(node, apiEntryMetadata);
       });
 
+      // Visits all HTML nodes from the current subtree to check for linter declarations.
+      // If there are, it gives them to the linter to parse and use.
+      visit(subTree, createQueries.UNIST.isLinterComment, node => {
+        if (linter) {
+          linter.parseLinterDeclaration(
+            node.value.match(createQueries.QUERIES.linterComment)[1]
+          );
+        }
+      });
+
       // Visits all Text nodes from the current subtree and if there's any that matches
       // any API doc type reference and then updates the type reference to be a Markdown link
       visit(subTree, createQueries.UNIST.isTextWithType, (node, _, parent) =>
@@ -150,6 +160,7 @@ const createParser = () => {
 
       // Removes already parsed items from the subtree so that they aren't included in the final content
       remove(subTree, [createQueries.UNIST.isYamlNode]);
+      remove(subTree, [createQueries.UNIST.isLinterComment]);
 
       // Applies the AST transformations to the subtree based on the API doc entry Metadata
       // Note that running the transformation on the subtree isn't costly as it is a reduced tree

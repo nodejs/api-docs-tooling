@@ -106,7 +106,7 @@ const {
 const linter = createLinter(lintDryRun, disableRule);
 
 const { loadFiles } = createMarkdownLoader();
-const { parseApiDocs } = createMarkdownParser();
+const { parseApiDocs } = createMarkdownParser(linter);
 
 const apiDocFiles = await loadFiles(input, ignore);
 

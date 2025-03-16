@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Checks if any change version is missing
  *

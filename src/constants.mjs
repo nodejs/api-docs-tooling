@@ -425,4 +425,9 @@ export const LINT_MESSAGES = {
   missingIntroducedIn: "Missing 'introduced_in' field in the API doc entry",
   missingChangeVersion: 'Missing version field in the API doc entry',
   invalidChangeVersion: 'Invalid version number: {{version}}',
+  malformedDeprecationHeader: 'Malformed deprecation header',
+  outOfOrderDeprecationCode:
+    "Deprecation code '{{code}}' out of order (expected {{expectedCode}})",
+  invalidLinterDeclaration: "Invalid linter declaration '{{declaration}}'",
+  malformedLinterDeclaration: 'Malformed linter declaration: {{message}}',
 };
