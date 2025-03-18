@@ -28,7 +28,7 @@ export default {
    * @param {Input} input
    * @param {Partial<GeneratorOptions>} options
    */
-  async generate(input) {
+  async generate(input, { output, version }) {
     const buildSection = createSectionBuilder();
 
     // Create the Orama instance with the schema
@@ -84,7 +84,11 @@ export default {
 
     headNodes.map(processModuleNodes);
 
-    await persistToFile(db, 'json', './db.json');
+    await persistToFile(
+      db,
+      'json',
+      `${output}/${version.raw.replaceAll('.', '-')}-orama-db.json`
+    );
 
     return db;
   },
