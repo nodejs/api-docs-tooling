@@ -1,8 +1,7 @@
 'use strict';
 
-import { writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { create } from '@orama/orama';
+import { persistToFile } from '@orama/plugin-data-persistence/server';
 import { groupNodesByModule } from '../../utils/generators.mjs';
 import { createSectionBuilder } from '../legacy-json/utils/buildSection.mjs';
 
@@ -29,7 +28,7 @@ export default {
    * @param {Input} input
    * @param {Partial<GeneratorOptions>} options
    */
-  async generate(input, { output }) {
+  async generate(input) {
     const buildSection = createSectionBuilder();
 
     // Create the Orama instance with the schema
@@ -83,27 +82,9 @@ export default {
       return section;
     };
 
-    await Promise.all(
-      headNodes.map(async node => {
-        // Get the json for the node's section
-        const section = processModuleNodes(node);
+    headNodes.map(processModuleNodes);
 
-        // Write it to the output file
-        if (output) {
-          await writeFile(
-            join(output, `${node.api}.json`),
-            JSON.stringify(section)
-          );
-        }
-      })
-    );
-
-    // Generate the JSON representation of the Orama db
-    const oramaDbJson = JSON.stringify(db);
-
-    if (output) {
-      await writeFile(join(output, 'orama-db.json'), oramaDbJson);
-    }
+    await persistToFile(db, 'json', './db.json');
 
     return db;
   },
