@@ -2,6 +2,7 @@
 
 import { create } from '@orama/orama';
 import { persistToFile } from '@orama/plugin-data-persistence/server';
+
 import { groupNodesByModule } from '../../utils/generators.mjs';
 import { createSectionBuilder } from '../legacy-json/utils/buildSection.mjs';
 
@@ -56,7 +57,7 @@ export default {
 
     /**
      * @param {ApiDocMetadataEntry} head
-     * @returns {import('./types.d.ts').OramaDbEntry}
+     * @returns {void}
      */
     const processModuleNodes = head => {
       const nodes = groupedModules.get(head.api);
@@ -89,7 +90,5 @@ export default {
       'json',
       `${output}/${version.raw.replaceAll('.', '-')}-orama-db.json`
     );
-
-    return db;
   },
 };
