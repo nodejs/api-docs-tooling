@@ -15,6 +15,9 @@ import rules from '../src/linter/rules/index.mjs';
 import createMarkdownLoader from '../src/loaders/markdown.mjs';
 import createMarkdownParser from '../src/parsers/markdown.mjs';
 import createNodeReleases from '../src/releases.mjs';
+import createLinter from '../src/linter/index.mjs';
+import reporters from '../src/linter/reporters/index.mjs';
+import rules from '../src/linter/rules/index.mjs';
 
 const availableGenerators = Object.keys(generators);
 
@@ -61,7 +64,9 @@ program
   )
   .addOption(
     new Option('--disable-rule [rule...]', 'Disable a specific linter rule')
-      .choices(Object.keys(rules))
+      .choices(
+        Object.keys(multiEntryRules).concat(Object.keys(singleEntryRules))
+      )
       .default([])
   )
   .addOption(
