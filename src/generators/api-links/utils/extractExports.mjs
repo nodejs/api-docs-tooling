@@ -179,7 +179,7 @@ function handleVariableDeclaration(node, basename, nameToLineNumberMap) {
     switch (lhs.object.name) {
       case 'exports': {
         nameToLineNumberMap[`${basename}.${lhs.property.name}`] =
-          node.start.line;
+          node.loc.start.line;
 
         break;
       }
