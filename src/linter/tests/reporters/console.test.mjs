@@ -13,14 +13,14 @@ describe('console', () => {
 
     assert.strictEqual(process.stdout.write.mock.callCount(), 3);
 
-    const callsArgs = process.stdout.write.mock.calls.map(
-      call => call.arguments[0]
+    const callsArgs = process.stdout.write.mock.calls.map(call =>
+      call.arguments[0].trim()
     );
 
     assert.deepStrictEqual(callsArgs, [
-      '\x1B[90mThis is a INFO issue at doc/api/test.md\x1B[39m\n',
-      '\x1B[33mThis is a WARN issue at doc/api/test.md (1:1)\x1B[39m\n',
-      '\x1B[31mThis is a ERROR issue at doc/api/test.md (1:1)\x1B[39m\n',
+      '\x1B[90mThis is a INFO issue at doc/api/test.md\x1B[39m',
+      '\x1B[33mThis is a WARN issue at doc/api/test.md (1:1)\x1B[39m',
+      '\x1B[31mThis is a ERROR issue at doc/api/test.md (1:1)\x1B[39m',
     ]);
   });
 });
