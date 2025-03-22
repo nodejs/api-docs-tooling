@@ -1,4 +1,4 @@
-import { buildHierarchy } from './buildHierarchy.mjs';
+import { buildHierarchy } from '../../../utils/buildHierarchy.mjs';
 import { getRemarkRehype } from '../../../utils/remark.mjs';
 import { transformNodesToString } from '../../../utils/unist.mjs';
 import { parseList } from './parseList.mjs';
