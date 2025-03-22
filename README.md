@@ -40,6 +40,6 @@ Options:
   -o, --output <path>        Specify the relative or absolute output directory
   -v, --version <semver>     Specify the target version of Node.js, semver compliant (default: "v22.6.0")
   -c, --changelog <url>      Specify the path (file: or https://) to the CHANGELOG.md file (default: "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
-  -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html", "legacy-html-all", "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links")
+  -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html", "legacy-html-all", "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links", "orama-db")
   -h, --help                 display help for command
 ```

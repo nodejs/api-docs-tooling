@@ -2,12 +2,14 @@
 
 import publicGenerators from './generators/index.mjs';
 import astJs from './generators/ast-js/index.mjs';
+import oramaDb from './generators/orama-db/index.mjs';
 
 const availableGenerators = {
   ...publicGenerators,
   // This one is a little special since we don't want it to run unless we need
   // it and we also don't want it to be publicly accessible through the CLI.
   'ast-js': astJs,
+  'orama-db': oramaDb,
 };
 
 /**
