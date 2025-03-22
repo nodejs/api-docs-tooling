@@ -3,9 +3,12 @@
 /**
  * Creates a linter engine instance to validate ApiDocMetadataEntry entries
  *
- * @param {import('./types').LintRule} rules Lint rules to validate the entries against
+ * @param {{
+ * multiEntryRules: import('./types').MultipleEntriesLintRules[]
+ * singleEntryRules: import('./types').SingleEntryLintRule[]
+ * }} rules Lint rules to validate the entries against
  */
-const createLinterEngine = rules => {
+const createLinterEngine = ({ multiEntryRules, singleEntryRules }) => {
   /**
    * Validates a ApiDocMetadataEntry entry against all defined rules
    *
@@ -15,7 +18,7 @@ const createLinterEngine = rules => {
   const lint = entry => {
     const issues = [];
 
-    for (const rule of rules) {
+    for (const rule of singleEntryRules) {
       const ruleIssues = rule(entry);
 
       if (ruleIssues.length > 0) {
@@ -34,6 +37,10 @@ const createLinterEngine = rules => {
    */
   const lintAll = entries => {
     const issues = [];
+
+    for (const rule of multiEntryRules) {
+      issues.push(...rule(entries));
+    }
 
     for (const entry of entries) {
       issues.push(...lint(entry));
