@@ -29,4 +29,7 @@ updates:
           - '@eslint/*'
           - 'globals'
           - 'stylelint-*'
+      orama:
+        patterns:
+          - '@orama/*'
     open-pull-requests-limit: 10
