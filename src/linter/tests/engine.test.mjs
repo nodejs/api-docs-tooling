@@ -9,17 +9,14 @@ describe('createLinterEngine', () => {
     const rule1 = mock.fn(() => []);
     const rule2 = mock.fn(() => []);
 
-    const engine = createLinterEngine({
-      singleEntryRules: [rule1],
-      multiEntryRules: [rule2],
-    });
+    const engine = createLinterEngine([rule1, rule2]);
 
     engine.lintAll([assertEntry]);
 
     assert.strictEqual(rule1.mock.callCount(), 1);
     assert.strictEqual(rule2.mock.callCount(), 1);
 
-    assert.deepEqual(rule1.mock.calls[0].arguments, [assertEntry]);
+    assert.deepEqual(rule1.mock.calls[0].arguments, [[assertEntry]]);
     assert.deepEqual(rule2.mock.calls[0].arguments, [[assertEntry]]);
   });
 
@@ -27,23 +24,20 @@ describe('createLinterEngine', () => {
     const rule1 = mock.fn(() => [infoIssue, warnIssue]);
     const rule2 = mock.fn(() => [errorIssue]);
 
-    const engine = createLinterEngine({
-      singleEntryRules: [rule1],
-      multiEntryRules: [rule2],
-    });
+    const engine = createLinterEngine([rule1, rule2]);
 
     const issues = engine.lintAll([assertEntry]);
 
     assert.equal(issues.length, 3);
-    assert.deepEqual(issues, [errorIssue, infoIssue, warnIssue]);
+    assert.deepEqual(issues, [infoIssue, warnIssue, errorIssue]);
   });
 
   it('should return an empty array when no issues are found', () => {
     const rule = () => [];
 
-    const engine = createLinterEngine({ singleEntryRules: [rule] });
+    const engine = createLinterEngine([rule]);
 
-    const issues = engine.lint(assertEntry);
+    const issues = engine.lintAll([assertEntry]);
 
     assert.deepEqual(issues, []);
   });

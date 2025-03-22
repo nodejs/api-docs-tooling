@@ -6,17 +6,11 @@ import { missingChangeVersion } from './missing-change-version.mjs';
 import { missingIntroducedIn } from './missing-introduced-in.mjs';
 
 /**
- * @type {Record<string, import('../types').SingleEntryLintRule>}
+ * @type {Record<string, import('../types').LintRule>}
  */
-export const singleEntryRules = {
+export default {
+  'duplicate-stability-nodes': duplicateStabilityNodes,
   'invalid-change-version': invalidChangeVersion,
   'missing-change-version': missingChangeVersion,
   'missing-introduced-in': missingIntroducedIn,
-};
-
-/**
- * @type {Record<string, import('../types').MultipleEntriesLintRule>}
- */
-export const multiEntryRules = {
-  'duplicate-stability-nodes': duplicateStabilityNodes,
 };

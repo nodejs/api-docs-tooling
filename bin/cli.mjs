@@ -64,9 +64,7 @@ program
   )
   .addOption(
     new Option('--disable-rule [rule...]', 'Disable a specific linter rule')
-      .choices(
-        Object.keys(multiEntryRules).concat(Object.keys(singleEntryRules))
-      )
+      .choices(Object.keys(rules))
       .default([])
   )
   .addOption(

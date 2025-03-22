@@ -2,7 +2,7 @@
 
 import createLinterEngine from './engine.mjs';
 import reporters from './reporters/index.mjs';
-import { multiEntryRules, singleEntryRules } from './rules/index.mjs';
+import rules from './rules/index.mjs';
 
 /**
  * Creates a linter instance to validate ApiDocMetadataEntry entries
@@ -13,19 +13,16 @@ import { multiEntryRules, singleEntryRules } from './rules/index.mjs';
 const createLinter = (dryRun, disabledRules) => {
   /**
    * Retrieves all enabled rules
-   * @param {Record<string, import('./types').LintRule>} rules
+   *
    * @returns {import('./types').LintRule[]}
    */
-  const getEnabledRules = rules => {
+  const getEnabledRules = () => {
     return Object.entries(rules)
       .filter(([ruleName]) => !disabledRules.includes(ruleName))
       .map(([, rule]) => rule);
   };
 
-  const engine = createLinterEngine({
-    multiEntryRules: getEnabledRules(multiEntryRules),
-    singleEntryRules: getEnabledRules(singleEntryRules),
-  });
+  const engine = createLinterEngine(getEnabledRules(disabledRules));
 
   /**
    * Lint issues found during validations

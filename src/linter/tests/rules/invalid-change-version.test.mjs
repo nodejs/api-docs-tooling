@@ -5,16 +5,21 @@ import { assertEntry } from '../fixtures/entries.mjs';
 
 describe('invalidChangeVersion', () => {
   it('should return an empty array if all change versions are valid', () => {
-    const issues = invalidChangeVersion(assertEntry);
+    const issues = invalidChangeVersion([assertEntry]);
 
     deepEqual(issues, []);
   });
 
   it('should return an issue if a change version is invalid', () => {
-    const issues = invalidChangeVersion({
-      ...assertEntry,
-      changes: [...assertEntry.changes, { version: ['v13.9.0', 'REPLACEME'] }],
-    });
+    const issues = invalidChangeVersion([
+      {
+        ...assertEntry,
+        changes: [
+          ...assertEntry.changes,
+          { version: ['v13.9.0', 'REPLACEME'] },
+        ],
+      },
+    ]);
 
     deepEqual(issues, [
       {
