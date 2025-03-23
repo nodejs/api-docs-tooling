@@ -41,7 +41,6 @@
     "dedent": "^1.5.3",
     "estree-util-visit": "^2.0.0",
     "github-slugger": "^2.0.0",
-    "glob": "^11.0.1",
     "hast-util-to-string": "^3.0.1",
     "hastscript": "^9.0.1",
     "html-minifier-terser": "^7.2.0",
