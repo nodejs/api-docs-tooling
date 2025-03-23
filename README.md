@@ -46,6 +46,7 @@ Options:
   --disable-rule [rule...]   Disable a specific linter rule (choices: "invalid-change-version",
                              "missing-change-version", "missing-introduced-in", default: [])
   --lint-dry-run             Run linter in dry-run mode (default: false)
+  --use-git                  Run git commands when needed (default: false)
   -r, --reporter [reporter]  Specify the linter reporter (choices: "console", "github", default: "console")
   -h, --help                 display help for command
 ```
