@@ -1,10 +1,12 @@
+'use strict';
+
 /**
  * Recursively finds the most suitable parent entry for a given `entry` based on heading depth.
  *
  * @param {ApiDocMetadataEntry} entry
  * @param {ApiDocMetadataEntry[]} entries
  * @param {number} startIdx
- * @returns {import('../types.d.ts').HierarchizedEntry}
+ * @returns {import('../generators/legacy-json/types').HierarchizedEntry}
  */
 function findParent(entry, entries, startIdx) {
   // Base case: if we're at the beginning of the list, no valid parent exists.
@@ -44,7 +46,7 @@ function findParent(entry, entries, startIdx) {
  * current index - 1.
  *
  * @param {Array<ApiDocMetadataEntry>} entries
- * @returns {Array<import('../types.d.ts').HierarchizedEntry>}
+ * @returns {Array<import('../generators/legacy-json/types').HierarchizedEntry>}
  */
 export function buildHierarchy(entries) {
   const roots = [];
