@@ -1,6 +1,5 @@
-import { equal, notStrictEqual, ok } from 'node:assert';
 import { describe, it } from 'node:test';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
 import astJs from '../../ast-js/index.mjs';
 import apiLinks from '../index.mjs';
@@ -15,32 +14,18 @@ const sourceFiles = fixtures
 describe('api links', () => {
   describe('should work correctly for all fixtures', () => {
     sourceFiles.forEach(sourceFile => {
-      it(`${basename(sourceFile)}`, async () => {
+      it(`${basename(sourceFile)}`, async t => {
         const astJsResult = await astJs.generate(undefined, {
           input: [sourceFile],
         });
 
         const actualOutput = await apiLinks.generate(astJsResult, {});
 
-        const expectedOutput = JSON.parse(
-          await readFile(sourceFile.replace('.js', '.json'), 'utf8')
-        );
-
-        for (const [k, v] of Object.entries(expectedOutput)) {
-          notStrictEqual(actualOutput[k], undefined, `missing ${k}`);
-          ok(
-            actualOutput[k].endsWith(`/${v}`),
-            `expected ${v}, got ${actualOutput[k]}`
-          );
-
-          delete actualOutput[k];
+        for (const [k, v] of Object.entries(actualOutput)) {
+          actualOutput[k] = v.replace(/.*(?=lib\/)/, '');
         }
 
-        equal(
-          Object.keys(actualOutput).length,
-          0,
-          'actual output has extra keys'
-        );
+        t.assert.snapshot(actualOutput);
       });
     });
   });

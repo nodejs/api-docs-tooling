@@ -1,0 +1,49 @@
+exports[`api links > should work correctly for all fixtures > buffer.js 1`] = `
+{
+  "buffer.Buffer": "lib/buffer.js#L5",
+  "buf.instanceMethod": "lib/buffer.js#L8"
+}
+`;
+
+exports[`api links > should work correctly for all fixtures > class.js 1`] = `
+{
+  "Class": "lib/class.js#L5",
+  "new Class": "lib/class.js#L6",
+  "class.method": "lib/class.js#L7"
+}
+`;
+
+exports[`api links > should work correctly for all fixtures > exports.js 1`] = `
+{
+  "exports.fn1": "lib/exports.js#L8",
+  "exports.fn2": "lib/exports.js#L10",
+  "exports.Buffer": "lib/exports.js#L5",
+  "exports.fn3": "lib/exports.js#L12"
+}
+`;
+
+exports[`api links > should work correctly for all fixtures > mod.js 1`] = `
+{
+  "mod.foo": "lib/mod.js#L5"
+}
+`;
+
+exports[`api links > should work correctly for all fixtures > prototype.js 1`] = `
+{
+  "prototype.Class": "lib/prototype.js#L5",
+  "Class.classMethod": "lib/prototype.js#L8",
+  "class.instanceMethod": "lib/prototype.js#L9"
+}
+`;
+
+exports[`api links > should work correctly for all fixtures > reverse.js 1`] = `
+{
+  "asserts": "lib/reverse.js#L8",
+  "asserts.ok": "lib/reverse.js#L5",
+  "asserts.strictEqual": "lib/reverse.js#L12"
+}
+`;
+
+exports[`api links > should work correctly for all fixtures > root.js 1`] = `
+{}
+`;

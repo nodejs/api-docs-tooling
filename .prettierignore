@@ -1,1 +1,3 @@
+# Tests files
 src/generators/api-links/test/fixtures/
+*.snapshot
