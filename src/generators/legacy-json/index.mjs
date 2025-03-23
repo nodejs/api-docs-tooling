@@ -16,7 +16,7 @@ import { createSectionBuilder } from './utils/buildSection.mjs';
  *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, import('./types.d.ts').Section[]>}
+ * @type {GeneratorMetadata<Input, import('./types.d.ts').Section[]>}
  */
 export default {
   name: 'legacy-json',

@@ -31,7 +31,7 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
  *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, Array<TemplateValues>>}
+ * @type {GeneratorMetadata<Input, Array<TemplateValues>>}
  */
 export default {
   name: 'legacy-html',

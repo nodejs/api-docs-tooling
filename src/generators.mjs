@@ -13,8 +13,8 @@ const availableGenerators = {
 };
 
 /**
- * @typedef {{ ast: import('./generators/types.d.ts').GeneratorMetadata<ApiDocMetadataEntry, ApiDocMetadataEntry>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
- * @typedef {import('./generators/types.d.ts').AvailableGenerators & AstGenerator} AllGenerators A complete set of the available generators, including the AST one
+ * @typedef {{ ast: GeneratorMetadata<ApiDocMetadataEntry, ApiDocMetadataEntry>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
+ * @typedef {AvailableGenerators & AstGenerator} AllGenerators A complete set of the available generators, including the AST one
  * @param markdownInput
  * @param jsInput
  *
@@ -41,14 +41,12 @@ const createGenerator = markdownInput => {
    *
    * @type {{ [K in keyof AllGenerators]: ReturnType<AllGenerators[K]['generate']> }}
    */
-  const cachedGenerators = {
-    ast: Promise.resolve(markdownInput),
-  };
+  const cachedGenerators = { ast: Promise.resolve(markdownInput) };
 
   /**
    * Runs the Generator engine with the provided top-level input and the given generator options
    *
-   * @param {import('./generators/types.d.ts').GeneratorOptions} options The options for the generator runtime
+   * @param {GeneratorOptions} options The options for the generator runtime
    */
   const runGenerators = async ({ generators, ...extra }) => {
     // Note that this method is blocking, and will only execute one generator per-time

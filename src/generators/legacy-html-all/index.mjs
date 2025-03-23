@@ -29,7 +29,7 @@ import { getRemarkRehype } from '../../utils/remark.mjs';
  *
  * @typedef {Array<TemplateValues>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, string>}
+ * @type {GeneratorMetadata<Input, string>}
  */
 export default {
   name: 'legacy-html-all',

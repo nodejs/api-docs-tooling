@@ -30,6 +30,9 @@ declare global {
 
     // A list of all Node.js major versions and their respective release information
     releases: Array<ApiDocReleaseEntry>;
+
+    // Wether to use `git` commands while running the generator
+    useGit: boolean;
   }
 
   export interface GeneratorMetadata<I extends any, O extends any> {

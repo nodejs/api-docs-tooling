@@ -20,7 +20,7 @@ import {
  *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, string>}
+ * @type {GeneratorMetadata<Input, string>}
  */
 export default {
   name: 'addon-verify',

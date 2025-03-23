@@ -9,6 +9,7 @@ import {
 import { extractExports } from './utils/extractExports.mjs';
 import { findDefinitions } from './utils/findDefinitions.mjs';
 import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
+import { DOC_NODE_REPO_URL } from '../../constants.mjs';
 
 /**
  * This generator is responsible for mapping publicly accessible functions in
@@ -20,7 +21,7 @@ import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
  *
  * @typedef {Array<JsProgram>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, Record<string, string>>}
+ * @type {GeneratorMetadata<Input, Record<string, string>>}
  */
 export default {
   name: 'api-links',
@@ -40,7 +41,7 @@ export default {
    * @param {Input} input
    * @param {Partial<GeneratorOptions>} options
    */
-  async generate(input, { output }) {
+  async generate(input, { output, useGit }) {
     /**
      * @type Record<string, string>
      */
@@ -54,9 +55,11 @@ export default {
     if (input.length > 0) {
       const repositoryDirectory = dirname(input[0].path);
 
-      const repository = getBaseGitHubUrl(repositoryDirectory);
+      const repository = useGit
+        ? getBaseGitHubUrl(repositoryDirectory)
+        : DOC_NODE_REPO_URL;
 
-      const tag = getCurrentGitHash(repositoryDirectory);
+      const tag = useGit ? getCurrentGitHash(repositoryDirectory) : 'HEAD';
 
       baseGithubLink = `${repository}/blob/${tag}`;
     }

@@ -7,6 +7,9 @@ export const DOC_NODE_VERSION = process.version;
 export const DOC_NODE_CHANGELOG_URL =
   'https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md';
 
+// The base URL for the Node.js runtime GitHub repository
+export const DOC_NODE_REPO_URL = 'https://github.com/nodejs/node';
+
 // This is the Node.js Base URL for viewing a file within GitHub UI
 export const DOC_NODE_BLOB_BASE_URL =
   'https://github.com/nodejs/node/blob/HEAD/';

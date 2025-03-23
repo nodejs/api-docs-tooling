@@ -68,6 +68,9 @@ program
     new Option('--lint-dry-run', 'Run linter in dry-run mode').default(false)
   )
   .addOption(
+    new Option('--use-git', 'Run git commands when needed').default(false)
+  )
+  .addOption(
     new Option('-r, --reporter [reporter]', 'Specify the linter reporter')
       .choices(Object.keys(reporters))
       .default('console')
@@ -85,6 +88,7 @@ program
  * @property {string} changelog Specifies the path to the Node.js CHANGELOG.md file.
  * @property {string[]} disableRule Specifies the linter rules to disable.
  * @property {boolean} lintDryRun Specifies whether the linter should run in dry-run mode.
+ * @property {boolean} useGit Specifies whether the parser should execute optional git commands. (Should only be used within a git repo)
  * @property {keyof reporters} reporter Specifies the linter reporter.
  *
  * @name ProgramOptions
@@ -100,6 +104,7 @@ const {
   changelog,
   disableRule,
   lintDryRun,
+  useGit,
   reporter,
 } = program.opts();
 
@@ -117,6 +122,7 @@ const { runGenerators } = createGenerator(parsedApiDocs);
 // Retrieves Node.js release metadata from a given Node.js version and CHANGELOG.md file
 const { getAllMajors } = createNodeReleases(changelog);
 
+// Runs the Linter on the parsed API docs
 linter.lintAll(parsedApiDocs);
 
 if (target && output) {
@@ -131,9 +137,13 @@ if (target && output) {
     version: coerce(version),
     // A list of all Node.js major versions with LTS status
     releases: await getAllMajors(),
+    // If it should run git commands when needed
+    // (should only be used within a git repo)
+    useGit,
   });
 }
 
+// Reports Lint Content
 linter.report(reporter);
 
 exit(Number(linter.hasError()));

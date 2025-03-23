@@ -16,7 +16,7 @@ import { DOC_SLUG_ENVIRONMENT, DOC_SLUG_OPTIONS } from '../../constants.mjs';
  *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, string>}
+ * @type {GeneratorMetadata<Input, string>}
  */
 export default {
   name: 'man-page',

@@ -36,10 +36,16 @@ CLI tool to generate API documentation of a Node.js project.
 
 Options:
   -i, --input [patterns...]  Specify input file patterns using glob syntax
-  --ignore [patterns...]     Specify files to be ignored from the input using glob syntax
+  --ignore [patterns...]     Specify which input files to ignore using glob syntax
   -o, --output <path>        Specify the relative or absolute output directory
-  -v, --version <semver>     Specify the target version of Node.js, semver compliant (default: "v22.6.0")
-  -c, --changelog <url>      Specify the path (file: or https://) to the CHANGELOG.md file (default: "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
-  -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html", "legacy-html-all", "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links", "orama-db")
+  -v, --version <semver>     Specify the target version of Node.js, semver compliant (default: "v22.11.0")
+  -c, --changelog <url>      Specify the path (file: or https://) to the CHANGELOG.md file (default:
+                             "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
+  -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html", "legacy-html-all",
+                             "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links", "orama-db")
+  --disable-rule [rule...]   Disable a specific linter rule (choices: "invalid-change-version",
+                             "missing-change-version", "missing-introduced-in", default: [])
+  --lint-dry-run             Run linter in dry-run mode (default: false)
+  -r, --reporter [reporter]  Specify the linter reporter (choices: "console", "github", default: "console")
   -h, --help                 display help for command
 ```

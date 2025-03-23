@@ -12,7 +12,7 @@ import { createSectionBuilder } from '../legacy-json/utils/buildSection.mjs';
  *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, import('./types.d.ts').OramaDb>}
+ * @type {GeneratorMetadata<Input, import('./types.d.ts').OramaDb>}
  */
 export default {
   name: 'orama-db',
