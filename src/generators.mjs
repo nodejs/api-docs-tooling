@@ -3,7 +3,7 @@
 import publicGenerators from './generators/index.mjs';
 import astJs from './generators/ast-js/index.mjs';
 import oramaDb from './generators/orama-db/index.mjs';
-import { mkdirSync, statSync } from 'node:fs';
+import { mkdir, stat } from 'node:fs/promises';
 
 const availableGenerators = {
   ...publicGenerators,
@@ -53,12 +53,12 @@ const createGenerator = markdownInput => {
    */
   const runGenerators = async ({ generators, ...extra }) => {
     try {
-      if (!statSync(extra.output).isDirectory()) {
+      if (!(await stat(extra.output).isDirectory())) {
         throw new Error('Output is not a directory');
       }
     } catch (err) {
       if (err.code === 'ENOENT') {
-        mkdirSync(extra.output, { recursive: true });
+        mkdir(extra.output, { recursive: true });
       }
     }
 
