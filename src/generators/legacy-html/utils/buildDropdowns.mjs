@@ -10,7 +10,7 @@ import {
 import {
   DOC_API_BASE_URL_VERSION,
   DOC_API_BLOB_EDIT_BASE_URL,
-} from '../../../constants.mjs';
+} from '../constants.mjs';
 
 /**
  * Builds the Dropdown for the current Table of Contents

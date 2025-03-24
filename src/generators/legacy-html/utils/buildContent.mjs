@@ -8,7 +8,7 @@ import buildExtraContent from './buildExtraContent.mjs';
 
 import createQueries from '../../../queries.mjs';
 
-import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
+import { DOC_NODE_BLOB_BASE_URL } from '../constants.mjs';
 
 /**
  * Builds a Markdown heading for a given node
