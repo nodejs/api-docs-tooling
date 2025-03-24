@@ -72,7 +72,7 @@ program
       .choices(Object.keys(reporters))
       .default('console')
   )
-  .parse(argv);
+  .parse(process.argv);
 
 /**
  * @typedef {keyof generators} Target A list of the available generator names.
