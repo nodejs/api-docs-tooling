@@ -25,7 +25,7 @@ export const duplicateStabilityNodes = entries => {
         message: LINT_MESSAGES.duplicateStabilityNode,
         location: {
           path: entry.api_doc_source,
-          position: entry.yaml_position,
+          position: entry.stability.children[0].children[0].position,
         },
       });
     } else {
