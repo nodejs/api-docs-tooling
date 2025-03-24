@@ -10,7 +10,7 @@ import createMetadata from '../metadata.mjs';
 import createQueries from '../queries.mjs';
 
 import { getRemark } from '../utils/remark.mjs';
-import { createNodeSlugger } from '../utils/slugger.mjs';
+import { createNodeSlugger } from '../utils/slugger/index.mjs';
 
 /**
  * Creates an API doc parser for a given Markdown API doc file
