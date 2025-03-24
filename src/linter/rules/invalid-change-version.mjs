@@ -1,42 +1,38 @@
 import { LINT_MESSAGES } from '../constants.mjs';
 import { valid } from 'semver';
+import { env } from 'node:process';
+
+const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
 
 /**
- * Checks if any change version is invalid
+ * Determines if a given version is invalid.
  *
- * @param {ApiDocMetadataEntry[]} entries
- * @returns {Array<import('../types').LintIssue>}
+ * @param {string} version - The version to check.
+ * @returns {boolean} True if the version is invalid, false otherwise.
  */
-export const invalidChangeVersion = entries => {
-  const issues = [];
+const isInvalid = NODE_RELEASED_VERSIONS
+  ? version =>
+      version !== 'REPLACEME' && !NODE_RELEASED_VERSIONS.includes(version)
+  : version => version !== 'REPLACEME' && !valid(version);
 
-  for (const entry of entries) {
-    if (entry.changes.length === 0) continue;
-
-    const allVersions = entry.changes
-      .filter(change => change.version)
-      .flatMap(change =>
-        Array.isArray(change.version) ? change.version : [change.version]
-      );
-
-    const invalidVersions = allVersions.filter(
-      version => valid(version) === null
-    );
-
-    issues.push(
-      ...invalidVersions.map(version => ({
-        level: 'warn',
-        message: LINT_MESSAGES.invalidChangeVersion.replace(
-          '{{version}}',
-          version
-        ),
-        location: {
-          path: entry.api_doc_source,
-          position: entry.yaml_position,
-        },
-      }))
-    );
-  }
-
-  return issues;
-};
+/**
+ * Checks if any change version is invalid.
+ *
+ * @param {ApiDocMetadataEntry[]} entries - The metadata entries to check.
+ * @returns {Array<import('../types').LintIssue>} List of lint issues found.
+ */
+export const invalidChangeVersion = entries =>
+  entries.flatMap(({ changes, api_doc_source, yaml_position }) =>
+    changes.flatMap(({ version }) =>
+      (Array.isArray(version) ? version : [version])
+        .filter(isInvalid)
+        .map(version => ({
+          level: 'error',
+          message: LINT_MESSAGES.invalidChangeVersion.replace(
+            '{{version}}',
+            version
+          ),
+          location: { path: api_doc_source, position: yaml_position },
+        }))
+    )
+  );

@@ -39,6 +39,11 @@ export const assertEntry = {
       'pr-url': 'https://github.com/nodejs/node/pull/34001',
       description: "Exposed as `require('node:assert/strict')`.",
     },
+    {
+      version: 'REPLACEME',
+      'pr-url': 'https://github.com/nodejs/node/pull/12345',
+      description: 'This is a test entry.',
+    },
   ],
   heading: {
     type: 'heading',
