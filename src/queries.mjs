@@ -11,7 +11,7 @@ import {
   parseHeadingIntoMetadata,
   parseYAMLIntoMetadata,
   transformTypeToReferenceLink,
-} from './utils/parser.mjs';
+} from './utils/parser/index.mjs';
 import { getRemark } from './utils/remark.mjs';
 
 /**
