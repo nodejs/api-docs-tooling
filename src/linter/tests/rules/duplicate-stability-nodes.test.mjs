@@ -11,9 +11,10 @@ const createEntry = (
   position = { line: 1, column: 1 }
 ) => ({
   heading: { data: { depth } },
-  stability: { children: [{ data: { index: stabilityIndex } }] },
+  stability: {
+    children: [{ data: { index: stabilityIndex }, children: [{ position }] }],
+  },
   api_doc_source: source,
-  yaml_position: position,
 });
 
 describe('duplicateStabilityNodes', () => {
