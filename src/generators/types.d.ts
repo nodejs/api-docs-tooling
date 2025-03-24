@@ -1,4 +1,3 @@
-import type { GitUrl } from 'git-url-parse';
 import type { SemVer } from 'semver';
 import type { ApiDocReleaseEntry } from '../types';
 import type availableGenerators from './index.mjs';
@@ -32,8 +31,11 @@ declare global {
     // A list of all Node.js major versions and their respective release information
     releases: Array<ApiDocReleaseEntry>;
 
-    // The current Node.js's git ref to be used within the API doc generation
-    gitRef: GitUrl;
+    // An URL containing a git ref URL pointing to the commit or ref that was used
+    // to generate the API docs. This is used to link to the source code of the
+    // i.e. https://github.com/nodejs/node/tree/2cb1d07e0f6d9456438016bab7db4688ab354fd2
+    // i.e. https://gitlab.com/someone/node/tree/HEAD
+    gitRef: string;
   }
 
   export interface GeneratorMetadata<I extends any, O extends any> {

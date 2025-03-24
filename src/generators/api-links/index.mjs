@@ -42,8 +42,6 @@ export default {
      */
     const definitions = {};
 
-    const gitBaseUrl = `https://${gitRef.host}/${gitRef.full_name}/blob/${gitRef.commit ?? 'HEAD'}`;
-
     input.forEach(program => {
       /**
        * Mapping of definitions to their line number
@@ -62,7 +60,7 @@ export default {
 
       checkIndirectReferences(program, exports, nameToLineNumberMap);
 
-      const fullGitUrl = `${gitBaseUrl}/lib/${baseName}.js`;
+      const fullGitUrl = `${gitRef}/lib/${baseName}.js`;
 
       // Add the exports we found in this program to our output
       Object.keys(nameToLineNumberMap).forEach(key => {

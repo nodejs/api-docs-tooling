@@ -4,7 +4,6 @@ import { resolve } from 'node:path';
 import { argv, exit } from 'node:process';
 
 import { Command, Option } from 'commander';
-import parseGitUrl from 'git-url-parse';
 
 import { coerce } from 'semver';
 import { DOC_NODE_CHANGELOG_URL, DOC_NODE_VERSION } from '../src/constants.mjs';
@@ -69,7 +68,7 @@ program
     new Option('--lint-dry-run', 'Run linter in dry-run mode').default(false)
   )
   .addOption(
-    new Option('--git-ref', 'The current Node.js git ref').default(
+    new Option('--git-ref', 'A git ref/commit URL pointing to Node.js').default(
       'https://github.com/nodejs/node/tree/HEAD'
     )
   )
@@ -116,8 +115,6 @@ const linter = createLinter(lintDryRun, disableRule);
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();
 
-const parsedGitRef = parseGitUrl(gitRef);
-
 const apiDocFiles = await loadFiles(input, ignore);
 
 const parsedApiDocs = await parseApiDocs(apiDocFiles);
@@ -142,9 +139,9 @@ if (target) {
     version: coerce(version),
     // A list of all Node.js major versions with LTS status
     releases: await getAllMajors(),
-    // The current Node.js's git ref to be used within API
-    // doc generation. This is used only to stamp some files.
-    gitRef: parsedGitRef,
+    // An URL containing a git ref URL pointing to the commit or ref that was used
+    // to generate the API docs. This is used to link to the source code of the
+    gitRef,
   });
 }
 

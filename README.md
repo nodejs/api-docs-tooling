@@ -43,10 +43,10 @@ Options:
                              "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
   -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html", "legacy-html-all",
                              "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links", "orama-db")
-  --disable-rule [rule...]   Disable a specific linter rule (choices: "invalid-change-version", "missing-change-version",
-                             "missing-introduced-in", default: [])
+  --disable-rule [rule...]   Disable a specific linter rule (choices: "invalid-change-version",
+                             "missing-change-version", "missing-introduced-in", default: [])
   --lint-dry-run             Run linter in dry-run mode (default: false)
-  --git-ref                  The current Node.js git ref
+  --git-ref                  A git ref/commit URL pointing to Node.js
   -r, --reporter [reporter]  Specify the linter reporter (choices: "console", "github", default: "console")
   -h, --help                 display help for command
 ```
