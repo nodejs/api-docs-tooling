@@ -95,9 +95,3 @@ export const DOC_SLUG_OPTIONS = 'options';
 // This slug should reference the section where the available
 // environment variables are defined.
 export const DOC_SLUG_ENVIRONMENT = 'environment-variables-1';
-
-export const LINT_MESSAGES = {
-  missingIntroducedIn: "Missing 'introduced_in' field in the API doc entry",
-  missingChangeVersion: 'Missing version field in the API doc entry',
-  invalidChangeVersion: 'Invalid version number: {{version}}',
-};
