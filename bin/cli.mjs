@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { resolve } from 'node:path';
-import { argv, exit } from 'node:process';
+import process from 'node:process';
 
 import { Command, Option } from 'commander';
 
@@ -77,7 +77,7 @@ program
       .choices(Object.keys(reporters))
       .default('console')
   )
-  .parse(argv);
+  .parse(process.argv);
 
 /**
  * @typedef {keyof generators} Target A list of the available generator names.
@@ -148,4 +148,4 @@ if (target) {
 // Reports Lint Content
 linter.report(reporter);
 
-exit(Number(linter.hasError()));
+process.exitCode = Number(linter.hasError());
