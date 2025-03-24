@@ -2,7 +2,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
-import { globSync } from 'node:fs';
+import { globSync } from 'glob';
 
 import { VFile } from 'vfile';
 
