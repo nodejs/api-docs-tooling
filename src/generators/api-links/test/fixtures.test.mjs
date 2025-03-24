@@ -19,7 +19,9 @@ describe('api links', () => {
           input: [sourceFile],
         });
 
-        const actualOutput = await apiLinks.generate(astJsResult, {});
+        const actualOutput = await apiLinks.generate(astJsResult, {
+          gitRef: 'https://github.com/nodejs/node/tree/HEAD',
+        });
 
         for (const [k, v] of Object.entries(actualOutput)) {
           actualOutput[k] = v.replace(/.*(?=lib\/)/, '');

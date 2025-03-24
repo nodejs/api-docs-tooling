@@ -11,7 +11,7 @@ import createJsParser from '../../parsers/javascript.mjs';
  *
  * @typedef {unknown} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, Array<JsProgram>>}
+ * @type {GeneratorMetadata<Input, Array<JsProgram>>}
  */
 export default {
   name: 'ast-js',

@@ -1,11 +1,7 @@
 'use strict';
 
-import { basename, dirname, join } from 'node:path';
+import { basename, join } from 'node:path';
 import { writeFile } from 'node:fs/promises';
-import {
-  getBaseGitHubUrl,
-  getCurrentGitHash,
-} from './utils/getBaseGitHubUrl.mjs';
 import { extractExports } from './utils/extractExports.mjs';
 import { findDefinitions } from './utils/findDefinitions.mjs';
 import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
@@ -20,7 +16,7 @@ import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
  *
  * @typedef {Array<JsProgram>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, Record<string, string>>}
+ * @type {GeneratorMetadata<Input, Record<string, string>>}
  */
 export default {
   name: 'api-links',
@@ -40,56 +36,37 @@ export default {
    * @param {Input} input
    * @param {Partial<GeneratorOptions>} options
    */
-  async generate(input, { output }) {
+  async generate(input, { output, gitRef }) {
     /**
      * @type Record<string, string>
      */
     const definitions = {};
 
-    /**
-     * @type {string}
-     */
-    let baseGithubLink;
-
-    if (input.length > 0) {
-      const repositoryDirectory = dirname(input[0].path);
-
-      const repository = getBaseGitHubUrl(repositoryDirectory);
-
-      const tag = getCurrentGitHash(repositoryDirectory);
-
-      baseGithubLink = `${repository}/blob/${tag}`;
-    }
-
     input.forEach(program => {
       /**
        * Mapping of definitions to their line number
+       *
        * @type {Record<string, number>}
        * @example { 'someclass.foo': 10 }
        */
       const nameToLineNumberMap = {};
 
       // `http.js` -> `http`
-      const programBasename = basename(program.path, '.js');
+      const baseName = basename(program.path, '.js');
 
-      const exports = extractExports(
-        program,
-        programBasename,
-        nameToLineNumberMap
-      );
+      const exports = extractExports(program, baseName, nameToLineNumberMap);
 
-      findDefinitions(program, programBasename, nameToLineNumberMap, exports);
+      findDefinitions(program, baseName, nameToLineNumberMap, exports);
 
       checkIndirectReferences(program, exports, nameToLineNumberMap);
 
-      const githubLink =
-        `${baseGithubLink}/lib/${programBasename}.js`.replaceAll('\\', '/');
+      const fullGitUrl = `${gitRef}/lib/${baseName}.js`;
 
       // Add the exports we found in this program to our output
       Object.keys(nameToLineNumberMap).forEach(key => {
         const lineNumber = nameToLineNumberMap[key];
 
-        definitions[key] = `${githubLink}#L${lineNumber}`;
+        definitions[key] = `${fullGitUrl}#L${lineNumber}`;
       });
     });
 

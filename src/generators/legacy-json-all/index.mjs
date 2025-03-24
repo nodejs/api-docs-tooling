@@ -9,7 +9,7 @@ import { join } from 'node:path';
  *
  * @typedef {Array<import('../legacy-json/types.d.ts').Section>} Input
  *
- * @type {import('../types.d.ts').GeneratorMetadata<Input, import('./types.d.ts').Output>}
+ * @type {GeneratorMetadata<Input, import('./types.d.ts').Output>}
  */
 export default {
   name: 'legacy-json-all',
