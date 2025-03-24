@@ -1,6 +1,7 @@
+import type { GitUrl } from 'git-url-parse';
 import type { SemVer } from 'semver';
-import type availableGenerators from './index.mjs';
 import type { ApiDocReleaseEntry } from '../types';
+import type availableGenerators from './index.mjs';
 
 declare global {
   // All available generators as an inferable type, to allow Generator interfaces
@@ -31,8 +32,8 @@ declare global {
     // A list of all Node.js major versions and their respective release information
     releases: Array<ApiDocReleaseEntry>;
 
-    // Wether to use `git` commands while running the generator
-    useGit: boolean;
+    // The current Node.js's git ref to be used within the API doc generation
+    gitRef: GitUrl;
   }
 
   export interface GeneratorMetadata<I extends any, O extends any> {

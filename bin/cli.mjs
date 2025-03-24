@@ -4,17 +4,18 @@ import { resolve } from 'node:path';
 import { argv, exit } from 'node:process';
 
 import { Command, Option } from 'commander';
+import parseGitUrl from 'git-url-parse';
 
 import { coerce } from 'semver';
 import { DOC_NODE_CHANGELOG_URL, DOC_NODE_VERSION } from '../src/constants.mjs';
 import createGenerator from '../src/generators.mjs';
 import generators from '../src/generators/index.mjs';
-import createMarkdownLoader from '../src/loaders/markdown.mjs';
-import createMarkdownParser from '../src/parsers/markdown.mjs';
-import createNodeReleases from '../src/releases.mjs';
 import createLinter from '../src/linter/index.mjs';
 import reporters from '../src/linter/reporters/index.mjs';
 import rules from '../src/linter/rules/index.mjs';
+import createMarkdownLoader from '../src/loaders/markdown.mjs';
+import createMarkdownParser from '../src/parsers/markdown.mjs';
+import createNodeReleases from '../src/releases.mjs';
 
 const availableGenerators = Object.keys(generators);
 
@@ -68,7 +69,9 @@ program
     new Option('--lint-dry-run', 'Run linter in dry-run mode').default(false)
   )
   .addOption(
-    new Option('--use-git', 'Run git commands when needed').default(false)
+    new Option('--git-ref', 'The current Node.js git ref').default(
+      'https://github.com/nodejs/node/tree/HEAD'
+    )
   )
   .addOption(
     new Option('-r, --reporter [reporter]', 'Specify the linter reporter')
@@ -104,7 +107,7 @@ const {
   changelog,
   disableRule,
   lintDryRun,
-  useGit,
+  gitRef,
   reporter,
 } = program.opts();
 
@@ -112,6 +115,8 @@ const linter = createLinter(lintDryRun, disableRule);
 
 const { loadFiles } = createMarkdownLoader();
 const { parseApiDocs } = createMarkdownParser();
+
+const parsedGitRef = parseGitUrl(gitRef);
 
 const apiDocFiles = await loadFiles(input, ignore);
 
@@ -125,21 +130,21 @@ const { getAllMajors } = createNodeReleases(changelog);
 // Runs the Linter on the parsed API docs
 linter.lintAll(parsedApiDocs);
 
-if (target && output) {
+if (target) {
   await runGenerators({
     // A list of target modes for the API docs parser
     generators: target,
     // Resolved `input` to be used
     input: input,
     // Resolved `output` path to be used
-    output: resolve(output),
+    output: output && resolve(output),
     // Resolved SemVer of current Node.js version
     version: coerce(version),
     // A list of all Node.js major versions with LTS status
     releases: await getAllMajors(),
-    // If it should run git commands when needed
-    // (should only be used within a git repo)
-    useGit,
+    // The current Node.js's git ref to be used within API
+    // doc generation. This is used only to stamp some files.
+    gitRef: parsedGitRef,
   });
 }
 
