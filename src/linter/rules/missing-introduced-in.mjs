@@ -1,4 +1,4 @@
-import { LINT_MESSAGES } from '../../constants.mjs';
+import { LINT_MESSAGES } from '../constants.mjs';
 
 /**
  * Checks if `introduced_in` field is missing

@@ -5,7 +5,7 @@ import {
   parseYAMLIntoMetadata,
   transformTypeToReferenceLink,
   parseHeadingIntoMetadata,
-} from '../parser.mjs';
+} from '../parser/index.mjs';
 
 describe('transformTypeToReferenceLink', () => {
   it('should transform a JavaScript primitive type into a Markdown link', () => {

@@ -10,7 +10,7 @@ import {
   DOC_TYPES_MAPPING_NODE_MODULES,
   DOC_TYPES_MAPPING_OTHER,
   DOC_TYPES_MAPPING_PRIMITIVES,
-} from '../constants.mjs';
+} from './constants.mjs';
 
 /**
  * This method replaces plain text Types within the Markdown content into Markdown links

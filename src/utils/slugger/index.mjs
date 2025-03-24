@@ -2,7 +2,7 @@
 
 import GitHubSlugger from 'github-slugger';
 
-import { DOC_API_SLUGS_REPLACEMENTS } from '../constants.mjs';
+import { DOC_API_SLUGS_REPLACEMENTS } from './constants.mjs';
 
 /**
  * Creates a modified version of the GitHub Slugger

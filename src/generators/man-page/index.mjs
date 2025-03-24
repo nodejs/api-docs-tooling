@@ -8,7 +8,7 @@ import {
   convertEnvVarToMandoc,
 } from './utils/converter.mjs';
 
-import { DOC_SLUG_ENVIRONMENT, DOC_SLUG_OPTIONS } from '../../constants.mjs';
+import { DOC_SLUG_ENVIRONMENT, DOC_SLUG_OPTIONS } from './constants.mjs';
 
 /**
  * This generator generates a man page version of the CLI.md file.

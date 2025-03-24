@@ -5,14 +5,14 @@ import { SKIP } from 'unist-util-visit';
 
 import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
 
-import { transformNodesToString } from './utils/unist.mjs';
+import { transformNodesToString } from '../unist.mjs';
 
 import {
   parseHeadingIntoMetadata,
   parseYAMLIntoMetadata,
   transformTypeToReferenceLink,
-} from './utils/parser.mjs';
-import { getRemark } from './utils/remark.mjs';
+} from '../parser/index.mjs';
+import { getRemark } from '../remark.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
@@ -25,7 +25,7 @@ const createQueries = () => {
    * and then parsing it into an API Metadata object and updating the current Metadata
    *
    * @param {import('@types/mdast').Html} node A HTML node containing the YAML content
-   * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
+   * @param {ReturnType<import('../../metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addYAMLMetadata = (node, apiEntryMetadata) => {
     const sanitizedString = node.value.replace(
@@ -43,7 +43,7 @@ const createQueries = () => {
    * Parse a Heading node into metadata and updates the current metadata
    *
    * @param {import('@types/mdast').Heading} node A Markdown heading node
-   * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
+   * @param {ReturnType<import('../../metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const setHeadingMetadata = (node, apiEntryMetadata) => {
     const stringifiedHeading = transformNodesToString(node.children);
@@ -122,7 +122,7 @@ const createQueries = () => {
    * Parses a Stability Index Entry and updates the current Metadata
    *
    * @param {import('@types/mdast').Blockquote} node Thead Link Reference Node
-   * @param {ReturnType<import('./metadata.mjs').default>} apiEntryMetadata The API entry Metadata
+   * @param {ReturnType<import('../../metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addStabilityMetadata = (node, apiEntryMetadata) => {
     // `node` is a `blockquote` node, and the first child will always be
