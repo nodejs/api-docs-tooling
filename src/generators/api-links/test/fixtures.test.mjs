@@ -19,7 +19,34 @@ describe('api links', () => {
           input: [sourceFile],
         });
 
-        const actualOutput = await apiLinks.generate(astJsResult, {});
+        const actualOutput = await apiLinks.generate(astJsResult, {
+          gitRef: {
+            protocols: ['https'],
+            protocol: 'https',
+            port: '',
+            resource: 'github.com',
+            host: 'github.com',
+            user: '',
+            password: '',
+            pathname: '/nodejs/node/tree/HEAD',
+            hash: '',
+            search: '',
+            href: 'https://github.com/nodejs/node/tree/HEAD',
+            query: {},
+            parse_failed: false,
+            token: '',
+            source: 'github.com',
+            git_suffix: false,
+            name: 'node',
+            owner: 'nodejs',
+            commit: 'HEAD',
+            ref: 'HEAD',
+            filepathtype: 'tree',
+            filepath: '',
+            organization: 'nodejs',
+            full_name: 'nodejs/node',
+          },
+        });
 
         for (const [k, v] of Object.entries(actualOutput)) {
           actualOutput[k] = v.replace(/.*(?=lib\/)/, '');
