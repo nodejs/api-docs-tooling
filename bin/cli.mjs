@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { resolve } from 'node:path';
-import { argv, exit } from 'node:process';
+import { argv } from 'node:process';
 
 import { Command, Option } from 'commander';
 
