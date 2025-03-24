@@ -1,4 +1,4 @@
-import { LINT_MESSAGES } from '../../constants.mjs';
+import { LINT_MESSAGES } from '../constants.mjs';
 
 /**
  * Checks if there are multiple stability nodes within a chain.

@@ -15,9 +15,6 @@ import rules from '../src/linter/rules/index.mjs';
 import createMarkdownLoader from '../src/loaders/markdown.mjs';
 import createMarkdownParser from '../src/parsers/markdown.mjs';
 import createNodeReleases from '../src/releases.mjs';
-import createLinter from '../src/linter/index.mjs';
-import reporters from '../src/linter/reporters/index.mjs';
-import rules from '../src/linter/rules/index.mjs';
 
 const availableGenerators = Object.keys(generators);
 

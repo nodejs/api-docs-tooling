@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import { deepStrictEqual } from 'assert';
 import { duplicateStabilityNodes } from '../../rules/duplicate-stability-nodes.mjs';
-import { LINT_MESSAGES } from '../../../constants.mjs';
+import { LINT_MESSAGES } from '../../constants.mjs';
 
 // Mock data structure for creating test entries
 const createEntry = (
