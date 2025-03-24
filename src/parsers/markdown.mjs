@@ -7,7 +7,7 @@ import { selectAll } from 'unist-util-select';
 import { SKIP, visit } from 'unist-util-visit';
 
 import createMetadata from '../metadata.mjs';
-import createQueries from '../queries.mjs';
+import createQueries from '../utils/queries/index.mjs';
 
 import { getRemark } from '../utils/remark.mjs';
 import { createNodeSlugger } from '../utils/slugger/index.mjs';

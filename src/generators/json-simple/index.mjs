@@ -5,7 +5,7 @@ import { join } from 'node:path';
 
 import { remove } from 'unist-util-remove';
 
-import createQueries from '../../queries.mjs';
+import createQueries from '../../utils/queries/index.mjs';
 import { getRemark } from '../../utils/remark.mjs';
 
 /**
