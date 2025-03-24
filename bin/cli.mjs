@@ -136,4 +136,4 @@ if (target && output) {
 
 linter.report(reporter);
 
-exit(Number(linter.hasError()));
+process.exitCode = Number(linter.hasError());
