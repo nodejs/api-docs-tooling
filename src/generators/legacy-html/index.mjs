@@ -88,7 +88,7 @@ export default {
       return apiTemplate
         .replace('__ID__', api)
         .replace(/__FILENAME__/g, api)
-        .replace('__SECTION__', section)
+        .replace(/__SECTION__/g, section)
         .replace(/__VERSION__/g, version)
         .replace(/__TOC__/g, tableOfContents.wrapToC(toc))
         .replace(/__GTOC__/g, nav)
