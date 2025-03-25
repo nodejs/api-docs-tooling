@@ -5,16 +5,18 @@ import { assertEntry } from '../fixtures/entries.mjs';
 
 describe('missingChangeVersion', () => {
   it('should return an empty array if all change versions are non-empty', () => {
-    const issues = missingChangeVersion(assertEntry);
+    const issues = missingChangeVersion([assertEntry]);
 
     deepEqual(issues, []);
   });
 
   it('should return an issue if a change version is missing', () => {
-    const issues = missingChangeVersion({
-      ...assertEntry,
-      changes: [...assertEntry.changes, { version: undefined }],
-    });
+    const issues = missingChangeVersion([
+      {
+        ...assertEntry,
+        changes: [...assertEntry.changes, { version: undefined }],
+      },
+    ]);
 
     deepEqual(issues, [
       {

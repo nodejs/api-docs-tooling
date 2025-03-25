@@ -11,13 +11,13 @@ describe('createLinterEngine', () => {
 
     const engine = createLinterEngine([rule1, rule2]);
 
-    engine.lint(assertEntry);
+    engine.lintAll([assertEntry]);
 
     assert.strictEqual(rule1.mock.callCount(), 1);
     assert.strictEqual(rule2.mock.callCount(), 1);
 
-    assert.deepEqual(rule1.mock.calls[0].arguments, [assertEntry]);
-    assert.deepEqual(rule2.mock.calls[0].arguments, [assertEntry]);
+    assert.deepEqual(rule1.mock.calls[0].arguments, [[assertEntry]]);
+    assert.deepEqual(rule2.mock.calls[0].arguments, [[assertEntry]]);
   });
 
   it('should return the aggregated issues from all rules', () => {
@@ -26,7 +26,7 @@ describe('createLinterEngine', () => {
 
     const engine = createLinterEngine([rule1, rule2]);
 
-    const issues = engine.lint(assertEntry);
+    const issues = engine.lintAll([assertEntry]);
 
     assert.equal(issues.length, 3);
     assert.deepEqual(issues, [infoIssue, warnIssue, errorIssue]);
@@ -37,7 +37,7 @@ describe('createLinterEngine', () => {
 
     const engine = createLinterEngine([rule]);
 
-    const issues = engine.lint(assertEntry);
+    const issues = engine.lintAll([assertEntry]);
 
     assert.deepEqual(issues, []);
   });

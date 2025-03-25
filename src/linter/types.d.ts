@@ -13,6 +13,6 @@ export interface LintIssue {
   location: LintIssueLocation;
 }
 
-type LintRule = (input: ApiDocMetadataEntry) => LintIssue[];
+type LintRule = (input: ApiDocMetadataEntry[]) => LintIssue[];
 
 export type Reporter = (msg: LintIssue) => void;
