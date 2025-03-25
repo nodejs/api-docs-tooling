@@ -21,10 +21,10 @@ describe('invalidChangeVersion', () => {
       {
         env: {
           NODE_RELEASED_VERSIONS: [
-            'v9.9.0',
-            'v13.9.0',
-            'v12.16.2',
-            'v15.0.0',
+            '9.9.0',
+            '13.9.0',
+            '12.16.2',
+            '15.0.0',
             'REPLACEME',
             'SOME_OTHER_RELEASED_VERSION',
           ].join(','),

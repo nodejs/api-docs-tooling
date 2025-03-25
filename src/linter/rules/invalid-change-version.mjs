@@ -12,7 +12,8 @@ const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
  */
 const isInvalid = NODE_RELEASED_VERSIONS
   ? version =>
-      version !== 'REPLACEME' && !NODE_RELEASED_VERSIONS.includes(version)
+      version !== 'REPLACEME' &&
+      !NODE_RELEASED_VERSIONS.includes(version.replace(/^v/, ''))
   : version => version !== 'REPLACEME' && !valid(version);
 
 /**
