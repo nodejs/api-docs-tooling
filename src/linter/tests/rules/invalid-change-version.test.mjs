@@ -65,4 +65,30 @@ describe('invalidChangeVersion', () => {
       },
     ]);
   });
+
+  it('should return an issue if a change version contains a REPLACEME and a version', () => {
+    const issues = invalidChangeVersion([
+      {
+        ...assertEntry,
+        changes: [
+          ...assertEntry.changes,
+          { version: ['v24.0.0', 'REPLACEME'] },
+        ],
+      },
+    ]);
+
+    deepEqual(issues, [
+      {
+        level: 'error',
+        location: {
+          path: 'doc/api/assert.md',
+          position: {
+            start: { column: 1, line: 7, offset: 103 },
+            end: { column: 35, line: 7, offset: 137 },
+          },
+        },
+        message: 'Invalid version number: REPLACEME',
+      },
+    ]);
+  });
 });
