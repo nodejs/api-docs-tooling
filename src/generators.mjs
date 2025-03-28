@@ -3,6 +3,7 @@
 import publicGenerators from './generators/index.mjs';
 import astJs from './generators/ast-js/index.mjs';
 import oramaDb from './generators/orama-db/index.mjs';
+import { mkdir, stat } from 'node:fs/promises';
 
 const availableGenerators = {
   ...publicGenerators,
@@ -49,6 +50,16 @@ const createGenerator = markdownInput => {
    * @param {GeneratorOptions} options The options for the generator runtime
    */
   const runGenerators = async ({ generators, ...extra }) => {
+    try {
+      if (!(await stat(extra.output).isDirectory())) {
+        throw new Error('Output is not a directory');
+      }
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        mkdir(extra.output, { recursive: true });
+      }
+    }
+
     // Note that this method is blocking, and will only execute one generator per-time
     // but it ensures all dependencies are resolved, and that multiple bottom-level generators
     // can reuse the already parsed content from the top-level/dependency generators
