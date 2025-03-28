@@ -113,7 +113,7 @@ const {
 const linter = createLinter(lintDryRun, disableRule);
 
 const { loadFiles } = createMarkdownLoader();
-const { parseApiDocs } = createMarkdownParser();
+const { parseApiDocs } = createMarkdownParser(linter);
 
 const apiDocFiles = await loadFiles(input, ignore);
 
@@ -123,9 +123,6 @@ const { runGenerators } = createGenerator(parsedApiDocs);
 
 // Retrieves Node.js release metadata from a given Node.js version and CHANGELOG.md file
 const { getAllMajors } = createNodeReleases(changelog);
-
-// Runs the Linter on the parsed API docs
-linter.lintAll(parsedApiDocs);
 
 if (target) {
   await runGenerators({

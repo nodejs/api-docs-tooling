@@ -5,10 +5,11 @@ import reporters from './reporters/index.mjs';
 import rules from './rules/index.mjs';
 
 /**
- * Creates a linter instance to validate ApiDocMetadataEntry entries
+ * Creates a linter instance to validate mdast trees
  *
  * @param {boolean} dryRun Whether to run the engine in dry-run mode
  * @param {string[]} disabledRules List of disabled rules names
+ * @returns {import('./types').Linter}
  */
 const createLinter = (dryRun, disabledRules) => {
   /**
@@ -34,10 +35,11 @@ const createLinter = (dryRun, disabledRules) => {
   /**
    * Lints all entries using the linter engine
    *
-   * @param entries
+   * @param {import('mdast').Root} ast
+   * @returns {void}
    */
-  const lintAll = entries => {
-    issues.push(...engine.lintAll(entries));
+  const lint = ast => {
+    issues.push(...engine.lint(ast));
   };
 
   /**
@@ -68,7 +70,7 @@ const createLinter = (dryRun, disabledRules) => {
   };
 
   return {
-    lintAll,
+    lint,
     report,
     hasError,
   };

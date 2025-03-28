@@ -1,29 +1,29 @@
 'use strict';
 
 /**
- * Creates a linter engine instance to validate ApiDocMetadataEntry entries
+ * Creates a linter engine instance to validate mdast trees.
  *
  * @param {import('./types').LintRule[]} rules Lint rules to validate the entries against
  */
 const createLinterEngine = rules => {
   /**
-   * Validates an array of ApiDocMetadataEntry entries against all defined rules
+   * Validates an array of mdast trees against all defined rules
    *
-   * @param {ApiDocMetadataEntry[]} entries
+   * @param {import('mdast').Root[]} ast
    * @returns {import('./types').LintIssue[]}
    */
-  const lintAll = entries => {
+  const lint = ast => {
     const issues = [];
 
     for (const rule of rules) {
-      issues.push(...rule(entries));
+      issues.push(...rule(ast));
     }
 
     return issues;
   };
 
   return {
-    lintAll,
+    lint,
   };
 };
 

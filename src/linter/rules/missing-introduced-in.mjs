@@ -1,26 +1,33 @@
 import { LINT_MESSAGES } from '../constants.mjs';
 
 /**
- * Checks if `introduced_in` field is missing
+ * Checks if `introduced_in` node is missing
  *
- * @param {ApiDocMetadataEntry[]} entries
+ * @param {import('mdast').Root} tree
  * @returns {Array<import('../types.d.ts').LintIssue>}
  */
-export const missingIntroducedIn = entries => {
-  const issues = [];
+export const missingIntroducedIn = tree => {
+  const regex = /<!--introduced_in=.*-->/;
 
-  for (const entry of entries) {
-    // Early continue if not a top-level heading or if introduced_in exists
-    if (entry.heading.depth !== 1 || entry.introduced_in) continue;
+  const introduced_in = tree.children.find(
+    node => node.type === 'html' && regex.test(node.value)
+  );
 
-    issues.push({
-      level: 'info',
-      message: LINT_MESSAGES.missingIntroducedIn,
-      location: {
-        path: entry.api_doc_source,
+  if (!introduced_in) {
+    return [
+      {
+        level: 'info',
+        message: LINT_MESSAGES.missingIntroducedIn,
+        location: {
+          path: '?',
+          position: {
+            start: { line: 1, column: 1 },
+            end: { line: 1, column: 1 },
+          },
+        },
       },
-    });
+    ];
   }
 
-  return issues;
+  return [];
 };
