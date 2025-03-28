@@ -1,4 +1,11 @@
+import { Root } from 'mdast';
 import { Position } from 'unist';
+
+export interface Linter {
+  lint: (ast: Root) => void;
+  report: (reporterName: keyof typeof reporters) => void;
+  hasError: () => boolean;
+}
 
 export type IssueLevel = 'info' | 'warn' | 'error';
 
@@ -13,6 +20,6 @@ export interface LintIssue {
   location: LintIssueLocation;
 }
 
-type LintRule = (input: ApiDocMetadataEntry[]) => LintIssue[];
+type LintRule = (input: Root[]) => LintIssue[];
 
 export type Reporter = (msg: LintIssue) => void;
