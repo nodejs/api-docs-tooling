@@ -1,42 +1,54 @@
 import { LINT_MESSAGES } from '../constants.mjs';
 import { valid } from 'semver';
+import { env } from 'node:process';
+
+const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
 
 /**
- * Checks if any change version is invalid
+ * Checks if the given version is "REPLACEME" and the array length is 1.
  *
- * @param {ApiDocMetadataEntry[]} entries
- * @returns {Array<import('../types').LintIssue>}
+ * @param {string} version - The version to check.
+ * @param {number} length - Length of the version array.
+ * @returns {boolean} True if conditions match, otherwise false.
  */
-export const invalidChangeVersion = entries => {
-  const issues = [];
+const isValidReplaceMe = (version, length) =>
+  length === 1 && version === 'REPLACEME';
 
-  for (const entry of entries) {
-    if (entry.changes.length === 0) continue;
+/**
+ * Determines if a given version is invalid.
+ *
+ * @param {string} version - The version to check.
+ * @param {unknown} _ - Unused parameter.
+ * @param {{ length: number }} context - Array containing the length property.
+ * @returns {boolean} True if the version is invalid, otherwise false.
+ */
+const isInvalid = NODE_RELEASED_VERSIONS
+  ? (version, _, { length }) =>
+      !(
+        isValidReplaceMe(version, length) ||
+        NODE_RELEASED_VERSIONS.includes(version.replace(/^v/, ''))
+      )
+  : (version, _, { length }) =>
+      !(isValidReplaceMe(version, length) || valid(version));
 
-    const allVersions = entry.changes
-      .filter(change => change.version)
-      .flatMap(change =>
-        Array.isArray(change.version) ? change.version : [change.version]
-      );
-
-    const invalidVersions = allVersions.filter(
-      version => valid(version) === null
-    );
-
-    issues.push(
-      ...invalidVersions.map(version => ({
-        level: 'warn',
-        message: LINT_MESSAGES.invalidChangeVersion.replace(
-          '{{version}}',
-          version
-        ),
-        location: {
-          path: entry.api_doc_source,
-          position: entry.yaml_position,
-        },
-      }))
-    );
-  }
-
-  return issues;
-};
+/**
+ * Identifies invalid change versions from metadata entries.
+ *
+ * @param {ApiDocMetadataEntry[]} entries - Metadata entries to check.
+ * @returns {import('../types').LintIssue[]} List of detected lint issues.
+ */
+export const invalidChangeVersion = entries =>
+  entries.flatMap(({ changes, api_doc_source, yaml_position }) =>
+    changes.flatMap(({ version }) =>
+      (Array.isArray(version) ? version : [version])
+        .filter(isInvalid)
+        .map(version => ({
+          level: 'error',
+          message: LINT_MESSAGES.invalidChangeVersion.replace(
+            '{{version}}',
+            version
+          ),
+          location: { path: api_doc_source, position: yaml_position },
+        }))
+    )
+  );
