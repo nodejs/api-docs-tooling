@@ -3,7 +3,7 @@ import { Position } from 'unist';
 import { VFile } from 'vfile';
 
 export interface Linter {
-  lint: (ast: Root) => void;
+  lint: (tree: Root) => void;
   report: (reporterName: keyof typeof reporters) => void;
   hasError: () => boolean;
 }
