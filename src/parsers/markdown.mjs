@@ -63,7 +63,7 @@ const createParser = linter => {
     // Parses the API doc into an AST tree using `unified` and `remark`
     const apiDocTree = remarkProcessor.parse(resolvedApiDoc);
 
-    linter.lint(apiDocTree);
+    linter.lint(resolvedApiDoc, apiDocTree);
 
     // Get all Markdown Footnote definitions from the tree
     const markdownDefinitions = selectAll('definition', apiDocTree);
@@ -139,8 +139,8 @@ const createParser = linter => {
       // our YAML metadata structure, it transforms into YAML metadata
       // and then apply the YAML Metadata to the current Metadata entry
       visit(subTree, createQueries.UNIST.isYamlNode, node => {
-        // TODO: Is there always only one YAML node?
         apiEntryMetadata.setYamlPosition(node.position);
+
         addYAMLMetadata(node, apiEntryMetadata);
       });
 

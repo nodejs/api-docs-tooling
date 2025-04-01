@@ -35,11 +35,12 @@ const createLinter = (dryRun, disabledRules) => {
   /**
    * Lints all entries using the linter engine
    *
+   * @param {import('vfile').VFile} file
    * @param {import('mdast').Root} ast
    * @returns {void}
    */
-  const lint = ast => {
-    issues.push(...engine.lint(ast));
+  const lint = (file, ast) => {
+    issues.push(...engine.lint(file, ast));
   };
 
   /**

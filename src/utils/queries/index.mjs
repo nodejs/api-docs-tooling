@@ -8,6 +8,7 @@ import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
 import { transformNodesToString } from '../unist.mjs';
 
 import {
+  extractYamlContent,
   parseHeadingIntoMetadata,
   parseYAMLIntoMetadata,
   transformTypeToReferenceLink,
@@ -28,13 +29,11 @@ const createQueries = () => {
    * @param {ReturnType<import('../../metadata.mjs').default>} apiEntryMetadata The API entry Metadata
    */
   const addYAMLMetadata = (node, apiEntryMetadata) => {
-    const sanitizedString = node.value.replace(
-      createQueries.QUERIES.yamlInnerContent,
-      // Either capture a YAML multinline block, or a simple single-line YAML block
-      (_, simple, yaml) => simple || yaml
-    );
+    const extractedYamlContent = extractYamlContent(node);
 
-    apiEntryMetadata.updateProperties(parseYAMLIntoMetadata(sanitizedString));
+    apiEntryMetadata.updateProperties(
+      parseYAMLIntoMetadata(extractedYamlContent)
+    );
 
     return [SKIP];
   };

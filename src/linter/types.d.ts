@@ -1,5 +1,6 @@
 import { Root } from 'mdast';
 import { Position } from 'unist';
+import { VFile } from 'vfile';
 
 export interface Linter {
   lint: (ast: Root) => void;
@@ -20,6 +21,6 @@ export interface LintIssue {
   location: LintIssueLocation;
 }
 
-type LintRule = (input: Root[]) => LintIssue[];
+type LintRule = (file: VFile, tree: Root[]) => LintIssue[];
 
 export type Reporter = (msg: LintIssue) => void;

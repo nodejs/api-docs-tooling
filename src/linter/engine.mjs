@@ -9,14 +9,15 @@ const createLinterEngine = rules => {
   /**
    * Validates an array of mdast trees against all defined rules
    *
+   * @param {import('vfile').VFile} file
    * @param {import('mdast').Root[]} ast
    * @returns {import('./types').LintIssue[]}
    */
-  const lint = ast => {
+  const lint = (file, ast) => {
     const issues = [];
 
     for (const rule of rules) {
-      issues.push(...rule(ast));
+      issues.push(...rule(file, ast));
     }
 
     return issues;
