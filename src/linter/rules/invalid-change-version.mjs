@@ -22,7 +22,6 @@ const isValidReplaceMe = (version, length) =>
  * @returns {boolean} Returns true if the version is ignored, false otherwise.
  */
 const isIgnoredVersion = version => {
-  if (version === 'v0.11.15') return true;
   const { major, minor } = parse(version) || {};
   return major === 0 && minor < 2;
 };
