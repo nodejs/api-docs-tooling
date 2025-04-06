@@ -1,5 +1,5 @@
 import { LINT_MESSAGES } from '../constants.mjs';
-import { valid } from 'semver';
+import { valid, parse } from 'semver';
 import { env } from 'node:process';
 
 const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
@@ -15,6 +15,19 @@ const isValidReplaceMe = (version, length) =>
   length === 1 && version === 'REPLACEME';
 
 /**
+ * Checks if a given semantic version should be ignored.
+ * A version is considered ignored if its major version is 0 and minor version is less than 2.
+ *
+ * @param {string} version - The version to check.
+ * @returns {boolean|undefined} Returns true if the version is ignored, false otherwise.
+ */
+const isIgnoredVersion = version => {
+  if (version === 'v0.11.15') return true;
+  const { major, minor } = parse(version) || {};
+  return major === 0 && minor < 2;
+};
+
+/**
  * Determines if a given version is invalid.
  *
  * @param {string} version - The version to check.
@@ -26,6 +39,7 @@ const isInvalid = NODE_RELEASED_VERSIONS
   ? (version, _, { length }) =>
       !(
         isValidReplaceMe(version, length) ||
+        isIgnoredVersion(version) ||
         NODE_RELEASED_VERSIONS.includes(version.replace(/^v/, ''))
       )
   : (version, _, { length }) =>

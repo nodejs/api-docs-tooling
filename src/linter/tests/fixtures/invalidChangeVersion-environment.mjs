@@ -7,7 +7,7 @@ const issues = invalidChangeVersion([
     ...assertEntry,
     changes: [
       ...assertEntry.changes,
-      { version: ['SOME_OTHER_RELEASED_VERSION'] },
+      { version: ['SOME_OTHER_RELEASED_VERSION', 'v0.11.15', 'v0.1.2'] },
     ],
   },
 ]);
