@@ -19,7 +19,7 @@ const isValidReplaceMe = (version, length) =>
  * A version is considered ignored if its major version is 0 and minor version is less than 2.
  *
  * @param {string} version - The version to check.
- * @returns {boolean|undefined} Returns true if the version is ignored, false otherwise.
+ * @returns {boolean} Returns true if the version is ignored, false otherwise.
  */
 const isIgnoredVersion = version => {
   if (version === 'v0.11.15') return true;
