@@ -18,6 +18,9 @@ const isValidReplaceMe = (version, length) =>
  * Checks if a given semantic version should be ignored.
  * A version is considered ignored if its major version is 0 and minor version is less than 2.
  *
+ * These versions are extremely old, and are not shown in the changelog used to generate
+ * `NODE_RELEASED_VERSIONS`, so they must be hardcoded.
+ *
  * @param {string} version - The version to check.
  * @returns {boolean} Returns true if the version is ignored, false otherwise.
  */
