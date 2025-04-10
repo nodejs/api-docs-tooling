@@ -70,15 +70,15 @@ const createGenerator = markdownInput => {
   const threadQueue = [];
 
   /**
-   *
-   * @param name
-   * @param dependencyOutput
-   * @param extra
+   * Run the input generator within a worker thread
+   * @param {keyof AllGenerators} name
+   * @param {any} dependencyOutput
+   * @param {Partial<GeneratorOptions>} extra
    */
   const runInWorker = (name, dependencyOutput, extra) => {
     return new Promise((resolve, reject) => {
       /**
-       *
+       * Run the generator
        */
       const run = () => {
         activeThreads++;
@@ -114,7 +114,7 @@ const createGenerator = markdownInput => {
   };
 
   /**
-   *
+   * Process the worker thread queue
    */
   const processQueue = () => {
     if (threadQueue.length > 0 && activeThreads < MAX_THREADS) {
