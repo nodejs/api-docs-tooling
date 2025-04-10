@@ -54,7 +54,7 @@ const createGenerator = markdownInput => {
 
       // If the generator dependency has not yet been resolved, we resolve
       // the dependency first before running the current generator
-      if (dependsOn && !(dependsOn in cachedGenerators)) {
+      if (dependsOn && dependsOn in cachedGenerators === false) {
         await runGenerators({
           ...extra,
           threads,
