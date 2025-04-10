@@ -58,7 +58,7 @@ export const createSectionBuilder = () => {
    * @param {import('../types.d.ts').HierarchizedEntry} entry - The entry providing stability information.
    */
   const parseStability = (section, nodes, { stability }) => {
-    const stabilityInfo = stability.children.map(node => node.data);
+    const stabilityInfo = stability.children.map(node => node.data)?.[0];
 
     if (stabilityInfo) {
       section.stability = stabilityInfo.index;
