@@ -1,11 +1,4 @@
 /**
- * Noop function.
- *
- * @returns {any}
- */
-const noop = () => {};
-
-/**
  * @type {ApiDocMetadataEntry}
  */
 export const assertEntry = {
@@ -69,12 +62,10 @@ export const assertEntry = {
       slug: 'assert',
       type: 'property',
     },
-    toJSON: noop,
   },
   stability: {
     type: 'root',
     children: [],
-    toJSON: noop,
   },
   content: {
     type: 'root',

@@ -6,7 +6,6 @@ import { join } from 'node:path';
 import { remove } from 'unist-util-remove';
 
 import createQueries from '../../utils/queries/index.mjs';
-import { getRemark } from '../../utils/remark.mjs';
 
 /**
  * This generator generates a simplified JSON version of the API docs and returns it as a string
@@ -35,9 +34,6 @@ export default {
    * @param {Partial<GeneratorOptions>} options
    */
   async generate(input, options) {
-    // Gets a remark processor for stringifying the AST tree into JSON
-    const remarkProcessor = getRemark();
-
     // Iterates the input (ApiDocMetadataEntry) and performs a few changes
     const mappedInput = input.map(node => {
       // Deep clones the content nodes to avoid affecting upstream nodes
@@ -49,12 +45,6 @@ export default {
         createQueries.UNIST.isStabilityNode,
         createQueries.UNIST.isHeading,
       ]);
-
-      /**
-       * For the JSON generate we want to transform the whole content into JSON
-       * @returns {string} The stringified JSON version of the content
-       */
-      content.toJSON = () => remarkProcessor.stringify(content);
 
       return { ...node, content };
     });

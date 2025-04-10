@@ -3,12 +3,6 @@ import type { Program } from 'acorn';
 import type { SemVer } from 'semver';
 import type { Data, Node, Parent, Position } from 'unist';
 
-// String serialization of the AST tree
-// @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
-interface WithJSON<T extends Node, J extends any = any> extends T {
-  toJSON: () => J;
-}
-
 // Unist Node with typed Data, which allows better type inference
 interface NodeWithData<T extends Node, J extends Data> extends T {
   data: J;
@@ -88,12 +82,9 @@ declare global {
     // Any changes to the API doc Metadata
     changes: Array<ApiDocMetadataChange>;
     // The parsed Markdown content of a Navigation Entry
-    heading: WithJSON<HeadingMetadataParent, HeadingMetadataEntry>;
+    heading: HeadingMetadataParent;
     // The API doc metadata Entry Stability Index if exists
-    stability: WithJSON<
-      StabilityIndexParent,
-      Array<StabilityIndexMetadataEntry>
-    >;
+    stability: StabilityIndexParent;
     // The subtree containing all Nodes of the API doc entry
     content: Root;
     // Extra YAML section entries that are stringd and serve

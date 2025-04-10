@@ -33,7 +33,6 @@ describe('createMetadata', () => {
     };
     metadata.addStability(stability);
     const actual = metadata.create(new VFile(), {}).stability;
-    delete actual.toJSON;
     deepStrictEqual(actual, {
       children: [stability],
       type: 'root',
@@ -82,8 +81,15 @@ describe('createMetadata', () => {
       yaml_position: {},
     };
     const actual = metadata.create(apiDoc, section);
-    delete actual.stability.toJSON;
-    delete actual.heading.toJSON;
     deepStrictEqual(actual, expected);
+  });
+
+  it('should be serializable', () => {
+    const { create } = createMetadata(new GitHubSlugger());
+    const actual = create(new VFile({ path: 'test.md' }), {
+      type: 'root',
+      children: [],
+    });
+    deepStrictEqual(structuredClone(actual), actual);
   });
 });

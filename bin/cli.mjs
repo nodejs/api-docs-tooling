@@ -2,13 +2,14 @@
 
 import { resolve } from 'node:path';
 import process from 'node:process';
+import { cpus } from 'node:os';
 
 import { Command, Option } from 'commander';
 
 import { coerce } from 'semver';
 import { DOC_NODE_CHANGELOG_URL, DOC_NODE_VERSION } from '../src/constants.mjs';
 import createGenerator from '../src/generators.mjs';
-import generators from '../src/generators/index.mjs';
+import { publicGenerators } from '../src/generators/index.mjs';
 import createLinter from '../src/linter/index.mjs';
 import reporters from '../src/linter/reporters/index.mjs';
 import rules from '../src/linter/rules/index.mjs';
@@ -16,7 +17,7 @@ import createMarkdownLoader from '../src/loaders/markdown.mjs';
 import createMarkdownParser from '../src/parsers/markdown.mjs';
 import createNodeReleases from '../src/releases.mjs';
 
-const availableGenerators = Object.keys(generators);
+const availableGenerators = Object.keys(publicGenerators);
 
 const program = new Command();
 
@@ -77,10 +78,16 @@ program
       .choices(Object.keys(reporters))
       .default('console')
   )
+  .addOption(
+    new Option(
+      '-p, --threads <number>',
+      'The maximum number of threads to use. Set to 1 to disable parallelism'
+    ).default(Math.max(1, cpus().length - 1))
+  )
   .parse(process.argv);
 
 /**
- * @typedef {keyof generators} Target A list of the available generator names.
+ * @typedef {keyof publicGenerators} Target A list of the available generator names.
  *
  * @typedef {Object} Options
  * @property {Array<string>|string} input Specifies the glob/path for input files.
@@ -108,6 +115,7 @@ const {
   lintDryRun,
   gitRef,
   reporter,
+  threads,
 } = program.opts();
 
 const linter = createLinter(lintDryRun, disableRule);
@@ -142,6 +150,8 @@ if (target) {
     // An URL containing a git ref URL pointing to the commit or ref that was used
     // to generate the API docs. This is used to link to the source code of the
     gitRef,
+    // How many threads should be used
+    threads,
   });
 }
 
