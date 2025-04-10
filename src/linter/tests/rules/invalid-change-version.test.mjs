@@ -7,6 +7,35 @@ import { fileURLToPath } from 'node:url';
 import { execPath } from 'node:process';
 
 describe('invalidChangeVersion', () => {
+  it('should return an empty array if all change versions are non-empty', () => {
+    const issues = invalidChangeVersion([assertEntry]);
+
+    deepEqual(issues, []);
+  });
+
+  it('should return an issue if a change version is missing', () => {
+    const issues = invalidChangeVersion([
+      {
+        ...assertEntry,
+        changes: [...assertEntry.changes, { version: undefined }],
+      },
+    ]);
+
+    deepEqual(issues, [
+      {
+        level: 'error',
+        location: {
+          path: 'doc/api/assert.md',
+          position: {
+            end: { column: 35, line: 7, offset: 137 },
+            start: { column: 1, line: 7, offset: 103 },
+          },
+        },
+        message: 'Missing version field in the API doc entry',
+      },
+    ]);
+  });
+
   it('should work with NODE_RELEASED_VERSIONS', () => {
     const result = spawnSync(
       execPath,
