@@ -60,10 +60,9 @@ export const invalidChangeVersion = entries =>
         .filter(isInvalid)
         .map(version => ({
           level: 'error',
-          message: LINT_MESSAGES.invalidChangeVersion.replace(
-            '{{version}}',
-            version
-          ),
+          message: version
+            ? LINT_MESSAGES.invalidChangeVersion.replace('{{version}}', version)
+            : LINT_MESSAGES.missingChangeVersion,
           location: { path: api_doc_source, position: yaml_position },
         }))
     )
