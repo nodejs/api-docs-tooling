@@ -1,11 +1,11 @@
 import type { SemVer } from 'semver';
 import type { ApiDocReleaseEntry } from '../types';
-import type availableGenerators from './index.mjs';
+import type { publicGenerators } from './index.mjs';
 
 declare global {
   // All available generators as an inferable type, to allow Generator interfaces
   // to be type complete and runtime friendly within `runGenerators`
-  export type AvailableGenerators = typeof availableGenerators;
+  export type AvailableGenerators = typeof publicGenerators;
 
   // This is the runtime config passed to the API doc generators
   export interface GeneratorOptions {
@@ -36,6 +36,9 @@ declare global {
     // i.e. https://github.com/nodejs/node/tree/2cb1d07e0f6d9456438016bab7db4688ab354fd2
     // i.e. https://gitlab.com/someone/node/tree/HEAD
     gitRef: string;
+
+    // The number of threads the process is allowed to use
+    threads: number;
   }
 
   export interface GeneratorMetadata<I extends any, O extends any> {
