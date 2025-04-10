@@ -77,6 +77,12 @@ program
       .choices(Object.keys(reporters))
       .default('console')
   )
+  .addOption(
+    new Option(
+      '--disable-parallelism',
+      'Disable the use of multiple threads'
+    ).default(false)
+  )
   .parse(process.argv);
 
 /**
@@ -108,6 +114,7 @@ const {
   lintDryRun,
   gitRef,
   reporter,
+  disableParallelism,
 } = program.opts();
 
 const linter = createLinter(lintDryRun, disableRule);
@@ -142,6 +149,8 @@ if (target) {
     // An URL containing a git ref URL pointing to the commit or ref that was used
     // to generate the API docs. This is used to link to the source code of the
     gitRef,
+    // Disable the use of parallel threads
+    disableParallelism,
   });
 }
 

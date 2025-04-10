@@ -84,7 +84,6 @@ export default {
      */
     const replaceTemplateValues = values => {
       const { api, added, section, version, toc, nav, content } = values;
-
       return apiTemplate
         .replace('__ID__', api)
         .replace(/__FILENAME__/g, api)
@@ -139,7 +138,7 @@ export default {
         api: head.api,
         added: head.introduced_in ?? '',
         section: head.heading.data.name || apiAsHeading,
-        version: `v${version.toString()}`,
+        version: `v${version.version}`,
         toc: String(parsedToC),
         nav: String(activeSideNav),
         content: parsedContent,

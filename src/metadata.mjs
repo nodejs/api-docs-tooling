@@ -140,17 +140,6 @@ const createMetadata = slugger => {
       internalMetadata.heading.data.type =
         type ?? internalMetadata.heading.data.type;
 
-      /**
-       * Defines the toJSON method for the Heading AST node to be converted as JSON
-       */
-      internalMetadata.heading.toJSON = () => internalMetadata.heading.data;
-
-      /**
-       * Maps the Stability Index AST nodes into a JSON objects from their data properties
-       */
-      internalMetadata.stability.toJSON = () =>
-        internalMetadata.stability.children.map(node => node.data);
-
       // Returns the Metadata entry for the API doc
       return {
         api: apiDoc.stem,
