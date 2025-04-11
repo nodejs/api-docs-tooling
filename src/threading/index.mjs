@@ -1,27 +1,9 @@
-import {
-  Worker,
-  isMainThread,
-  parentPort,
-  workerData,
-} from 'node:worker_threads';
-import { allGenerators } from './generators/index.mjs';
-
-// If inside a worker thread, perform the generator logic here
-if (!isMainThread) {
-  const { name, dependencyOutput, extra } = workerData;
-  const generator = allGenerators[name];
-
-  // Execute the generator and send the result or error back to the parent thread
-  generator
-    .generate(dependencyOutput, extra)
-    .then(result => parentPort.postMessage(result))
-    .catch(error => parentPort.postMessage({ error }));
-}
+import { Worker } from 'node:worker_threads';
 
 /**
  * WorkerPool class to manage a pool of worker threads
  */
-export class WorkerPool {
+export default class WorkerPool {
   /** @private {number} - Number of active threads */
   activeThreads = 0;
   /** @private {Array<Function>} - Queue of pending tasks */
@@ -44,20 +26,19 @@ export class WorkerPool {
         this.activeThreads++;
 
         // Create and start the worker thread
-        const worker = new Worker(new URL(import.meta.url), {
-          workerData: { name, dependencyOutput, extra },
-        });
+        const worker = new Worker(
+          new URL(import.meta.resolve('./worker.mjs')),
+          {
+            workerData: { name, dependencyOutput, extra },
+          }
+        );
 
         // Handle worker thread messages (result or error)
         worker.on('message', result => {
           this.activeThreads--;
           this.processQueue(threads);
 
-          if (result?.error) {
-            reject(result.error);
-          } else {
-            resolve(result);
-          }
+          (result?.error ? reject : resolve)(result);
         });
 
         // Handle worker thread errors

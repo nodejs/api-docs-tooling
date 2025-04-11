@@ -1,7 +1,7 @@
 'use strict';
 
 import { allGenerators } from './generators/index.mjs';
-import { WorkerPool } from './threading.mjs';
+import WorkerPool from './threading/index.mjs';
 
 /**
  * @typedef {{ ast: GeneratorMetadata<ApiDocMetadataEntry, ApiDocMetadataEntry>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
@@ -46,11 +46,7 @@ const createGenerator = markdownInput => {
     // but it ensures all dependencies are resolved, and that multiple bottom-level generators
     // can reuse the already parsed content from the top-level/dependency generators
     for (const generatorName of generators) {
-      const {
-        dependsOn,
-        generate,
-        parallizable = true,
-      } = allGenerators[generatorName];
+      const { dependsOn, generate } = allGenerators[generatorName];
 
       // If the generator dependency has not yet been resolved, we resolve
       // the dependency first before running the current generator
@@ -68,7 +64,7 @@ const createGenerator = markdownInput => {
 
       // Adds the current generator execution Promise to the cache
       cachedGenerators[generatorName] =
-        threads < 2 || !parallizable
+        threads < 2
           ? generate(dependencyOutput, extra) // Run in main thread
           : threadPool.run(generatorName, dependencyOutput, threads, extra); // Offload to worker thread
     }
