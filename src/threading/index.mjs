@@ -4,10 +4,28 @@ import { Worker } from 'node:worker_threads';
  * WorkerPool class to manage a pool of worker threads
  */
 export default class WorkerPool {
-  /** @private {number} - Number of active threads */
-  activeThreads = 0;
+  /** @private {SharedArrayBuffer} - Shared memory for active thread count */
+  sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT);
+  /** @private {Int32Array} - A typed array to access shared memory */
+  activeThreads = new Int32Array(this.sharedBuffer);
   /** @private {Array<Function>} - Queue of pending tasks */
   queue = [];
+
+  /**
+   * Gets the current active thread count.
+   * @returns {number} The current active thread count.
+   */
+  getActiveThreadCount() {
+    return Atomics.load(this.activeThreads, 0);
+  }
+
+  /**
+   * Changes the active thread count atomically by a given delta.
+   * @param {number} delta - The value to increment or decrement the active thread count by.
+   */
+  changeActiveThreadCount(delta) {
+    Atomics.add(this.activeThreads, 0, delta);
+  }
 
   /**
    * Runs a generator within a worker thread.
@@ -23,7 +41,7 @@ export default class WorkerPool {
        * Function to run the generator in a worker thread
        */
       const run = () => {
-        this.activeThreads++;
+        this.changeActiveThreadCount(1);
 
         // Create and start the worker thread
         const worker = new Worker(
@@ -35,7 +53,7 @@ export default class WorkerPool {
 
         // Handle worker thread messages (result or error)
         worker.on('message', result => {
-          this.activeThreads--;
+          this.changeActiveThreadCount(-1);
           this.processQueue(threads);
 
           (result?.error ? reject : resolve)(result);
@@ -43,14 +61,14 @@ export default class WorkerPool {
 
         // Handle worker thread errors
         worker.on('error', err => {
-          this.activeThreads--;
+          this.changeActiveThreadCount(-1);
           this.processQueue(threads);
           reject(err);
         });
       };
 
       // If the active thread count exceeds the limit, add the task to the queue
-      if (this.activeThreads >= threads) {
+      if (this.getActiveThreadCount() >= threads) {
         this.queue.push(run);
       } else {
         run();
@@ -65,7 +83,7 @@ export default class WorkerPool {
    * @private
    */
   processQueue(threads) {
-    if (this.queue.length > 0 && this.activeThreads < threads) {
+    if (this.queue.length > 0 && this.getActiveThreadCount() < threads) {
       const next = this.queue.shift();
       if (next) next();
     }
