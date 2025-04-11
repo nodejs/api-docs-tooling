@@ -85,7 +85,7 @@ export default {
     const generatedAllTemplate = apiTemplate
       .replace('__ID__', 'all')
       .replace(/__FILENAME__/g, 'all')
-      .replace('__SECTION__', 'All')
+      .replace(/__SECTION__/g, 'All')
       .replace(/__VERSION__/g, `v${version.toString()}`)
       .replace(/__TOC__/g, tableOfContents.wrapToC(aggregatedToC))
       .replace(/__GTOC__/g, parsedSideNav)
