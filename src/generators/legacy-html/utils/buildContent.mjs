@@ -110,7 +110,7 @@ const buildMetadataElement = node => {
 
     // Creates the added in element with the added in version
     const addedinElement = createElement('span', [
-      createElement('b', 'Added In: '),
+      'Added in: ',
       addedIn,
     ]);
 
@@ -126,7 +126,7 @@ const buildMetadataElement = node => {
 
     // Creates the deprecated in element with the deprecated in version
     const deprecatedInElement = createElement('span', [
-      createElement('b', 'Deprecated In: '),
+      'Deprecated in: ',
       deprecatedIn,
     ]);
 
@@ -142,7 +142,7 @@ const buildMetadataElement = node => {
 
     // Creates the removed in element with the removed in version
     const removedInElement = createElement('span', [
-      createElement('b', 'Removed In: '),
+      'Removed in: ',
       removedIn,
     ]);
 
