@@ -9,8 +9,9 @@ import legacyJsonAll from './legacy-json-all/index.mjs';
 import addonVerify from './addon-verify/index.mjs';
 import apiLinks from './api-links/index.mjs';
 import oramaDb from './orama-db/index.mjs';
+import astJs from './ast-js/index.mjs';
 
-export default {
+export const publicGenerators = {
   'json-simple': jsonSimple,
   'legacy-html': legacyHtml,
   'legacy-html-all': legacyHtmlAll,
@@ -20,4 +21,11 @@ export default {
   'addon-verify': addonVerify,
   'api-links': apiLinks,
   'orama-db': oramaDb,
+};
+
+export const allGenerators = {
+  ...publicGenerators,
+  // This one is a little special since we don't want it to run unless we need
+  // it and we also don't want it to be publicly accessible through the CLI.
+  'ast-js': astJs,
 };

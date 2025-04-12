@@ -1,16 +1,7 @@
 'use strict';
 
-import publicGenerators from './generators/index.mjs';
-import astJs from './generators/ast-js/index.mjs';
-import oramaDb from './generators/orama-db/index.mjs';
-
-const availableGenerators = {
-  ...publicGenerators,
-  // This one is a little special since we don't want it to run unless we need
-  // it and we also don't want it to be publicly accessible through the CLI.
-  'ast-js': astJs,
-  'orama-db': oramaDb,
-};
+import { allGenerators } from './generators/index.mjs';
+import WorkerPool from './threading/index.mjs';
 
 /**
  * @typedef {{ ast: GeneratorMetadata<ApiDocMetadataEntry, ApiDocMetadataEntry>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
@@ -43,22 +34,28 @@ const createGenerator = markdownInput => {
    */
   const cachedGenerators = { ast: Promise.resolve(markdownInput) };
 
+  const threadPool = new WorkerPool();
+
   /**
    * Runs the Generator engine with the provided top-level input and the given generator options
    *
    * @param {GeneratorOptions} options The options for the generator runtime
    */
-  const runGenerators = async ({ generators, ...extra }) => {
+  const runGenerators = async ({ generators, threads, ...extra }) => {
     // Note that this method is blocking, and will only execute one generator per-time
     // but it ensures all dependencies are resolved, and that multiple bottom-level generators
     // can reuse the already parsed content from the top-level/dependency generators
     for (const generatorName of generators) {
-      const { dependsOn, generate } = availableGenerators[generatorName];
+      const { dependsOn, generate } = allGenerators[generatorName];
 
       // If the generator dependency has not yet been resolved, we resolve
       // the dependency first before running the current generator
       if (dependsOn && dependsOn in cachedGenerators === false) {
-        await runGenerators({ ...extra, generators: [dependsOn] });
+        await runGenerators({
+          ...extra,
+          threads,
+          generators: [dependsOn],
+        });
       }
 
       // Ensures that the dependency output gets resolved before we run the current
@@ -66,7 +63,10 @@ const createGenerator = markdownInput => {
       const dependencyOutput = await cachedGenerators[dependsOn];
 
       // Adds the current generator execution Promise to the cache
-      cachedGenerators[generatorName] = generate(dependencyOutput, extra);
+      cachedGenerators[generatorName] =
+        threads < 2
+          ? generate(dependencyOutput, extra) // Run in main thread
+          : threadPool.run(generatorName, dependencyOutput, threads, extra); // Offload to worker thread
     }
 
     // Returns the value of the last generator of the current pipeline

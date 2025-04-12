@@ -60,8 +60,9 @@ const buildNavigation = navigationContents =>
 const buildVersions = (api, added, versions) => {
   // All Node.js versions that support the current API; If there's no "introduced_at" field,
   // we simply show all versions, as we cannot pinpoint the exact version
+  const coercedMajor = major(coerceSemVer(added));
   const compatibleVersions = versions.filter(({ version }) =>
-    added ? major(version) >= major(coerceSemVer(added)) : true
+    added ? version.major >= coercedMajor : true
   );
 
   // Parses the SemVer version into something we use for URLs and to display the Node.js version
