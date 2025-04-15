@@ -6,7 +6,7 @@ import globals from 'globals';
 export default [
   // @see https://eslint.org/docs/latest/use/configure/configuration-files#specifying-files-and-ignores
   {
-    files: ['src/**/*.mjs'],
+    files: ['src/**/*.mjs', 'bin/cli.mjs'],
     plugins: {
       jsdoc: jsdoc,
     },

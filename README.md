@@ -23,30 +23,61 @@
 
 ## Usage
 
-Local invocation:
+### `generate`
+
+Generate API documentation from Markdown files.
 
 ```sh
-$ npx api-docs-tooling --help
+npx api-docs-tooling generate [options]
 ```
 
+**Options:**
+
+- `-i, --input <patterns...>` Input file patterns (glob)
+- `--ignore [patterns...]` Files to ignore
+- `-o, --output <dir>` Output directory
+- `-v, --version <semver>` Target Node.js version (default: latest)
+- `-c, --changelog <url>` Changelog file or URL
+- `--git-ref <url>` Git ref/commit URL
+- `-t, --target [modes...]` Generator target(s): `json-simple`, `legacy-html`, etc.
+- `--no-lint` Skip linting before generation
+
+### `lint`
+
+Run the linter on API documentation.
+
 ```sh
-Usage: api-docs-tooling [options]
+npx api-docs-tooling lint [options]
+```
 
-CLI tool to generate API documentation of a Node.js project.
+**Options:**
 
-Options:
-  -i, --input [patterns...]  Specify input file patterns using glob syntax
-  --ignore [patterns...]     Specify which input files to ignore using glob syntax
-  -o, --output <path>        Specify the relative or absolute output directory
-  -v, --version <semver>     Specify the target version of Node.js, semver compliant (default: "v22.11.0")
-  -c, --changelog <url>      Specify the path (file: or https://) to the CHANGELOG.md file (default:
-                             "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
-  -t, --target [mode...]     Set the processing target modes (choices: "json-simple", "legacy-html", "legacy-html-all",
-                             "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links", "orama-db")
-  --disable-rule [rule...]   Disable a specific linter rule (choices: "invalid-change-version",
-                             "missing-change-version", "missing-introduced-in", default: [])
-  --lint-dry-run             Run linter in dry-run mode (default: false)
-  --git-ref                  A git ref/commit URL pointing to Node.js
-  -r, --reporter [reporter]  Specify the linter reporter (choices: "console", "github", default: "console")
-  -h, --help                 display help for command
+- `-i, --input <patterns...>` Input file patterns (glob)
+- `--ignore [patterns...]` Files to ignore
+- `--disable-rule [rules...]` Disable specific linting rules
+- `--lint-dry-run` Run linter without applying changes
+- `-r, --reporter <reporter>` Reporter format: `console`, `github`, etc.
+
+### `interactive`
+
+Launches a fully interactive CLI prompt to guide you through all available options.
+
+```sh
+npx api-docs-tooling interactive
+```
+
+### `list`
+
+See available modules for each subsystem.
+
+```sh
+npx api-docs-tooling list generators
+npx api-docs-tooling list rules
+npx api-docs-tooling list reporters
+```
+
+### `help`
+
+```sh
+npx api-docs-tooling help [command]
 ```
