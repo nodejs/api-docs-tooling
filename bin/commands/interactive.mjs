@@ -145,7 +145,10 @@ export default async function interactive() {
 
     // Handle different value types (boolean, array, string)
     if (typeof value === 'boolean') {
-      if (value) cmdParts.push(flag);
+      if (value) {
+        cmdParts.push(flag);
+        executionArgs.push(flag);
+      }
     } else if (Array.isArray(value)) {
       for (const item of value) {
         cmdParts.push(flag, escapeShellArg(item));
