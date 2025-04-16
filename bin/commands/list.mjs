@@ -5,9 +5,12 @@ import rules from '../../src/linter/rules/index.mjs';
 const availableRules = Object.keys(rules);
 const availableReporters = Object.keys(reporters);
 
+export const types = ['generators', 'rules', 'reporters'];
+
 /**
+ * Lists available generators, rules, or reporters based on the given type.
  *
- * @param type
+ * @param {'generators' | 'rules' | 'reporters'} type - The type of items to list.
  */
 export default function list(type) {
   const list =
@@ -22,5 +25,3 @@ export default function list(type) {
 
   console.log(list.join('\n'));
 }
-
-export const types = ['generators', 'rules', 'reporters'];
