@@ -109,10 +109,7 @@ const buildMetadataElement = node => {
       : node.added_in;
 
     // Creates the added in element with the added in version
-    const addedinElement = createElement('span', [
-      'Added in: ',
-      addedIn,
-    ]);
+    const addedinElement = createElement('span', ['Added in: ', addedIn]);
 
     // Appends the added in element to the metadata element
     metadataElement.children.push(addedinElement);
@@ -141,10 +138,7 @@ const buildMetadataElement = node => {
       : node.removed_in;
 
     // Creates the removed in element with the removed in version
-    const removedInElement = createElement('span', [
-      'Removed in: ',
-      removedIn,
-    ]);
+    const removedInElement = createElement('span', ['Removed in: ', removedIn]);
 
     // Appends the removed in element to the metadata element
     metadataElement.children.push(removedInElement);

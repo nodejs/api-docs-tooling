@@ -23,6 +23,12 @@
 
 ## Usage
 
+### `help`
+
+```sh
+npx api-docs-tooling help [command]
+```
+
 ### `generate`
 
 Generate API documentation from Markdown files.
@@ -55,7 +61,7 @@ npx api-docs-tooling lint [options]
 - `-i, --input <patterns...>` Input file patterns (glob)
 - `--ignore [patterns...]` Files to ignore
 - `--disable-rule [rules...]` Disable specific linting rules
-- `--lint-dry-run` Run linter without applying changes
+- `--dry-run` Run linter without applying changes
 - `-r, --reporter <reporter>` Reporter format: `console`, `github`, etc.
 
 ### `interactive`
@@ -74,10 +80,4 @@ See available modules for each subsystem.
 npx api-docs-tooling list generators
 npx api-docs-tooling list rules
 npx api-docs-tooling list reporters
-```
-
-### `help`
-
-```sh
-npx api-docs-tooling help [command]
 ```
