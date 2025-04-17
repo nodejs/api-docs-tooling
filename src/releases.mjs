@@ -38,9 +38,9 @@ const createNodeReleases = changelogPath => {
   const changelogUrl = new URL(changelogPath);
 
   const changelogStrategy =
-    changelogUrl.protocol === 'https:'
-      ? getChangelogFromNetwork(changelogUrl)
-      : getChangelogFromFileSystem(changelogUrl);
+    changelogUrl.protocol === 'file:'
+      ? getChangelogFromFileSystem(changelogUrl)
+      : getChangelogFromNetwork(changelogUrl);
 
   /**
    * Retrieves all Node.js major versions from the provided CHANGELOG.md file
