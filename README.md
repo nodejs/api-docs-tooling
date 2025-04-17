@@ -23,61 +23,18 @@
 
 ## Usage
 
-### `help`
-
-```sh
-npx api-docs-tooling help [command]
 ```
+Usage: api-docs-tooling [options] [command]
 
-### `generate`
+CLI tool to generate and lint Node.js API documentation
 
-Generate API documentation from Markdown files.
+Options:
+  -h, --help          display help for command
 
-```sh
-npx api-docs-tooling generate [options]
-```
-
-**Options:**
-
-- `-i, --input <patterns...>` Input file patterns (glob)
-- `--ignore [patterns...]` Files to ignore
-- `-o, --output <dir>` Output directory
-- `-v, --version <semver>` Target Node.js version (default: latest)
-- `-c, --changelog <url>` Changelog file or URL
-- `--git-ref <url>` Git ref/commit URL
-- `-t, --target [modes...]` Generator target(s): `json-simple`, `legacy-html`, etc.
-- `--no-lint` Skip linting before generation
-
-### `lint`
-
-Run the linter on API documentation.
-
-```sh
-npx api-docs-tooling lint [options]
-```
-
-**Options:**
-
-- `-i, --input <patterns...>` Input file patterns (glob)
-- `--ignore [patterns...]` Files to ignore
-- `--disable-rule [rules...]` Disable specific linting rules
-- `--dry-run` Run linter without applying changes
-- `-r, --reporter <reporter>` Reporter format: `console`, `github`, etc.
-
-### `interactive`
-
-Launches a fully interactive CLI prompt to guide you through all available options.
-
-```sh
-npx api-docs-tooling interactive
-```
-
-### `list`
-
-See available modules for each subsystem.
-
-```sh
-npx api-docs-tooling list generators
-npx api-docs-tooling list rules
-npx api-docs-tooling list reporters
+Commands:
+  generate [options]  Generate API docs
+  lint [options]      Run linter independently
+  interactive         Launch guided CLI wizard
+  list <types>        List the given type
+  help [command]      display help for command
 ```

@@ -49,14 +49,5 @@ program
   .description('List the given type')
   .action(list);
 
-// Register the help command
-program
-  .command('help [cmd]')
-  .description('Show help for a command')
-  .action(cmdName => {
-    const target = program.commands.find(c => c.name() === cmdName) ?? program;
-    target.help();
-  });
-
 // Parse and execute command-line arguments
 program.parse(process.argv);
