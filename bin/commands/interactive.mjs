@@ -139,7 +139,10 @@ export default async function interactive() {
 
   for (const [key, { flags }] of Object.entries(options)) {
     const value = answers[key];
-    if (value == null || (Array.isArray(value) && value.length === 0)) continue; // Skip empty values
+    // Skip empty values
+    if (value == null || (Array.isArray(value) && value.length === 0)) {
+      continue;
+    }
 
     const flag = flags[0].split(/[\s,]+/)[0]; // Use the first flag
 
