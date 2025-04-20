@@ -56,7 +56,11 @@ export default class WorkerPool {
           this.changeActiveThreadCount(-1);
           this.processQueue(threads);
 
-          (result?.error ? reject : resolve)(result);
+          if (result?.error) {
+            reject(result.error);
+          } else {
+            resolve(result);
+          }
         });
 
         // Handle worker thread errors

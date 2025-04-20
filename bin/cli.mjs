@@ -11,6 +11,21 @@ const program = new Command()
   .name('api-docs-tooling')
   .description('CLI tool to generate and lint Node.js API documentation');
 
+/**
+ * Returns a wrapped version of the given async function that catches and rethrows any errors.
+ *
+ * @function
+ * @param {Function} fn - The async function to wrap.
+ * @returns {Function} A new function that calls `fn` with any given arguments and rethrows errors.
+ */
+const errorWrap =
+  fn =>
+  (...args) =>
+    fn(...args).catch(e => {
+      console.error(e);
+      process.exit(1);
+    });
+
 // Registering generate and lint commands
 commands.forEach(({ name, description, options, action }) => {
   const cmd = program.command(name).description(description);
@@ -33,21 +48,21 @@ commands.forEach(({ name, description, options, action }) => {
   });
 
   // Set the action for the command
-  cmd.action(action);
+  cmd.action(errorWrap(action));
 });
 
 // Register the interactive command
 program
   .command('interactive')
   .description('Launch guided CLI wizard')
-  .action(interactive);
+  .action(errorWrap(interactive));
 
 // Register the list command
 program
   .command('list')
   .addArgument(new Argument('<types>', 'The type to list').choices(types))
   .description('List the given type')
-  .action(list);
+  .action(errorWrap(list));
 
 // Parse and execute command-line arguments
 program.parse(process.argv);
