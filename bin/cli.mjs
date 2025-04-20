@@ -12,19 +12,21 @@ const program = new Command()
   .description('CLI tool to generate and lint Node.js API documentation');
 
 /**
- * Returns a wrapped version of the given async function that catches and rethrows any errors.
+ * Wraps a function to catch both synchronous and asynchronous errors.
  *
- * @function
- * @param {Function} fn - The async function to wrap.
- * @returns {Function} A new function that calls `fn` with any given arguments and rethrows errors.
+ * @param {Function} fn - The function to wrap. Can be synchronous or return a Promise.
+ * @returns {Function} A new function that handles errors and logs them.
  */
 const errorWrap =
   fn =>
-  (...args) =>
-    fn(...args).catch(e => {
-      console.error(e);
+  async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (err) {
+      console.error(err);
       process.exit(1);
-    });
+    }
+  };
 
 // Registering generate and lint commands
 commands.forEach(({ name, description, options, action }) => {
