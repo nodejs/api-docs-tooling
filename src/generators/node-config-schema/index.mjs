@@ -2,9 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import {
   ERRORS,
   ADD_OPTION_REGEX,
-  BASIC_SCHEMA,
   OPTION_HEADER_KEY_REGEX,
-  TYPE_DEFINITION_MAP,
 } from './constants.mjs';
 import { join } from 'node:path';
 
@@ -48,10 +46,10 @@ export default {
     // Read the contents of the cc and h files
     const ccContent = await readFile(ccFile, 'utf-8');
     const hContent = await readFile(hFile, 'utf-8');
+    const schema = JSON.parse(
+      await readFile(new URL('./schema.json', import.meta.url))
+    );
 
-    // Clone the BASIC_SCHEMA to avoid mutating the original schema object
-    /** @type {typeof BASIC_SCHEMA} */
-    const schema = Object.assign({}, BASIC_SCHEMA);
     const { nodeOptions } = schema.properties;
 
     // Process the cc content and match AddOption calls
@@ -78,18 +76,10 @@ export default {
         );
       }
 
-      const headerType = headerTypeMatch[1].trim();
-
-      // Ensure the headerType exists in the TYPE_DEFINITION_MAP
-      const typeDefinition = TYPE_DEFINITION_MAP[headerType];
-      if (!typeDefinition) {
-        throw new Error(
-          formatErrorMessage(ERRORS.missingTypeDefinition, { headerType })
-        );
-      }
-
       // Add the option to the schema after removing the '--' prefix
-      nodeOptions.properties[option.replace('--', '')] = typeDefinition;
+      nodeOptions.properties[option.replace('--', '')] = getTypeSchema(
+        headerTypeMatch[1].trim()
+      );
     }
 
     nodeOptions.properties = Object.fromEntries(
@@ -115,4 +105,38 @@ export default {
  */
 function formatErrorMessage(message, params) {
   return message.replace(/{{(\w+)}}/g, (_, key) => params[key] || `{{${key}}}`);
+}
+
+/**
+ * Returns the JSON Schema definition for a given C++ type.
+ *
+ * @param {string} type - The type to get the schema for.
+ * @returns {object} JSON Schema definition for the given type.
+ */
+function getTypeSchema(type) {
+  switch (type) {
+    case 'std::vector<std::string>':
+      return {
+        oneOf: [
+          { type: 'string' },
+          {
+            type: 'array',
+            items: { type: 'string' },
+            minItems: 1,
+          },
+        ],
+      };
+    case 'uint64_t':
+    case 'int64_t':
+    case 'HostPort':
+      return { type: 'number' };
+    case 'std::string':
+      return { type: 'string' };
+    case 'bool':
+      return { type: 'boolean' };
+    default:
+      throw new Error(
+        formatErrorMessage(ERRORS.missingTypeDefinition, { type })
+      );
+  }
 }
