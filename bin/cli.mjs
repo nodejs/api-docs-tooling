@@ -6,27 +6,11 @@ import { Argument, Command, Option } from 'commander';
 import interactive from './commands/interactive.mjs';
 import list, { types } from './commands/list.mjs';
 import commands from './commands/index.mjs';
+import { errorWrap } from './utils.mjs';
 
 const program = new Command()
   .name('api-docs-tooling')
   .description('CLI tool to generate and lint Node.js API documentation');
-
-/**
- * Wraps a function to catch both synchronous and asynchronous errors.
- *
- * @param {Function} fn - The function to wrap. Can be synchronous or return a Promise.
- * @returns {Function} A new function that handles errors and logs them.
- */
-const errorWrap =
-  fn =>
-  async (...args) => {
-    try {
-      return await fn(...args);
-    } catch (err) {
-      console.error(err);
-      process.exit(1);
-    }
-  };
 
 // Registering generate and lint commands
 commands.forEach(({ name, description, options, action }) => {

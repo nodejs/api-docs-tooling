@@ -1,9 +1,23 @@
 import createMarkdownLoader from '../src/loaders/markdown.mjs';
 import createMarkdownParser from '../src/parsers/markdown.mjs';
 
-// Instantiate loader and parser once to reuse
-const loader = createMarkdownLoader();
-const parser = createMarkdownParser();
+/**
+ * Generic lazy initializer.
+ * @template T
+ * @param {() => T} factory - Function to create the instance.
+ * @returns {() => T} - A function that returns the singleton instance.
+ */
+export const lazy = factory => {
+  let instance;
+  return () => (instance ??= factory());
+};
+
+// Instantiate loader and parser once to reuse,
+// but only if/when we actually need them. No need
+// to create these objects just to load a different
+// utility.
+const loader = lazy(createMarkdownLoader);
+const parser = lazy(createMarkdownParser);
 
 /**
  * Load and parse markdown API docs.
@@ -12,9 +26,26 @@ const parser = createMarkdownParser();
  * @returns {Promise<ApiDocMetadataEntry[]>} - Parsed documentation objects.
  */
 export async function loadAndParse(input, ignore) {
-  const files = await loader.loadFiles(input, ignore);
-  return parser.parseApiDocs(files);
+  const files = await loader().loadFiles(input, ignore);
+  return parser().parseApiDocs(files);
 }
+
+/**
+ * Wraps a function to catch both synchronous and asynchronous errors.
+ *
+ * @param {Function} fn - The function to wrap. Can be synchronous or return a Promise.
+ * @returns {Function} A new function that handles errors and logs them.
+ */
+export const errorWrap =
+  fn =>
+  async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  };
 
 /**
  * Represents a command-line option for the linter CLI.
