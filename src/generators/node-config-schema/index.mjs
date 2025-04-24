@@ -5,7 +5,7 @@ import {
   OPTION_HEADER_KEY_REGEX,
 } from './constants.mjs';
 import { join } from 'node:path';
-import schema from './schema.json' with { type: 'json ' };
+import schema from './schema.json' with { type: 'json' };
 
 /**
  * This generator generates the `node.config.json` schema.
