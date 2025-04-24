@@ -5,6 +5,7 @@ import {
   OPTION_HEADER_KEY_REGEX,
 } from './constants.mjs';
 import { join } from 'node:path';
+import schema from './schema.json' with { type: 'json ' };
 
 /**
  * This generator generates the `node.config.json` schema.
@@ -27,16 +28,13 @@ export default {
    * @throws {Error} If the required files node_options.cc or node_options.h are missing or invalid.
    */
   async generate(_, options) {
-    let ccFile, hFile;
-
     // Ensure input files are provided and capture the paths
-    for (const filePath of options.input) {
-      if (filePath.endsWith('node_options.cc')) {
-        ccFile = filePath;
-      } else if (filePath.endsWith('node_options.h')) {
-        hFile = filePath;
-      }
-    }
+    const ccFile = options.input.find(filePath =>
+      filePath.endsWith('node_options.cc')
+    );
+    const hFile = options.input.find(filePath =>
+      filePath.endsWith('node_options.h')
+    );
 
     // Error handling if either cc or h file is missing
     if (!ccFile || !hFile) {
@@ -46,9 +44,6 @@ export default {
     // Read the contents of the cc and h files
     const ccContent = await readFile(ccFile, 'utf-8');
     const hContent = await readFile(hFile, 'utf-8');
-    const schema = JSON.parse(
-      await readFile(new URL('./schema.json', import.meta.url))
-    );
 
     const { nodeOptions } = schema.properties;
 
