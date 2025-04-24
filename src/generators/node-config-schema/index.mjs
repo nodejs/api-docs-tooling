@@ -1,11 +1,13 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
 import {
-  ERRORS,
   ADD_OPTION_REGEX,
+  ERRORS,
   OPTION_HEADER_KEY_REGEX,
 } from './constants.mjs';
-import { join } from 'node:path';
 import schema from './schema.json' with { type: 'json' };
+import { formatErrorMessage, getTypeSchema } from './utilities.mjs';
 
 /**
  * This generator generates the `node.config.json` schema.
@@ -55,6 +57,7 @@ export default {
       }
 
       const headerKey = config.match(OPTION_HEADER_KEY_REGEX)?.[1];
+
       // If there's no header key, it's either a V8 option or a no-op
       if (!headerKey) {
         continue;
@@ -91,47 +94,3 @@ export default {
     return schema;
   },
 };
-
-/**
- * Helper function to replace placeholders in error messages with dynamic values.
- * @param {string} message - The error message with placeholders.
- * @param {Object} params - The values to replace the placeholders.
- * @returns {string} - The formatted error message.
- */
-function formatErrorMessage(message, params) {
-  return message.replace(/{{(\w+)}}/g, (_, key) => params[key] || `{{${key}}}`);
-}
-
-/**
- * Returns the JSON Schema definition for a given C++ type.
- *
- * @param {string} type - The type to get the schema for.
- * @returns {object} JSON Schema definition for the given type.
- */
-function getTypeSchema(type) {
-  switch (type) {
-    case 'std::vector<std::string>':
-      return {
-        oneOf: [
-          { type: 'string' },
-          {
-            type: 'array',
-            items: { type: 'string' },
-            minItems: 1,
-          },
-        ],
-      };
-    case 'uint64_t':
-    case 'int64_t':
-    case 'HostPort':
-      return { type: 'number' };
-    case 'std::string':
-      return { type: 'string' };
-    case 'bool':
-      return { type: 'boolean' };
-    default:
-      throw new Error(
-        formatErrorMessage(ERRORS.missingTypeDefinition, { type })
-      );
-  }
-}
