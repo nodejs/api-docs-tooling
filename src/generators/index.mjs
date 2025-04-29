@@ -10,6 +10,7 @@ import addonVerify from './addon-verify/index.mjs';
 import apiLinks from './api-links/index.mjs';
 import oramaDb from './orama-db/index.mjs';
 import astJs from './ast-js/index.mjs';
+import llmsTxt from './llms-txt/index.mjs';
 
 export const publicGenerators = {
   'json-simple': jsonSimple,
@@ -21,6 +22,7 @@ export const publicGenerators = {
   'addon-verify': addonVerify,
   'api-links': apiLinks,
   'orama-db': oramaDb,
+  'llms-txt': llmsTxt,
 };
 
 export const allGenerators = {
