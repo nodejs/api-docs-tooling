@@ -31,7 +31,7 @@ export default {
 
     const introductionEntries = [
       `- [About this documentation](${LATEST_DOC_API_BASE_URL}/api/documentation.md)`,
-      `- [Usage and example](${LATEST_DOC_API_BASE_URL}/api/synopsis.md)`,
+      `- [Usage and examples](${LATEST_DOC_API_BASE_URL}/api/synopsis.md)`,
     ];
 
     const filledTemplate = template
