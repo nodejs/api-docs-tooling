@@ -1,4 +1,4 @@
-import { LATEST_DOC_API_BASE_URL } from '../constants.mjs';
+import { LATEST_DOC_API_BASE_URL } from '../../../constants.mjs';
 
 /**
  * Generates a list of introduction links for the llms.txt file
