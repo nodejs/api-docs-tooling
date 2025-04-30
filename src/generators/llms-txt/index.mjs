@@ -1,45 +1,62 @@
-'use strict';
-
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { generateDocEntry } from './utils/generateDocEntry.mjs';
-import { LATEST_DOC_API_BASE_URL } from './constants.mjs';
+
+import { buildApiDocLink } from './utils/buildApiDocLink.mjs';
+import { ENTRY_IGNORE_LIST } from './constants.mjs';
+import { getIntroLinks } from './utils/getIntroLinks.mjs';
 
 /**
+ * This generator generates a llms.txt file to provide information to LLMs at
+ * inference time
+ *
  * @typedef {Array<ApiDocMetadataEntry>} Input
  *
  * @type {GeneratorMetadata<Input, string>}
  */
 export default {
   name: 'llms-txt',
+
   version: '1.0.0',
-  description: 'Generates a llms.txt file of the API docs',
+
+  description:
+    'Generates a llms.txt file to provide information to LLMs at inference time',
+
   dependsOn: 'ast',
 
   /**
-   * @param {Input} input The API documentation metadata
-   * @param {Partial<GeneratorOptions>} options Generator options
-   * @returns {Promise<string>} The generated documentation text
+   * Generates a llms.txt file
+   *
+   * @param {Input} entries
+   * @param {Partial<GeneratorOptions>} options
+   * @returns {Promise<void>}
    */
-  async generate(input, options) {
+  async generate(entries, { output }) {
     const template = await readFile(
       join(import.meta.dirname, 'template.txt'),
       'utf-8'
     );
 
-    const apiDocEntries = input.map(generateDocEntry).filter(Boolean);
+    const introLinks = getIntroLinks().join('\n');
 
-    const introductionEntries = [
-      `- [About this documentation](${LATEST_DOC_API_BASE_URL}/api/documentation.md)`,
-      `- [Usage and examples](${LATEST_DOC_API_BASE_URL}/api/synopsis.md)`,
-    ];
+    const apiDocsLinks = entries
+      .filter(entry => {
+        // Filter non top-level headings and ignored entries
+        return (
+          entry.heading.depth === 1 || ENTRY_IGNORE_LIST.includes(entry.path)
+        );
+      })
+      .map(entry => {
+        const link = buildApiDocLink(entry);
+        return `- ${link}`;
+      })
+      .join('\n');
 
     const filledTemplate = template
-      .replace('__INTRODUCTION__', introductionEntries.join('\n'))
-      .replace('__API_DOCS__', apiDocEntries.join('\n'));
+      .replace('__INTRODUCTION__', introLinks)
+      .replace('__API_DOCS__', apiDocsLinks);
 
-    if (options.output) {
-      await writeFile(join(options.output, 'llms.txt'), filledTemplate);
+    if (output) {
+      await writeFile(join(output, 'llms.txt'), filledTemplate);
     }
 
     return filledTemplate;
