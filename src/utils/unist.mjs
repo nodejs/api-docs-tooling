@@ -3,6 +3,25 @@
 import { pointEnd, pointStart } from 'unist-util-position';
 
 /**
+ * Extracts text content from a node recursively
+ *
+ * @param {import('unist').Node} node The Node to be transformed into a string
+ * @returns {string} The transformed Node as a string
+ */
+export const transformNodeToString = node => {
+  switch (node.type) {
+    case 'inlineCode':
+      return `\`${node.value}\``;
+    case 'strong':
+      return `**${transformNodesToString(node.children)}**`;
+    case 'emphasis':
+      return `_${transformNodesToString(node.children)}_`;
+    default:
+      return node.children ? transformNodesToString(node.children) : node.value;
+  }
+};
+
+/**
  * This utility allows us to join children Nodes into one
  * and transfor them back to what their source would look like
  *
@@ -10,20 +29,7 @@ import { pointEnd, pointStart } from 'unist-util-position';
  * @returns {string} The parsed and joined nodes as a string
  */
 export const transformNodesToString = nodes => {
-  const mappedChildren = nodes.map(node => {
-    switch (node.type) {
-      case 'inlineCode':
-        return `\`${node.value}\``;
-      case 'strong':
-        return `**${transformNodesToString(node.children)}**`;
-      case 'emphasis':
-        return `_${transformNodesToString(node.children)}_`;
-      default:
-        return node.children
-          ? transformNodesToString(node.children)
-          : node.value;
-    }
-  });
+  const mappedChildren = nodes.map(node => transformNodeToString(node));
 
   return mappedChildren.join('');
 };

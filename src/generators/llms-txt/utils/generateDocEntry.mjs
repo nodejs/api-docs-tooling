@@ -1,5 +1,5 @@
+import { transformNodeToString } from '../../../utils/unist.mjs';
 import { ENTRY_IGNORE_LIST, LATEST_DOC_API_BASE_URL } from '../constants.mjs';
-import { paragraphToString } from './paragraphToString.mjs';
 
 /**
  * Generates a documentation entry string
@@ -30,7 +30,7 @@ export function generateDocEntry(entry) {
     return `- ${entryLink}`;
   }
 
-  const description = paragraphToString(descriptionNode).replace(
+  const description = transformNodeToString(descriptionNode).replace(
     /[\r\n]+/g,
     ' '
   );
