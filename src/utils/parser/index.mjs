@@ -95,7 +95,8 @@ export const parseYAMLIntoMetadata = yamlString => {
     .replace('introduced_in=', 'introduced_in: ')
     .replace('source_link=', 'source_link: ')
     .replace('type=', 'type: ')
-    .replace('name=', 'name: ');
+    .replace('name=', 'name: ')
+    .replace('llm_description=', 'llm_description: ');
 
   // Ensures that the parsed YAML is an object, because even if it is not
   // i.e. a plain string or an array, it will simply not result into anything

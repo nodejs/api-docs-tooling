@@ -2,6 +2,34 @@ import { LATEST_DOC_API_BASE_URL } from '../../../constants.mjs';
 import { transformNodeToString } from '../../../utils/unist.mjs';
 
 /**
+ * Retrieves the description of a given API doc entry. It first checks whether
+ * the entry has a llm_description property. If not, it extracts the first
+ * paragraph from the entry's content.
+ *
+ * @param {ApiDocMetadataEntry} entry
+ * @returns {string}
+ */
+const getEntryDescription = entry => {
+  if (entry.llm_description) {
+    return entry.llm_description;
+  }
+
+  const descriptionNode = entry.content.children.find(
+    child => child.type === 'paragraph'
+  );
+
+  if (!descriptionNode) {
+    return '';
+  }
+
+  return (
+    transformNodeToString(descriptionNode)
+      // Remove newlines and extra spaces
+      .replace(/[\r\n]+/g, '')
+  );
+};
+
+/**
  * Builds a markdown link for an API doc entry
  *
  * @param {ApiDocMetadataEntry} entry
@@ -16,18 +44,7 @@ export const buildApiDocLink = entry => {
 
   const link = `[${title}](${url})`;
 
-  // Find the first paragraph in the content
-  const descriptionNode = entry.content.children.find(
-    child => child.type === 'paragraph'
-  );
-
-  if (!descriptionNode) {
-    return link;
-  }
-
-  const description = transformNodeToString(descriptionNode)
-    // Remove newlines and extra spaces
-    .replace(/[\r\n]+/g, ' ');
+  const description = getEntryDescription(entry);
 
   return `${link}: ${description}`;
 };
