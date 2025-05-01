@@ -5,7 +5,11 @@
  * @typedef {import('../../legacy-json/types.d.ts').HierarchizedEntry} HierarchizedEntry
  */
 
-const MARKDOWN_TO_SECTION_TYPE = {
+/**
+ * Mapping of {@link HeadingMetadataEntry['type']} to types defined in the
+ * JSON schema.
+ */
+const ENTRY_TO_SECTION_TYPE = /** @type {const} */ ({
   module: 'module',
   class: 'class',
   ctor: 'method',
@@ -14,7 +18,7 @@ const MARKDOWN_TO_SECTION_TYPE = {
   property: 'property',
   misc: 'text',
   text: 'text',
-};
+});
 
 /**
  * Converts a value to an array.
@@ -24,18 +28,98 @@ const MARKDOWN_TO_SECTION_TYPE = {
  */
 const enforceArray = val => (Array.isArray(val) ? val : [val]);
 
+/**
+ *
+ */
 export const createSectionBaseBuilder = () => {
+  /**
+   * @param {import('mdast').RootContent} headingNode
+   * @param {number} depth
+   * @returns {typeof ENTRY_TO_SECTION_TYPE[string]}
+   */
+  const determineType = (headingNode, depth) => {
+    const fallback = depth === 1 ? 'module' : 'text';
+
+    return ENTRY_TO_SECTION_TYPE[headingNode?.data.type ?? fallback];
+  };
+
   /**
    * Adds a description to the section base.
    * @param {import('../generated.d.ts').SectionBase} section
    * @param {Array} nodes
    */
   const addDescriptionAndExamples = (section, nodes) => {
-    section.description = 'TODO';
+    nodes.forEach(node => {
+      /**
+       * @type {string | undefined}
+       */
+      let content;
+
+      switch (node.type) {
+        case 'paragraph': {
+          addDescriptionAndExamples(section, node.children);
+
+          break;
+        }
+        case 'emphasis': {
+          addDescriptionAndExamples(section, node.children);
+          break;
+        }
+        case 'inlineCode': {
+          content = `\`${node.value}\``;
+          break;
+        }
+        case 'text': {
+          content = node.value;
+          break;
+        }
+        case 'link': {
+          if (node.label) {
+            // Standard link to some resource
+            content = `[${node.label}](${node.url})`;
+          } else {
+            // Missing the label, let's see if it's a reference to a global
+            const childNode = node.children[0];
+
+            if (childNode && childNode.type === 'inlineCode') {
+              content = `[${childNode.value}](${node.url})`;
+            } else {
+              console.error('not', childNode);
+            }
+          }
+
+          break;
+        }
+        case 'code': {
+          // TODO this is kinda ugly
+          if (Array.isArray(section['@example'])) {
+            section['@example'] = [...section['@example'], node.value];
+          } else if (section['@example']) {
+            section['@example'] = [section['@example'], node.value];
+          } else {
+            section['@example'] = node.value;
+          }
+
+          break;
+        }
+        default: {
+          // No content to add to description
+          break;
+        }
+      }
+
+      if (content) {
+        // Create the description property if it doesn't already exist
+        section.description ??= '';
+
+        // Add this nodes' content to the description
+        section.description += content;
+      }
+    });
   };
 
   /**
-   * TODO
+   * TODO docs
    * @param {import('../generated.d.ts').SectionBase} section
    * @param {HierarchizedEntry} entry
    */
@@ -48,13 +132,12 @@ export const createSectionBaseBuilder = () => {
   };
 
   /**
-   * TODO
+   * TODO docs
    * @param {import('../generated.d.ts').SectionBase} section
-   * @param {Array} nodes The remaining AST nodes
    * @param {HierarchizedEntry} entry
    */
-  const addStabilityStatus = (section, nodes, entry) => {
-    const stability = entry.stability.toJSON()?.[0];
+  const addStabilityStatus = (section, entry) => {
+    const stability = entry.stability.children.map(node => node.data)?.[0];
 
     if (!stability) {
       return;
@@ -64,13 +147,10 @@ export const createSectionBaseBuilder = () => {
       value: stability.index,
       text: stability.description,
     };
-
-    // Remove the stability node from processing
-    nodes.shift();
   };
 
   /**
-   * TODO
+   * TODO docs
    * @param {import('../generated.d.ts').SectionBase} section
    * @param {HierarchizedEntry} entry
    */
@@ -101,23 +181,24 @@ export const createSectionBaseBuilder = () => {
    * section type that we have.
    *
    * @param {HierarchizedEntry} entry The AST entry
-   * @param {HeadingMetadataEntry['type'] | undefined} type The type of the entry
    * @returns {import('../generated.d.ts').SectionBase}
    */
-  return (entry, parentType) => {
-    const [headingNode, ...nodes] = structuredClone(entry.content.children);
+  return entry => {
+    const [headingNode, ...nodes] = entry.content.children;
+
+    const type = determineType(headingNode, entry.heading.depth);
 
     /**
      * @type {import('../generated.d.ts').SectionBase}
      */
     const base = {
-      type: MARKDOWN_TO_SECTION_TYPE[headingNode.data.type ?? parentType ?? 'module'],
+      type,
       '@name': headingNode.data.name,
     };
 
     addDescriptionAndExamples(base, nodes);
     addDeprecatedStatus(base, entry);
-    addStabilityStatus(base, nodes, entry);
+    addStabilityStatus(base, entry);
     addVersionProperties(base, entry);
 
     return base;

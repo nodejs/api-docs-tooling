@@ -1,8 +1,8 @@
 {
-  // TODO vscode doesn't support the latest schema https://github.com/microsoft/vscode/issues/155379
-  // "$schema": "https://json-schema.org/draft/2020-12/schema",
+  // TODO vscode doesn't support 2020-12 yet
+  //  https://github.com/microsoft/vscode/issues/165219
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "nodejs-api-doc@v2.0.0",
+  "$id": "nodejs-api-doc@v2.0.0", // This should be kept in sync with the generator version
   "title": "Node.js API Documentation Schema",
   "readOnly": true,
 
@@ -11,7 +11,7 @@
     {
       "oneOf": [
         { "$ref": "#/definitions/Module" },
-        { "$ref": "#/definitions/Text" }
+        { "$ref": "#/definitions/Text" },
       ],
     },
   ],
@@ -47,6 +47,11 @@
         "description": {
           "type": "string",
           "description": "Description of the section.",
+        },
+        "text": {
+          "type": "array",
+          "description": "Sections that just hold further text on this section.",
+          "items": { "$ref": "#/definitions/Text" },
         },
         "@example": {
           "description": "https://jsdoc.app/tags-example",
@@ -136,11 +141,6 @@
               "type": "array",
               "items": { "$ref": "#/definitions/Property" },
             },
-            "text": {
-              "type": "array",
-              "description": "Sections that just hold further text on this module.",
-              "items": { "$ref": "#/definitions/Text" }
-            }
           },
           // TODO what else to be required
           "required": ["type", "@module", "@see"],
@@ -175,7 +175,13 @@
               "items": { "$ref": "#/definitions/Property" },
             },
           },
-          "required": ["type"],
+          "required": [
+            "type",
+            "@constructor",
+            "methods",
+            "staticMethods",
+            "properties",
+          ],
         },
       ],
     },
@@ -307,9 +313,7 @@
     },
 
     "Text": {
-      "allOf": [
-        { "$ref": "#/definitions/SectionBase" },
-      ]
+      "allOf": [{ "$ref": "#/definitions/SectionBase" }],
     },
 
     "NodeCoreVersion": {

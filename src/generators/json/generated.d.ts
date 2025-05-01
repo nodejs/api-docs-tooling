@@ -10,15 +10,15 @@ export type NodeJsAPIDocumentationSchema = DocumentRoot & (Module | Text);
  * A JavaScript module.
  */
 export type Module = SectionBase & {
-  type: "module";
+  type: 'module';
   /**
    * https://jsdoc.app/tags-see
    */
-  "@see": string;
+  '@see': string;
   /**
    * https://jsdoc.app/tags-module
    */
-  "@module": string;
+  '@module': string;
   /**
    * Classes exported from this module.
    */
@@ -39,8 +39,8 @@ export type Module = SectionBase & {
  */
 export type NodeCoreVersion = string;
 export type Class = SectionBase & {
-  type: "class";
-  "@constructor"?: MethodSignature[];
+  type: 'class';
+  '@constructor'?: MethodSignature[];
   methods?: Method[];
   staticMethods?: Method[];
   properties?: Property[];
@@ -50,7 +50,7 @@ export type Class = SectionBase & {
  * A JavaScript function.
  */
 export type Method = SectionBase & {
-  type: "method";
+  type: 'method';
   signatures: MethodSignature[];
   [k: string]: unknown;
 };
@@ -58,11 +58,11 @@ export type Method = SectionBase & {
  * A property on a JavaScript object or class.
  */
 export type Property = SectionBase & {
-  type: "property";
+  type: 'property';
   /**
    * JavaScript type of the property.
    */
-  "@type": string | [string, ...string[]];
+  '@type': string | [string, ...string[]];
   /**
    * Is this property modifiable by user code?
    */
@@ -88,11 +88,11 @@ export interface SectionBase {
   /**
    * Type of the section
    */
-  type: "module" | "class" | "method" | "property" | "text";
+  type: 'module' | 'class' | 'method' | 'property' | 'text';
   /**
    * https://jsdoc.app/tags-name
    */
-  "@name": string;
+  '@name': string;
   /**
    * Description of the section.
    */
@@ -100,11 +100,11 @@ export interface SectionBase {
   /**
    * https://jsdoc.app/tags-example
    */
-  "@example"?: string | string[];
+  '@example'?: string | string[];
   /**
    * https://jsdoc.app/tags-deprecated
    */
-  "@deprecated"?: NodeCoreVersion[];
+  '@deprecated'?: NodeCoreVersion[];
   stability?: Stability;
   /**
    * The changes this API has underwent.
@@ -113,7 +113,7 @@ export interface SectionBase {
   /**
    * https://jsdoc.app/tags-since
    */
-  "@since"?: NodeCoreVersion[];
+  '@since'?: NodeCoreVersion[];
   /**
    * todo what does this describe lol
    */
@@ -155,22 +155,22 @@ export interface MethodSignature {
   /**
    * The method signature's return type.
    */
-  "@returns"?: string | [string, ...string[]];
+  '@returns'?: string | [string, ...string[]];
   [k: string]: unknown;
 }
 export interface MethodParameter {
   /**
    * Name of the parameter.
    */
-  "@name": string;
+  '@name': string;
   /**
    * Type of the parameter
    */
-  "@type": string | [string, ...string[]];
+  '@type': string | [string, ...string[]];
   description?: string;
   /**
    * The parameter's default value
    */
-  "@default"?: string;
+  '@default'?: string;
   [k: string]: unknown;
 }

@@ -24,7 +24,8 @@ import { createSectionBuilder } from './utils/createSection.mjs';
 export default {
   name: 'json',
 
-  version: '1.0.0',
+  // This should be kept in sync with the JSON schema version
+  version: '2.0.0',
 
   description: 'TODO',
 
@@ -73,10 +74,10 @@ export default {
 
       // Write it to the output file
       if (output) {
-        // await writeFile(
-        //   join(output, `${node.api}.json`),
-        //   JSON.stringify(section)
-        // );
+        await writeFile(
+          join(output, `${node.api}.json`),
+          JSON.stringify(section)
+        );
       }
     });
 
