@@ -2,8 +2,6 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { buildApiDocLink } from './utils/buildApiDocLink.mjs';
-import { ENTRY_IGNORE_LIST } from './constants.mjs';
-import { getIntroLinks } from './utils/getIntroLinks.mjs';
 
 /**
  * This generator generates a llms.txt file to provide information to LLMs at
@@ -36,24 +34,13 @@ export default {
       'utf-8'
     );
 
-    const introLinks = getIntroLinks().join('\n');
-
     const apiDocsLinks = entries
-      .filter(entry => {
-        // Filter non top-level headings and ignored entries
-        return (
-          entry.heading.depth === 1 || ENTRY_IGNORE_LIST.includes(entry.path)
-        );
-      })
-      .map(entry => {
-        const link = buildApiDocLink(entry);
-        return `- ${link}`;
-      })
+      // Filter non top-level headings
+      .filter(entry => entry.heading.depth === 1)
+      .map(entry => `- ${buildApiDocLink(entry)}`)
       .join('\n');
 
-    const filledTemplate = template
-      .replace('__INTRODUCTION__', introLinks)
-      .replace('__API_DOCS__', apiDocsLinks);
+    const filledTemplate = template.replace('__API_DOCS__', apiDocsLinks);
 
     if (output) {
       await writeFile(join(output, 'llms.txt'), filledTemplate);

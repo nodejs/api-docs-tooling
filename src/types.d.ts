@@ -4,9 +4,9 @@ import type { SemVer } from 'semver';
 import type { Data, Node, Parent, Position } from 'unist';
 
 // Unist Node with typed Data, which allows better type inference
-type NodeWithData<T extends Node, J extends Data> = T & {
+interface NodeWithData<T extends Node, J extends Data> extends T {
   data: J;
-};
+}
 
 declare global {
   export interface StabilityIndexMetadataEntry {
