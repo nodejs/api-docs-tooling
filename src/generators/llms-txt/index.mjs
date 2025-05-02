@@ -40,7 +40,7 @@ export default {
       .map(entry => `- ${buildApiDocLink(entry)}`)
       .join('\n');
 
-    const filledTemplate = template.replace('__API_DOCS__', apiDocsLinks);
+    const filledTemplate = `${template}${apiDocsLinks}`;
 
     if (output) {
       await writeFile(join(output, 'llms.txt'), filledTemplate);

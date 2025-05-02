@@ -5,4 +5,3 @@
 Below are the sections of the API documentation. Look out especially towards the links that point towards guidance/introductioon to the structure of this documentation.
 
 ## API Documentations
-__API_DOCS__
