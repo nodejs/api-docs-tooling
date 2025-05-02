@@ -14,6 +14,8 @@ export const createMethodSectionBuilder = () => {
    */
   const parseSignatures = (entry, section) => {
     section.signatures = [];
+
+    
   };
 
   /**

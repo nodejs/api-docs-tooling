@@ -58,7 +58,6 @@ export const createSectionBaseBuilder = () => {
       switch (node.type) {
         case 'paragraph': {
           addDescriptionAndExamples(section, node.children);
-
           break;
         }
         case 'emphasis': {

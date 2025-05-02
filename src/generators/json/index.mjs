@@ -3,7 +3,7 @@
 
 import { writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parse } from 'jsonc-parser';
+import { parse as jsoncParse } from 'jsonc-parser';
 import { groupNodesByModule } from '../../utils/generators.mjs';
 import { createSectionBuilder } from './utils/createSection.mjs';
 
@@ -50,7 +50,7 @@ export default {
     const processModuleNodes = head => {
       const nodes = groupedModules.get(head.api);
       if (!nodes) {
-        throw new TypeError('TODO');
+        throw new TypeError(`no grouped nodes found for ${head.api}`);
       }
 
       const section = buildSection(head, nodes);
@@ -92,7 +92,7 @@ export default {
       );
 
       // Parse the JSON schema into an object
-      const schema = await parse(schemaString);
+      const schema = await jsoncParse(schemaString);
 
       // Write the parsed JSON schema to the output directory
       // await writeFile(

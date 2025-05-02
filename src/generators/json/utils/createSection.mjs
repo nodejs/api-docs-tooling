@@ -45,7 +45,7 @@ export const createSectionBuilder = () => {
     /**
      * @type {import('../types.d.ts').Section}
      */
-    const section = createSectionBase(entry, parent?.type);
+    const section = (createSectionBase(entry, parent?.type));
 
     section.parent = parent;
 
@@ -63,6 +63,12 @@ export const createSectionBuilder = () => {
         // createPropertySection(entry, parent, section);
         break;
       case 'text':
+        if (parent) {
+          parent.text ??= [];
+
+          parent.text.push(section);
+        }
+
         break;
       default:
         throw new TypeError(`unhandled section type ${section.type}`);
@@ -70,15 +76,15 @@ export const createSectionBuilder = () => {
 
     handleChildren(entry, section);
 
-    if (parent) {
-      if (!parent.tmp) {
-        parent.tmp = [];
-      }
-      parent.tmp.push(section);
-    }
-    // console.debug(section);
-
     delete section.parent;
+
+    // if (parent) {
+    //   if (!parent.tmp) {
+    //     parent.tmp = [];
+    //   }
+    //   parent.tmp.push(section);
+    // }
+    // console.debug(section);
 
     return section;
   };

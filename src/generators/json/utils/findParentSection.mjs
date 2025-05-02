@@ -1,6 +1,7 @@
 'use strict';
 
 /**
+ * Finds the closest parent section with the specified type(s).
  * @param {import('../types.d.ts').Section} section
  * @param {import('../generated.d.ts').SectionBase['type'] | Array<import('../generated.d.ts').SectionBase['type']>} type
  * @returns {import('../types.d.ts').Section | undefined}
