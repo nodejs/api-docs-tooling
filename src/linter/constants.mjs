@@ -5,4 +5,6 @@ export const LINT_MESSAGES = {
   missingChangeVersion: 'Missing version field in the API doc entry',
   invalidChangeVersion: 'Invalid version number: {{version}}',
   duplicateStabilityNode: 'Duplicate stability node',
+  missingLlmDescription:
+    'Missing llm_description field or paragraph node in the API doc entry',
 };
