@@ -1,4 +1,4 @@
-import type { Heading, Root } from '@types/mdast';
+import type { Heading, Root } from 'mdast';
 import type { Program } from 'acorn';
 import type { SemVer } from 'semver';
 import type { Data, Node, Parent, Position } from 'unist';
@@ -56,6 +56,7 @@ declare global {
     introduced_in?: string;
     napiVersion?: number;
     tags?: Array<string>;
+    llm_description?: string;
   }
 
   export interface ApiDocMetadataEntry {
@@ -90,6 +91,8 @@ declare global {
     // Extra YAML section entries that are stringd and serve
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
+    // The llms.txt specific description
+    llm_description: string | undefined;
     // The postion of the YAML of the API doc entry
     yaml_position: Position;
   }
