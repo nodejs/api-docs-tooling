@@ -60,7 +60,7 @@ Options:
   -v, --version <semver>     Target Node.js version (default: "v22.14.0")
   -c, --changelog <url>      Changelog URL or path (default: "https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md")
   --git-ref <url>            Git ref/commit URL (default: "https://github.com/nodejs/node/tree/HEAD")
-  -t, --target [modes...]    Target generator modes (choices: "json-simple", "legacy-html", "legacy-html-all", "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links", "orama-db")
+  -t, --target [modes...]    Target generator modes (choices: "json-simple", "legacy-html", "legacy-html-all", "man-page", "legacy-json", "legacy-json-all", "addon-verify", "api-links", "orama-db", "llms-txt")
   --no-lint                  Skip lint before generate
   -h, --help                 display help for command
 ```
