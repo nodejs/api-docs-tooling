@@ -7,5 +7,5 @@ export const DOC_NODE_VERSION = process.version;
 export const DOC_NODE_CHANGELOG_URL =
   'https://raw.githubusercontent.com/nodejs/node/HEAD/CHANGELOG.md';
 
-// The base URL for the latest Node.js documentation
-export const LATEST_DOC_API_BASE_URL = 'https://nodejs.org/docs/latest/';
+// The base URL for the Node.js website
+export const BASE_URL = 'https://nodejs.org/';

@@ -38,8 +38,7 @@ const getEntryDescription = entry => {
 export const buildApiDocLink = entry => {
   const title = entry.heading.data.name;
 
-  // Remove the leading doc/ from the path
-  const path = entry.api_doc_source.replace(/^doc\//, '');
+  const path = entry.api_doc_source.replace(/^doc\//, '/docs/latest/');
   const url = new URL(path, LATEST_DOC_API_BASE_URL);
 
   const link = `[${title}](${url})`;
