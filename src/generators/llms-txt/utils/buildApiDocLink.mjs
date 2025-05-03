@@ -1,4 +1,4 @@
-import { LATEST_DOC_API_BASE_URL } from '../../../constants.mjs';
+import { BASE_URL } from '../../../constants.mjs';
 import { transformNodeToString } from '../../../utils/unist.mjs';
 
 /**
@@ -39,7 +39,7 @@ export const buildApiDocLink = entry => {
   const title = entry.heading.data.name;
 
   const path = entry.api_doc_source.replace(/^doc\//, '/docs/latest/');
-  const url = new URL(path, LATEST_DOC_API_BASE_URL);
+  const url = new URL(path, BASE_URL);
 
   const link = `[${title}](${url})`;
 
