@@ -26,4 +26,6 @@ You can check the items by adding an `x` between the brackets, like this: `[x]`
 -->
 
 - [ ] I have read the [Contributing Guidelines](https://github.com/nodejs/api-docs-tooling/blob/main/CONTRIBUTING.md) and made commit messages that follow the guideline.
+- [ ] I have run `node --run test` and all tests passed.
+- [ ] I have check code formatting with `node --run format` & `node --run lint`.
 - [ ] I've covered new added functionality with unit tests if necessary.
