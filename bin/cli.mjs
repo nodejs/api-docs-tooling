@@ -1,4 +1,4 @@
-#!/usr/bin/env node --disable-warning=11982
+#!/usr/bin/env node
 
 import process from 'node:process';
 import { Argument, Command, Option } from 'commander';
