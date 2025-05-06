@@ -35,13 +35,10 @@ export default {
     const generatedValue = {
       $schema: './node-doc-all-schema.jsonc',
       modules: [],
-      text: []
-    }
+      text: [],
+    };
 
-    const propertiesToIgnore = [
-      '$schema',
-      'source',
-    ]
+    const propertiesToIgnore = ['$schema', 'source'];
 
     input.forEach(section => {
       const copiedSection = {};
@@ -50,7 +47,7 @@ export default {
         if (!propertiesToIgnore.includes(key)) {
           copiedSection[key] = section[key];
         }
-      })
+      });
 
       switch (section.type) {
         case 'module':
@@ -62,7 +59,7 @@ export default {
         default:
           throw new TypeError(`unsupported root section type ${section.type}`);
       }
-    })
+    });
 
     if (output) {
       // Current directory path relative to the `index.mjs` file

@@ -1,5 +1,7 @@
 'use strict';
 
+import { enforceArray } from './enforceArray.mjs';
+
 /**
  * Finds the closest parent section with the specified type(s).
  * @param {import('../types.d.ts').Section} section
@@ -7,9 +9,7 @@
  * @returns {import('../types.d.ts').Section | undefined}
  */
 export function findParentSection(section, type) {
-  if (!Array.isArray(type)) {
-    type = [type];
-  }
+  type = enforceArray(type);
 
   let parent = section.parent;
 

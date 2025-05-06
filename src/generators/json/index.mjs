@@ -27,7 +27,8 @@ export default {
   // This should be kept in sync with the JSON schema version
   version: '2.0.0',
 
-  description: 'TODO',
+  description:
+    'This generator is responsible for generating the JSON representation of the docs.',
 
   dependsOn: 'ast',
 
@@ -76,7 +77,7 @@ export default {
       if (output) {
         await writeFile(
           join(output, `${node.api}.json`),
-          JSON.stringify(section)
+          JSON.stringify(section, null, 2)
         );
       }
     });
@@ -86,13 +87,13 @@ export default {
       const baseDir = import.meta.dirname;
 
       // Read the contents of the JSON schema
-      const schemaString = await readFile(
-        join(baseDir, 'schema.jsonc'),
-        'utf8'
-      );
+      // const schemaString = await readFile(
+      //   join(baseDir, 'schema.jsonc'),
+      //   'utf8'
+      // );
 
-      // Parse the JSON schema into an object
-      const schema = await jsoncParse(schemaString);
+      // // Parse the JSON schema into an object
+      // const schema = await jsoncParse(schemaString);
 
       // Write the parsed JSON schema to the output directory
       // await writeFile(

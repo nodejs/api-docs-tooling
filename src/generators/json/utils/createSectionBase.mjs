@@ -1,6 +1,8 @@
 // @ts-check
 'use strict';
 
+import { enforceArray } from './enforceArray.mjs';
+
 /**
  * @typedef {import('../../legacy-json/types.d.ts').HierarchizedEntry} HierarchizedEntry
  */
@@ -20,17 +22,6 @@ const ENTRY_TO_SECTION_TYPE = /** @type {const} */ ({
   text: 'text',
 });
 
-/**
- * Converts a value to an array.
- * @template T
- * @param {T | T[]} val - The value to convert.
- * @returns {T[]} The value as an array.
- */
-const enforceArray = val => (Array.isArray(val) ? val : [val]);
-
-/**
- *
- */
 export const createSectionBaseBuilder = () => {
   /**
    * @param {import('mdast').RootContent} headingNode
@@ -118,7 +109,7 @@ export const createSectionBaseBuilder = () => {
   };
 
   /**
-   * TODO docs
+   * Adds the deprecated property to the section if needed.
    * @param {import('../generated.d.ts').SectionBase} section
    * @param {HierarchizedEntry} entry
    */
@@ -131,7 +122,7 @@ export const createSectionBaseBuilder = () => {
   };
 
   /**
-   * TODO docs
+   * Adds the stability property to the section.
    * @param {import('../generated.d.ts').SectionBase} section
    * @param {HierarchizedEntry} entry
    */
@@ -149,7 +140,7 @@ export const createSectionBaseBuilder = () => {
   };
 
   /**
-   * TODO docs
+   * Adds the properties relating to versioning to the section.
    * @param {import('../generated.d.ts').SectionBase} section
    * @param {HierarchizedEntry} entry
    */

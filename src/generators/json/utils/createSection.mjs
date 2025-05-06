@@ -18,7 +18,7 @@ export const createSectionBuilder = () => {
   const createMethodSection = createMethodSectionBuilder();
 
   /**
-   * TODO docs
+   * Creates the properties that exist in the root of a document
    * @param {ApiDocMetadataEntry} head The head metadata entry
    * @returns {import('../generated.d.ts').DocumentRoot}
    */
@@ -45,8 +45,10 @@ export const createSectionBuilder = () => {
     /**
      * @type {import('../types.d.ts').Section}
      */
-    const section = (createSectionBase(entry, parent?.type));
+    const section = createSectionBase(entry, parent?.type);
 
+    // Temporarily add the parent section to the section so we have access to
+    //  it and can easily traverse through them when we need to
     section.parent = parent;
 
     switch (section.type) {
@@ -76,6 +78,7 @@ export const createSectionBuilder = () => {
 
     handleChildren(entry, section);
 
+    // Remove the parent property we added to the section earlier
     delete section.parent;
 
     // if (parent) {

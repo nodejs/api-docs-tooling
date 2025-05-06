@@ -1,6 +1,10 @@
 {
-  // TODO vscode doesn't support 2020-12 yet
-  //  https://github.com/microsoft/vscode/issues/165219
+  /**
+   * NOTE: if you modify this, please:
+   *  - Bump the version in the $id property and in the generator
+   *  - Run `tools/generate-json-types.mjs`
+   */
+
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "nodejs-api-doc@v2.0.0", // This should be kept in sync with the generator version
   "title": "Node.js API Documentation Schema",
@@ -142,7 +146,6 @@
               "items": { "$ref": "#/definitions/Property" },
             },
           },
-          // TODO what else to be required
           "required": ["type", "@module", "@see"],
         },
       ],

@@ -11,7 +11,7 @@
     },
     "text": {
       "type": "array",
-      "items": { "$ref": "../json/schema.jsonc/#/definitions/Text" }
-    }
+      "items": { "$ref": "../json/schema.jsonc/#/definitions/Text" },
+    },
   },
 }

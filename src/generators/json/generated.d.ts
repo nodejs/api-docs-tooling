@@ -34,16 +34,17 @@ export type Module = SectionBase & {
   properties?: Property[];
   [k: string]: unknown;
 };
+export type Text = SectionBase;
 /**
  * Node.js version number
  */
 export type NodeCoreVersion = string;
 export type Class = SectionBase & {
   type: 'class';
-  '@constructor'?: MethodSignature[];
-  methods?: Method[];
-  staticMethods?: Method[];
-  properties?: Property[];
+  '@constructor': MethodSignature[];
+  methods: Method[];
+  staticMethods: Method[];
+  properties: Property[];
   [k: string]: unknown;
 };
 /**
@@ -69,7 +70,6 @@ export type Property = SectionBase & {
   mutable?: boolean;
   [k: string]: unknown;
 };
-export type Text = SectionBase;
 
 /**
  * Common properties found at the root of each document.
@@ -97,6 +97,10 @@ export interface SectionBase {
    * Description of the section.
    */
   description?: string;
+  /**
+   * Sections that just hold further text on this section.
+   */
+  text?: Text[];
   /**
    * https://jsdoc.app/tags-example
    */
