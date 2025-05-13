@@ -219,7 +219,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   RecordableHistogram:
     'perf_hooks.html#class-recordablehistogram-extends-histogram',
 
-  RsaHashedKeyAlgorithm: 'webcrypto.html#class-rsahashedkeygenparams',
+  RsaHashedKeyAlgorithm: 'webcrypto.html#class-rsahashedkeyalgorithm',
   RsaHashedImportParams: 'webcrypto.html#class-rsahashedimportparams',
   RsaHashedKeyGenParams: 'webcrypto.html#class-rsahashedkeygenparams',
   RsaOaepParams: 'webcrypto.html#class-rsaoaepparams',
