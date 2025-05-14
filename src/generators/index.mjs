@@ -11,9 +11,11 @@ import legacyJson from './legacy-json/index.mjs';
 import legacyJsonAll from './legacy-json-all/index.mjs';
 import llmsTxt from './llms-txt/index.mjs';
 import manPage from './man-page/index.mjs';
+import metadata from './metadata/index.mjs';
 import oramaDb from './orama-db/index.mjs';
 
 export const publicGenerators = {
+  metadata: metadata,
   'json-simple': jsonSimple,
   'legacy-html': legacyHtml,
   'legacy-html-all': legacyHtmlAll,

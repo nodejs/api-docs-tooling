@@ -135,17 +135,24 @@ export default {
       process.exit(1);
     }
 
-    const { runGenerators } = createGenerator(docs);
     const { getAllMajors } = createNodeReleases(opts.changelog);
 
-    await runGenerators({
-      generators: opts.target,
-      input: opts.input,
-      output: opts.output && resolve(opts.output),
-      version: coerce(opts.version),
-      releases: await getAllMajors(),
-      gitRef: opts.gitRef,
-      threads: parseInt(opts.threads, 10),
-    });
+    const releases = await getAllMajors();
+
+    await Promise.all(
+      docs.map(async doc => {
+        const { runGenerators } = createGenerator(doc);
+
+        await runGenerators({
+          generators: opts.target,
+          input: opts.input,
+          output: opts.output && resolve(opts.output),
+          version: coerce(opts.version),
+          releases,
+          gitRef: opts.gitRef,
+          threads: parseInt(opts.threads, 10),
+        });
+      })
+    );
   },
 };

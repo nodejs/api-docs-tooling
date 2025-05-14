@@ -40,7 +40,7 @@ export default {
   description:
     'Generates the legacy version of the API docs in HTML, with the assets and styles included as files',
 
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * Generates the legacy version of the API docs in HTML
