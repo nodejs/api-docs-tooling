@@ -19,7 +19,7 @@ export default {
   description:
     'Generates a llms.txt file to provide information to LLMs at inference time',
 
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * Generates a llms.txt file

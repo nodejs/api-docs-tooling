@@ -9,6 +9,14 @@ type NodeWithData<T extends Node, J extends Data> = T & {
 };
 
 declare global {
+  export interface ParserOutput<T> {
+    file: {
+      stem?: string;
+      basename?: string;
+    };
+    tree: T;
+  }
+
   export interface StabilityIndexMetadataEntry {
     index: number;
     description: string;

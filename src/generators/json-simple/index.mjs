@@ -26,7 +26,7 @@ export default {
   description:
     'Generates the simple JSON version of the API docs, and returns it as a string',
 
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * Generates the simplified JSON version of the API docs
