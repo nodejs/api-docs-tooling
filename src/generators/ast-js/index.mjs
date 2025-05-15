@@ -20,7 +20,7 @@ export default {
 
   description: 'Parses Javascript source files passed into the input.',
 
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * @param {Input} _

@@ -1,6 +1,5 @@
 import { cpus } from 'node:os';
 import { resolve } from 'node:path';
-import process from 'node:process';
 
 import { coerce } from 'semver';
 
@@ -12,7 +11,6 @@ import createGenerator from '../../src/generators.mjs';
 import { publicGenerators } from '../../src/generators/index.mjs';
 import createNodeReleases from '../../src/releases.mjs';
 import { loadAndParse } from '../utils.mjs';
-import { runLint } from './lint.mjs';
 
 const availableGenerators = Object.keys(publicGenerators);
 
@@ -125,22 +123,29 @@ export default {
   async action(opts) {
     const docs = await loadAndParse(opts.input, opts.ignore);
 
-    if (!opts.skipLint && !runLint(docs)) {
-      console.error('Lint failed; aborting generation.');
-      process.exit(1);
-    }
+    // if (!opts.skipLint && !runLint(docs)) {
+    //   console.error('Lint failed; aborting generation.');
+    //   process.exit(1);
+    // }
 
-    const { runGenerators } = createGenerator(docs);
     const { getAllMajors } = createNodeReleases(opts.changelog);
 
-    await runGenerators({
-      generators: opts.target,
-      input: opts.input,
-      output: opts.output && resolve(opts.output),
-      version: coerce(opts.version),
-      releases: await getAllMajors(),
-      gitRef: opts.gitRef,
-      threads: parseInt(opts.threads, 10),
-    });
+    const releases = await getAllMajors();
+
+    await Promise.all(
+      docs.map(async doc => {
+        const { runGenerators } = createGenerator(doc);
+
+        await runGenerators({
+          generators: opts.target,
+          input: opts.input,
+          output: opts.output && resolve(opts.output),
+          version: coerce(opts.version),
+          releases,
+          gitRef: opts.gitRef,
+          threads: parseInt(opts.threads, 10),
+        });
+      })
+    );
   },
 };

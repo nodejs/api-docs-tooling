@@ -4,11 +4,19 @@ import type { SemVer } from 'semver';
 import type { Data, Node, Parent, Position } from 'unist';
 
 // Unist Node with typed Data, which allows better type inference
-interface NodeWithData<T extends Node, J extends Data> extends T {
+type NodeWithData<T extends Node, J extends Data> = T & {
   data: J;
-}
+};
 
 declare global {
+  export interface ParserOutput<T> {
+    file: {
+      stem?: string;
+      basename?: string;
+    };
+    tree: T;
+  }
+
   export interface StabilityIndexMetadataEntry {
     index: number;
     description: string;

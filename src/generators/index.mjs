@@ -11,8 +11,10 @@ import apiLinks from './api-links/index.mjs';
 import oramaDb from './orama-db/index.mjs';
 import astJs from './ast-js/index.mjs';
 import llmsTxt from './llms-txt/index.mjs';
+import metadata from './metadata/index.mjs';
 
 export const publicGenerators = {
+  metadata: metadata,
   'json-simple': jsonSimple,
   'legacy-html': legacyHtml,
   'legacy-html-all': legacyHtmlAll,

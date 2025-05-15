@@ -23,7 +23,7 @@ const parser = lazy(createMarkdownParser);
  * Load and parse markdown API docs.
  * @param {string[]} input - Glob patterns for input files.
  * @param {string[]} [ignore] - Glob patterns to ignore.
- * @returns {Promise<ApiDocMetadataEntry[]>} - Parsed documentation objects.
+ * @returns {Promise<ParserOutput<import('mdast').Root>[]>}
  */
 export async function loadAndParse(input, ignore) {
   const files = await loader().loadFiles(input, ignore);
