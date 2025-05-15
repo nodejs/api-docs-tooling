@@ -113,6 +113,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   AbortController: 'globals.html#class-abortcontroller',
   AbortSignal: 'globals.html#class-abortsignal',
 
+  Algorithm: 'webcrypto.html#class-algorithm',
   AlgorithmIdentifier: 'webcrypto.html#class-algorithmidentifier',
   AsyncHook: 'async_hooks.html#async_hookscreatehookcallbacks',
   AsyncLocalStorage: 'async_context.html#class-asynclocalstorage',
@@ -121,6 +122,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   AesCbcParams: 'webcrypto.html#class-aescbcparams',
   AesCtrParams: 'webcrypto.html#class-aesctrparams',
   AesGcmParams: 'webcrypto.html#class-aesgcmparams',
+  AesKeyAlgorithm: 'webcrypto.html#class-aeskeyalgorithm',
   AesKeyGenParams: 'webcrypto.html#class-aeskeygenparams',
 
   Blob: 'buffer.html#class-blob',
@@ -154,6 +156,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   ECDH: 'crypto.html#class-ecdh',
   EcdhKeyDeriveParams: 'webcrypto.html#class-ecdhkeyderiveparams',
   EcdsaParams: 'webcrypto.html#class-ecdsaparams',
+  EcKeyAlgorithm: 'webcrypto.html#class-eckeyalgorithm',
   EcKeyGenParams: 'webcrypto.html#class-eckeygenparams',
   EcKeyImportParams: 'webcrypto.html#class-eckeyimportparams',
   Ed448Params: 'webcrypto.html#class-ed448params',
@@ -172,6 +175,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   HkdfParams: 'webcrypto.html#class-hkdfparams',
   Hmac: 'crypto.html#class-hmac',
   HmacImportParams: 'webcrypto.html#class-hmacimportparams',
+  HmacKeyAlgorithm: 'webcrypto.html#class-hmackeyalgorithm',
   HmacKeyGenParams: 'webcrypto.html#class-hmackeygenparams',
 
   Http2SecureServer: 'http2.html#class-http2secureserver',
@@ -184,6 +188,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   IntervalHistogram:
     'perf_hooks.html#class-intervalhistogram-extends-histogram',
 
+  KeyAlgorithm: 'webcrypto.html#class-keyalgorithm',
   KeyObject: 'crypto.html#class-keyobject',
 
   MIMEParams: 'util.html#class-utilmimeparams',
@@ -214,6 +219,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   RecordableHistogram:
     'perf_hooks.html#class-recordablehistogram-extends-histogram',
 
+  RsaHashedKeyAlgorithm: 'webcrypto.html#class-rsahashedkeyalgorithm',
   RsaHashedImportParams: 'webcrypto.html#class-rsahashedimportparams',
   RsaHashedKeyGenParams: 'webcrypto.html#class-rsahashedkeygenparams',
   RsaOaepParams: 'webcrypto.html#class-rsaoaepparams',
