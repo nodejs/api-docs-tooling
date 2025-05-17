@@ -15,7 +15,8 @@
     "test:watch": "node --test --watch",
     "prepare": "husky",
     "run": "node bin/cli.mjs",
-    "watch": "node --watch bin/cli.mjs"
+    "watch": "node --watch bin/cli.mjs",
+    "postinstall": "git-deps install"
   },
   "main": "./src/index.mjs",
   "bin": {
@@ -28,6 +29,7 @@
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-jsdoc": "^50.6.9",
+    "git-deps": "^1.0.0",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
@@ -41,12 +43,16 @@
     "acorn": "^8.14.1",
     "commander": "^13.1.0",
     "dedent": "^1.5.3",
+    "estree-util-value-to-estree": "^3.4.0",
     "estree-util-visit": "^2.0.0",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.1",
     "hast-util-to-string": "^3.0.1",
     "hastscript": "^9.0.1",
     "html-minifier-terser": "^7.2.0",
+    "reading-time": "^1.5.0",
+    "recma-jsx": "^1.0.0",
+    "rehype-recma": "^1.0.0",
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
@@ -63,5 +69,8 @@
     "unist-util-visit": "^5.0.0",
     "vfile": "^6.0.3",
     "yaml": "^2.7.1"
+  },
+  "gitDependencies": {
+    "@node-core/rehype-shiki": "https://github.com/nodejs/nodejs.org#path:/packages/rehype-shiki"
   }
 }

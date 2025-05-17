@@ -1,16 +1,14 @@
 'use strict';
 
-import { major } from 'semver';
-
 import {
-  coerceSemVer,
+  getCompatibleVersions,
   getVersionFromSemVer,
 } from '../../../utils/generators.mjs';
 
 import {
   DOC_API_BASE_URL_VERSION,
   DOC_API_BLOB_EDIT_BASE_URL,
-} from '../constants.mjs';
+} from '../../../constants.mjs';
 
 /**
  * Builds the Dropdown for the current Table of Contents
@@ -58,12 +56,7 @@ const buildNavigation = navigationContents =>
  * @param {Array<ApiDocReleaseEntry>} versions All available Node.js releases
  */
 const buildVersions = (api, added, versions) => {
-  // All Node.js versions that support the current API; If there's no "introduced_at" field,
-  // we simply show all versions, as we cannot pinpoint the exact version
-  const coercedMajor = major(coerceSemVer(added));
-  const compatibleVersions = versions.filter(({ version }) =>
-    added ? version.major >= coercedMajor : true
-  );
+  const compatibleVersions = getCompatibleVersions(added, versions);
 
   // Parses the SemVer version into something we use for URLs and to display the Node.js version
   // Then we create a `<li>` entry for said version, ensuring we link to the correct API doc

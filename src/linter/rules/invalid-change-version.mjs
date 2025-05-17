@@ -1,6 +1,7 @@
 import { LINT_MESSAGES } from '../constants.mjs';
 import { valid, parse } from 'semver';
 import { env } from 'node:process';
+import { enforceArray } from '../../utils/generators.mjs';
 
 const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
 
@@ -56,7 +57,7 @@ const isInvalid = NODE_RELEASED_VERSIONS
 export const invalidChangeVersion = entries =>
   entries.flatMap(({ changes, api_doc_source, yaml_position }) =>
     changes.flatMap(({ version }) =>
-      (Array.isArray(version) ? version : [version])
+      enforceArray(version)
         .filter(isInvalid)
         .map(version => ({
           level: 'error',
