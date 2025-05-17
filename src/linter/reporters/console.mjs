@@ -21,10 +21,10 @@ export default issue => {
     ? ` (${issue.location.position.start.line}:${issue.location.position.end.line})`
     : '';
 
-  process.stdout.write(
+  console[issue.level](
     styleText(
       levelToColorMap[issue.level],
       `${issue.message} at ${issue.location.path}${position}`
-    ) + '\n'
+    )
   );
 };
