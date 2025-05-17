@@ -8,7 +8,7 @@ import buildExtraContent from './buildExtraContent.mjs';
 
 import createQueries from '../../../utils/queries/index.mjs';
 
-import { DOC_NODE_BLOB_BASE_URL } from '../constants.mjs';
+import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
 
 /**
  * Builds a Markdown heading for a given node
@@ -209,7 +209,7 @@ export default (headNodes, metadataEntries, remark) => {
     // Parses the metadata pieces of each node and the content
     metadataEntries.map(entry => {
       // Deep clones the content nodes to avoid affecting upstream nodes
-      const content = JSON.parse(JSON.stringify(entry.content));
+      const content = structuredClone(entry.content);
 
       // Parses the Heading nodes into Heading elements
       visit(content, createQueries.UNIST.isHeading, buildHeading);

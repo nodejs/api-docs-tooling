@@ -1,10 +1,7 @@
 'use strict';
 
 import { u as createTree } from 'unist-builder';
-
-import { compare } from 'semver';
-
-import { coerceSemVer } from './utils/generators.mjs';
+import { sortChanges } from './utils/generators.mjs';
 
 /**
  * This method allows us to handle creation of Metadata entries
@@ -16,22 +13,6 @@ import { coerceSemVer } from './utils/generators.mjs';
  * @param {InstanceType<typeof import('github-slugger').default>} slugger A GitHub Slugger
  */
 const createMetadata = slugger => {
-  /**
-   * Maps `updates` into `changes` format, merges them and sorts them by version
-   * ç
-   * @param {Array<ApiDocMetadataChange>} changes Changes to be merged into updates
-   * @returns {Array<ApiDocMetadataChange>} Mapped, merged and sorted changes
-   */
-  const sortChanges = changes => {
-    // Sorts the updates and changes by the first version on a given entry
-    return changes.sort((a, b) => {
-      const aVersion = Array.isArray(a.version) ? a.version[0] : a.version;
-      const bVersion = Array.isArray(b.version) ? b.version[0] : b.version;
-
-      return compare(coerceSemVer(aVersion), coerceSemVer(bVersion));
-    });
-  };
-
   /**
    * This holds a temporary buffer of raw metadata before being
    * transformed into NavigationEntries and MetadataEntries
