@@ -1,6 +1,14 @@
-import { LINT_MESSAGES } from '../constants.mjs';
 import { valid, parse } from 'semver';
 import { env } from 'node:process';
+import { visit } from 'unist-util-visit';
+import yaml from 'yaml';
+
+import createQueries from '../../utils/queries/index.mjs';
+import {
+  extractYamlContent,
+  normalizeYamlSyntax,
+} from '../../utils/parser/index.mjs';
+import { LINT_MESSAGES } from '../constants.mjs';
 
 const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
 
@@ -48,22 +56,49 @@ const isInvalid = NODE_RELEASED_VERSIONS
       !(isValidReplaceMe(version, length) || valid(version));
 
 /**
+ *
+ * @param version
+ */
+const normalizeVersion = version =>
+  Array.isArray(version) ? version : [version];
+
+/**
  * Identifies invalid change versions from metadata entries.
  *
- * @param {ApiDocMetadataEntry[]} entries - Metadata entries to check.
- * @returns {import('../types').LintIssue[]} List of detected lint issues.
+ * @param {import('../types.d.ts').LintContext} context
+ * @returns {void}
  */
-export const invalidChangeVersion = entries =>
-  entries.flatMap(({ changes, api_doc_source, yaml_position }) =>
-    changes.flatMap(({ version }) =>
-      (Array.isArray(version) ? version : [version])
+export const invalidChangeVersion = context => {
+  visit(context.tree, createQueries.UNIST.isYamlNode, node => {
+    const yamlContent = extractYamlContent(node);
+
+    const normalizedYaml = normalizeYamlSyntax(yamlContent);
+
+    // TODO: Use YAML AST to provide better issues positions
+    /**
+     * @type {ApiDocRawMetadataEntry}
+     */
+    const { changes } = yaml.parse(normalizedYaml);
+
+    if (!changes) {
+      return;
+    }
+
+    changes.forEach(({ version }) =>
+      normalizeVersion(version)
         .filter(isInvalid)
-        .map(version => ({
-          level: 'error',
-          message: version
-            ? LINT_MESSAGES.invalidChangeVersion.replace('{{version}}', version)
-            : LINT_MESSAGES.missingChangeVersion,
-          location: { path: api_doc_source, position: yaml_position },
-        }))
-    )
-  );
+        .forEach(version =>
+          context.report({
+            level: 'error',
+            message: version
+              ? LINT_MESSAGES.invalidChangeVersion.replace(
+                  '{{version}}',
+                  version
+                )
+              : LINT_MESSAGES.missingChangeVersion,
+            position: node.position,
+          })
+        )
+    );
+  });
+};

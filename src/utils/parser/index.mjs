@@ -11,6 +11,38 @@ import {
   DOC_TYPES_MAPPING_OTHER,
   DOC_TYPES_MAPPING_PRIMITIVES,
 } from './constants.mjs';
+import createQueries from '../queries/index.mjs';
+
+/**
+ * Extracts raw YAML content from a node
+ *
+ * @param {import('mdast').Html} node A HTML node containing the YAML content
+ * @returns {string} The extracted raw YAML content
+ */
+export const extractYamlContent = node => {
+  return node.value.replace(
+    createQueries.QUERIES.yamlInnerContent,
+    // Either capture a YAML multinline block, or a simple single-line YAML block
+    (_, simple, yaml) => simple || yaml
+  );
+};
+
+/**
+ * Normalizes YAML syntax by fixing some non-cool formatted properties of the
+ * docs schema
+ *
+ * @param {string} yamlContent The raw YAML content to normalize
+ * @returns {string} The normalized YAML content
+ */
+export const normalizeYamlSyntax = yamlContent => {
+  return yamlContent
+    .replace('introduced_in=', 'introduced_in: ')
+    .replace('source_link=', 'source_link: ')
+    .replace('type=', 'type: ')
+    .replace('name=', 'name: ')
+    .replace('llm_description=', 'llm_description: ')
+    .replace(/^\n+|\n+$/g, ''); // Remove initial and final line breaks
+};
 
 /**
  * This method replaces plain text Types within the Markdown content into Markdown links
@@ -90,18 +122,12 @@ export const transformTypeToReferenceLink = type => {
  * @returns {ApiDocRawMetadataEntry} The parsed YAML metadata
  */
 export const parseYAMLIntoMetadata = yamlString => {
-  const replacedContent = yamlString
-    // special validations for some non-cool formatted properties of the docs schema
-    .replace('introduced_in=', 'introduced_in: ')
-    .replace('source_link=', 'source_link: ')
-    .replace('type=', 'type: ')
-    .replace('name=', 'name: ')
-    .replace('llm_description=', 'llm_description: ');
+  const normalizedYaml = normalizeYamlSyntax(yamlString);
 
   // Ensures that the parsed YAML is an object, because even if it is not
   // i.e. a plain string or an array, it will simply not result into anything
   /** @type {ApiDocRawMetadataEntry | string} */
-  let parsedYaml = yaml.parse(replacedContent);
+  let parsedYaml = yaml.parse(normalizedYaml);
 
   // Ensure that only Objects get parsed on Object.keys(), since some `<!--`
   // comments, might be just plain strings and not even a valid YAML metadata

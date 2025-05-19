@@ -1,6 +1,5 @@
 import { cpus } from 'node:os';
 import { resolve } from 'node:path';
-import process from 'node:process';
 
 import { coerce } from 'semver';
 
@@ -12,7 +11,8 @@ import createGenerator from '../../src/generators.mjs';
 import { publicGenerators } from '../../src/generators/index.mjs';
 import createNodeReleases from '../../src/releases.mjs';
 import { loadAndParse } from '../utils.mjs';
-import { runLint } from './lint.mjs';
+import createLinter from '../../src/linter/index.mjs';
+import { getEnabledRules } from '../../src/linter/utils/rules.mjs';
 
 const availableGenerators = Object.keys(publicGenerators);
 
@@ -123,12 +123,12 @@ export default {
    * @returns {Promise<void>}
    */
   async action(opts) {
-    const docs = await loadAndParse(opts.input, opts.ignore);
+    const linter = opts.skipLint
+      ? undefined
+      : createLinter(getEnabledRules(opts.disableRule));
+    const docs = await loadAndParse(opts.input, opts.ignore, linter);
 
-    if (!opts.skipLint && !runLint(docs)) {
-      console.error('Lint failed; aborting generation.');
-      process.exit(1);
-    }
+    linter.report();
 
     const { runGenerators } = createGenerator(docs);
     const { getAllMajors } = createNodeReleases(opts.changelog);
