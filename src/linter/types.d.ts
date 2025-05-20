@@ -27,7 +27,7 @@ export interface Linter {
   hasError: () => boolean;
 }
 
-export interface ReportIssueProps {
+export interface IssueDescriptor {
   level: IssueLevel;
   message: string;
   position?: Position;
@@ -35,6 +35,6 @@ export interface ReportIssueProps {
 
 export interface LintContext {
   readonly tree: Root;
-  report(issue: ReportIssueProps): void;
+  report(descriptor: IssueDescriptor): void;
   getIssues(): LintIssue[];
 }

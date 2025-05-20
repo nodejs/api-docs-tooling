@@ -1,10 +1,15 @@
 import { describe, mock, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { VFile } from 'vfile';
+
 import createLinter from '../index.mjs';
 import { errorIssue, infoIssue, warnIssue } from './fixtures/issues.mjs';
-import { VFile } from 'vfile';
 import createContext from '../context.mjs';
-import { errorReport, infoReport, warnReport } from './fixtures/report.mjs';
+import {
+  errorDescriptor,
+  infoDescriptor,
+  warnDescriptor,
+} from './fixtures/descriptors.mjs';
 import { emptyTree } from './fixtures/tree.mjs';
 
 describe('createLinter', () => {
@@ -33,11 +38,11 @@ describe('createLinter', () => {
 
   it('should return the aggregated issues from all rules', () => {
     const rule1 = mock.fn(ctx => {
-      ctx.report(infoReport);
-      ctx.report(warnReport);
+      ctx.report(infoDescriptor);
+      ctx.report(warnDescriptor);
     });
 
-    const rule2 = mock.fn(ctx => ctx.report(errorReport));
+    const rule2 = mock.fn(ctx => ctx.report(errorDescriptor));
 
     const linter = createLinter([rule1, rule2]);
 

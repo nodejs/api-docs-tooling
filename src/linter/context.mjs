@@ -18,7 +18,7 @@ const createContext = (file, tree) => {
   /**
    * Reports a lint issue.
    *
-   * @param {import('./types').ReportIssueProps} issue
+   * @param {import('./types').IssueDescriptor} descriptor
    * @returns {void}
    */
   const report = ({ level, message, position }) => {
