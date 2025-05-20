@@ -9,6 +9,7 @@ import {
   normalizeYamlSyntax,
 } from '../../utils/parser/index.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
+import { enforceArray } from '../../utils/array.mjs';
 
 const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
 
@@ -56,13 +57,6 @@ const isInvalid = NODE_RELEASED_VERSIONS
       !(isValidReplaceMe(version, length) || valid(version));
 
 /**
- *
- * @param version
- */
-const normalizeVersion = version =>
-  Array.isArray(version) ? version : [version];
-
-/**
  * Identifies invalid change versions from metadata entries.
  *
  * @param {import('../types.d.ts').LintContext} context
@@ -85,7 +79,7 @@ export const invalidChangeVersion = context => {
     }
 
     changes.forEach(({ version }) =>
-      normalizeVersion(version)
+      enforceArray(version)
         .filter(isInvalid)
         .forEach(version =>
           context.report({

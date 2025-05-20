@@ -1,9 +1,7 @@
 'use strict';
 
-import { LINT_MESSAGES } from '../constants.mjs';
+import { INTRDOCUED_IN_REGEX, LINT_MESSAGES } from '../constants.mjs';
 import { findTopLevelEntry } from '../utils/find.mjs';
-
-const regex = /<!--\s?introduced_in=.*-->/;
 
 /**
  * Checks if `introduced_in` field is missing in the top-level entry.
@@ -14,7 +12,7 @@ const regex = /<!--\s?introduced_in=.*-->/;
 export const missingIntroducedIn = context => {
   const introducedIn = findTopLevelEntry(
     context.tree,
-    node => node.type === 'html' && regex.test(node.value)
+    node => node.type === 'html' && INTRDOCUED_IN_REGEX.test(node.value)
   );
 
   if (introducedIn) {

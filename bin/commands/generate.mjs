@@ -12,7 +12,7 @@ import { publicGenerators } from '../../src/generators/index.mjs';
 import createNodeReleases from '../../src/releases.mjs';
 import { loadAndParse } from '../utils.mjs';
 import createLinter from '../../src/linter/index.mjs';
-import rules from '../../src/linter/rules/index.mjs';
+import { getEnabledRules } from '../../src/linter/utils/rules.mjs';
 
 const availableGenerators = Object.keys(publicGenerators);
 
@@ -123,13 +123,14 @@ export default {
    * @returns {Promise<void>}
    */
   async action(opts) {
+    const rules = getEnabledRules(opts.disableRule);
     const linter = opts.skipLint ? undefined : createLinter(rules);
 
     const docs = await loadAndParse(opts.input, opts.ignore, linter);
 
-    linter.report();
+    linter?.report();
 
-    if (linter.hasError()) {
+    if (linter?.hasError()) {
       console.error('Lint failed; aborting generation.');
       process.exit(1);
     }

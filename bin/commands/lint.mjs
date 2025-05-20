@@ -87,7 +87,7 @@ export default {
 
       linter.report();
 
-      process.exitCode = linter.hasError() ? 1 : 0;
+      process.exitCode = +linter.hasError();
     } catch (error) {
       console.error('Error running the linter:', error);
       process.exitCode = 1;

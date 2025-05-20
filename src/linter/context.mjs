@@ -27,11 +27,8 @@ const createContext = (file, tree) => {
      */
     const location = {
       path: file.path,
+      position,
     };
-
-    if (position) {
-      location.position = position;
-    }
 
     issues.push({
       level,
