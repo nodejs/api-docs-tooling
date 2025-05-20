@@ -4,6 +4,7 @@
 export const infoDescriptor = {
   level: 'info',
   message: 'This is a INFO issue',
+  position: { start: { line: 1, column: 1 }, end: { line: 1, column: 2 } },
 };
 
 /**
