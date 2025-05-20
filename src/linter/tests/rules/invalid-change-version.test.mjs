@@ -113,7 +113,7 @@ changes:
     strictEqual(result.error, undefined);
   });
 
-  it('should return an empty array if all change versions are valid', () => {
+  it('should not report if all change versions are valid', () => {
     const yamlContent = dedent`
 <!-- YAML
 changes:
@@ -143,7 +143,7 @@ changes:
     strictEqual(context.report.mock.callCount(), 0);
   });
 
-  it('should return an issue if a change version is invalid', () => {
+  it('should report an issue if a change version is invalid', () => {
     const yamlContent = dedent`
 <!-- YAML
 changes:
@@ -187,7 +187,7 @@ changes:
     ]);
   });
 
-  it('should return an issue if a change version contains a REPLACEME and a version', () => {
+  it('should report an issue if a change version contains a REPLACEME and a version', () => {
     const yamlContent = dedent`
 <!-- YAML
 changes:
