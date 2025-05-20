@@ -3,7 +3,7 @@
 import { LINT_MESSAGES } from '../constants.mjs';
 import { findTopLevelEntry } from '../utils/find.mjs';
 
-const regex = /<!--introduced_in=.*-->/;
+const regex = /<!--\s?introduced_in=.*-->/;
 
 /**
  * Checks if `introduced_in` field is missing in the top-level entry.
