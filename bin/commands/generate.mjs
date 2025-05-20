@@ -130,6 +130,11 @@ export default {
 
     linter.report();
 
+    if (linter.hasError()) {
+      console.error('Lint failed; aborting generation.');
+      process.exit(1);
+    }
+
     const { runGenerators } = createGenerator(docs);
     const { getAllMajors } = createNodeReleases(opts.changelog);
 
