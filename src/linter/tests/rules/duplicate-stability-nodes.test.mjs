@@ -1,5 +1,5 @@
-import { describe, it } from 'node:test';
-import { deepStrictEqual } from 'node:assert';
+import { describe, it, mock } from 'node:test';
+import { deepStrictEqual, strictEqual } from 'node:assert';
 import { duplicateStabilityNodes } from '../../rules/duplicate-stability-nodes.mjs';
 import { LINT_MESSAGES } from '../../constants.mjs';
 
@@ -44,18 +44,20 @@ const createContext = (nodes, path = 'file.md') => ({
     children: nodes,
   },
   path,
+  report: mock.fn(),
 });
 
 describe('duplicateStabilityNodes', () => {
-  it('returns empty array when there are no stability nodes', () => {
+  it('should not report when there are no stability nodes', () => {
     const context = createContext([
       createHeadingNode(1, 1),
       createHeadingNode(2, 2),
     ]);
-    deepStrictEqual(duplicateStabilityNodes(context), []);
+    duplicateStabilityNodes(context);
+    strictEqual(context.report.mock.callCount(), 0);
   });
 
-  it('returns empty array when there are no duplicate stability nodes', () => {
+  it('should not report when there are no duplicate stability nodes', () => {
     const context = createContext([
       createHeadingNode(1, 1),
       createStabilityNode(0, 2),
@@ -64,7 +66,8 @@ describe('duplicateStabilityNodes', () => {
       createHeadingNode(3, 5),
       createStabilityNode(2, 6),
     ]);
-    deepStrictEqual(duplicateStabilityNodes(context), []);
+    duplicateStabilityNodes(context);
+    strictEqual(context.report.mock.callCount(), 0);
   });
 
   it('detects duplicate stability nodes within a chain', () => {
@@ -76,7 +79,13 @@ describe('duplicateStabilityNodes', () => {
       duplicateNode, // Duplicate stability node
     ]);
 
-    deepStrictEqual(duplicateStabilityNodes(context), [
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 1);
+
+    const call = context.report.mock.calls[0];
+
+    deepStrictEqual(call.arguments, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
@@ -99,7 +108,13 @@ describe('duplicateStabilityNodes', () => {
       duplicateNode2, // This should trigger another issue
     ]);
 
-    deepStrictEqual(duplicateStabilityNodes(context), [
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 2);
+
+    const calls = context.report.mock.calls.flatMap(call => call.arguments);
+
+    deepStrictEqual(calls, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
@@ -133,7 +148,13 @@ describe('duplicateStabilityNodes', () => {
       duplicateNode, // This should trigger an issue
     ]);
 
-    deepStrictEqual(duplicateStabilityNodes(context), [
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 1);
+
+    const call = context.report.mock.calls[0];
+
+    deepStrictEqual(call.arguments, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
@@ -158,7 +179,13 @@ describe('duplicateStabilityNodes', () => {
       duplicateNode2, // This should trigger another issue
     ]);
 
-    deepStrictEqual(duplicateStabilityNodes(context), [
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 2);
+
+    const calls = context.report.mock.calls.flatMap(call => call.arguments);
+
+    deepStrictEqual(calls, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
@@ -199,6 +226,8 @@ describe('duplicateStabilityNodes', () => {
       },
     ]);
 
-    deepStrictEqual(duplicateStabilityNodes(context), []);
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 0);
   });
 });

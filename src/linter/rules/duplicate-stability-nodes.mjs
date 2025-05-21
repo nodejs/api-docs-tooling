@@ -1,3 +1,5 @@
+// @ts-check
+
 import createQueries from '../../utils/queries/index.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
 import { visit } from 'unist-util-visit';
@@ -9,7 +11,6 @@ import { visit } from 'unist-util-visit';
  * @returns {void}
  */
 export const duplicateStabilityNodes = context => {
-  const issues = [];
   let currentDepth = 0;
   let currentStability = -1;
   let currentHeaderDepth = 0;
@@ -42,7 +43,7 @@ export const duplicateStabilityNodes = context => {
                 stability >= 0 &&
                 stability === currentStability
               ) {
-                issues.push({
+                context.report({
                   level: 'warn',
                   message: LINT_MESSAGES.duplicateStabilityNode,
                   position: node.position,
@@ -57,6 +58,4 @@ export const duplicateStabilityNodes = context => {
       }
     }
   });
-
-  return issues;
 };
