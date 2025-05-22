@@ -62,10 +62,10 @@ export const coerceSemVer = version => {
  * @returns {Array<Release>}
  */
 export const getCompatibleVersions = (introduced, releases) => {
+  if (!introduced) return releases;
   const coercedMajor = major(coerceSemVer(introduced));
   // All Node.js versions that support the current API; If there's no "introduced_at" field,
   // we simply show all versions, as we cannot pinpoint the exact version
-  if (!introduced) return releases;
   return releases.filter(release => release.version.major >= coercedMajor);
 };
 
