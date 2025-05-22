@@ -1,11 +1,10 @@
 import {
-  coerceSemVer,
   getCompatibleVersions,
   groupNodesByModule,
 } from '../../utils/generators.mjs';
 import buildContent from './utils/buildContent.mjs';
 import { getRemarkRecma } from '../../utils/remark.mjs';
-import { major } from 'semver';
+import { buildSideBarDocPages } from './utils/buildBarProps.mjs';
 
 /**
  * This generator generates a JSX AST from an input MDAST
@@ -37,24 +36,19 @@ export default {
       .sort((a, b) => a.heading.data.name.localeCompare(b.heading.data.name));
 
     // Generate table of contents
-    const docPages = headNodes.map(node => [
-      node.heading.data.name,
-      `${node.api}.html`,
-    ]);
+    const docPages = buildSideBarDocPages(groupedModules, headNodes);
 
     // Process each head node and build content
     const results = await Promise.all(
       headNodes.map(entry => {
-        const coercedMajor = major(coerceSemVer(entry.introduced_in));
-        const otherVersions = getCompatibleVersions(
+        const versions = getCompatibleVersions(
           entry.introduced_in,
-          releases
-        ).filter(({ version }) => version.major != coercedMajor);
+          releases,
+          true
+        );
 
         const sideBarProps = {
-          otherVersions: otherVersions.map(
-            ({ version }) => `v${version.major}.x`
-          ),
+          versions: versions.map(({ version }) => `v${version.version}`),
           currentVersion: `v${version.version}`,
           currentPage: `${entry.api}.html`,
           docPages,

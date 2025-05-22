@@ -11,12 +11,9 @@ import {
   STABILITY_LEVELS,
   CHANGE_TYPES,
 } from '../constants.mjs';
-import {
-  DOC_API_BLOB_EDIT_BASE_URL,
-  DOC_NODE_BLOB_BASE_URL,
-} from '../../../constants.mjs';
+import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
 import { enforceArray, sortChanges } from '../../../utils/generators.mjs';
-import readingTime from 'reading-time';
+import { buildMetaBarProps } from './buildBarProps.mjs';
 
 /**
  * Transforms a stability node into an AlertBox JSX element
@@ -149,50 +146,6 @@ function processEntry(entry) {
   );
 
   return content;
-}
-
-/**
- * Collects text content from nodes for reading time calculation
- *
- * @param {Array<ApiDocMetadataEntry>} entries - The API metadata entries
- * @returns {string} Concatenated text content
- */
-function collectTextContent(entries) {
-  let text = '';
-  entries.forEach(entry => {
-    visit(entry.content, ['text', 'code'], node => {
-      text += node.value || '';
-    });
-  });
-  return text;
-}
-
-/**
- * Builds the metadata for the sidebar and meta bar
- *
- * @param {ApiDocMetadataEntry} head - The main API metadata entry
- * @param {Array<ApiDocMetadataEntry>} entries - The API metadata entries
- * @returns {Object} Props for meta bar including headings and reading time
- */
-function buildMetaBarProps(head, entries) {
-  // Extract headings in one pass
-  const headings = entries
-    .filter(({ heading }) => heading?.data?.name)
-    .map(({ heading }) => ({
-      depth: heading.depth,
-      value: heading.data.name,
-    }));
-
-  // Calculate reading time
-  const text = collectTextContent(entries);
-
-  return {
-    headings,
-    addedIn: head.introduced_in || head.added_in || '',
-    readingTime: readingTime(text).text,
-    viewAs: [['JSON', `${head.api}.json`]],
-    editThisPage: `${DOC_API_BLOB_EDIT_BASE_URL}${head.api}.md`,
-  };
 }
 
 /**

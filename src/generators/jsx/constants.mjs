@@ -1,4 +1,4 @@
-// Maps the the stability index (0-3) to the level used by @node-core/ui-components
+// Maps Node.js API stability indices (0-3) to UI component stability levels.
 export const STABILITY_LEVELS = [
   'danger', // (0) Deprecated
   'warning', // (1) Experimental
@@ -6,13 +6,13 @@ export const STABILITY_LEVELS = [
   'info', // (3) Legacy
 ];
 
-// Maps HTML tags to corresponding component names in @node-core/ui-components
+// Maps HTML tags to corresponding component names in @node-core/ui-components.
 export const TAG_TRANSFORMS = {
   pre: 'CodeBox',
   blockquote: 'Blockquote',
 };
 
-// Maps types to icon symbols
+// Maps API heading types to their CircularIcon props.
 export const ICON_SYMBOL_MAP = {
   event: { symbol: 'E', color: 'red' },
   method: { symbol: 'M', color: 'red' },
@@ -23,6 +23,7 @@ export const ICON_SYMBOL_MAP = {
   ctor: { symbol: 'C', color: 'red' },
 };
 
+// Maps API lifecycle change type identifiers to their human-readable labels.
 export const CHANGE_TYPES = {
   added_in: 'Added in',
   deprecated_in: 'Deprecated in',
