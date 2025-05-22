@@ -1,26 +1,36 @@
 import { describe, it } from 'node:test';
-import console from '../../reporters/console.mjs';
 import assert from 'node:assert';
+import reporter from '../../reporters/console.mjs';
 import { errorIssue, infoIssue, warnIssue } from '../fixtures/issues.mjs';
 
+const testCases = [
+  {
+    issue: infoIssue,
+    method: 'info',
+    expected: '\x1B[90mThis is a INFO issue at doc/api/test.md\x1B[39m',
+  },
+  {
+    issue: warnIssue,
+    method: 'warn',
+    expected: '\x1B[33mThis is a WARN issue at doc/api/test.md (1:1)\x1B[39m',
+  },
+  {
+    issue: errorIssue,
+    method: 'error',
+    expected: '\x1B[31mThis is a ERROR issue at doc/api/test.md (1:1)\x1B[39m',
+  },
+];
+
 describe('console', () => {
-  it('should write to stdout with the correct colors based on the issue level', t => {
-    t.mock.method(process.stdout, 'write');
+  testCases.forEach(({ issue, method, expected }) => {
+    it(`should use correct colors and output on ${method} issues`, t => {
+      t.mock.method(console, method);
+      const mock = console[method].mock;
 
-    console(infoIssue);
-    console(warnIssue);
-    console(errorIssue);
+      reporter(issue);
 
-    assert.strictEqual(process.stdout.write.mock.callCount(), 3);
-
-    const callsArgs = process.stdout.write.mock.calls.map(call =>
-      call.arguments[0].trim()
-    );
-
-    assert.deepStrictEqual(callsArgs, [
-      '\x1B[90mThis is a INFO issue at doc/api/test.md\x1B[39m',
-      '\x1B[33mThis is a WARN issue at doc/api/test.md (1:1)\x1B[39m',
-      '\x1B[31mThis is a ERROR issue at doc/api/test.md (1:1)\x1B[39m',
-    ]);
+      assert.strictEqual(mock.callCount(), 1);
+      assert.deepStrictEqual(mock.calls[0].arguments, [expected]);
+    });
   });
 });
