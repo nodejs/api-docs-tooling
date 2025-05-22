@@ -1,37 +1,85 @@
-import { describe, it } from 'node:test';
+import { describe, it, mock } from 'node:test';
 import { invalidChangeVersion } from '../../rules/invalid-change-version.mjs';
-import { deepEqual, strictEqual } from 'node:assert';
-import { assertEntry } from '../fixtures/entries.mjs';
+import { deepStrictEqual, strictEqual } from 'node:assert';
+import dedent from 'dedent';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { execPath } from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 describe('invalidChangeVersion', () => {
-  it('should return an empty array if all change versions are non-empty', () => {
-    const issues = invalidChangeVersion([assertEntry]);
+  it('should not report if all change versions are non-empty', () => {
+    const yamlContent = dedent`
+<!-- YAML
+changes:
+  - version:
+      - v15.7.0
+      - v14.18.0
+  - version: v6.4.0
+  - version: v5.0.0
+-->`;
 
-    deepEqual(issues, []);
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: yamlContent,
+          },
+        ],
+      },
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
+
+    invalidChangeVersion(context);
+
+    strictEqual(context.report.mock.callCount(), 0);
   });
 
-  it('should return an issue if a change version is missing', () => {
-    const issues = invalidChangeVersion([
-      {
-        ...assertEntry,
-        changes: [...assertEntry.changes, { version: undefined }],
-      },
-    ]);
+  it('should report an issue if a change version is missing', () => {
+    const yamlContent = dedent`
+<!-- YAML
+changes:
+  - version:
+      - v15.7.0
+      - v14.18.0
+  - version: v6.4.0
+  - version:
+-->`;
 
-    deepEqual(issues, [
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: yamlContent,
+            position: {
+              start: { line: 1, column: 1, offset: 1 },
+              end: { line: 1, column: 1, offset: 1 },
+            },
+          },
+        ],
+      },
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
+
+    invalidChangeVersion(context);
+
+    strictEqual(context.report.mock.callCount(), 1);
+
+    const call = context.report.mock.calls[0];
+
+    deepStrictEqual(call.arguments, [
       {
         level: 'error',
-        location: {
-          path: 'doc/api/assert.md',
-          position: {
-            end: { column: 35, line: 7, offset: 137 },
-            start: { column: 1, line: 7, offset: 103 },
-          },
-        },
         message: 'Missing version field in the API doc entry',
+        position: {
+          start: { line: 1, column: 1, offset: 1 },
+          end: { line: 1, column: 1, offset: 1 },
+        },
       },
     ]);
   });
@@ -65,58 +113,120 @@ describe('invalidChangeVersion', () => {
     strictEqual(result.error, undefined);
   });
 
-  it('should return an empty array if all change versions are valid', () => {
-    deepEqual(invalidChangeVersion([assertEntry]), []);
-  });
+  it('should not report if all change versions are valid', () => {
+    const yamlContent = dedent`
+<!-- YAML
+changes:
+  - version:
+      - v15.7.0
+      - v14.18.0
+  - version: v6.4.0
+  - version: v5.0.0
+-->`;
 
-  it('should return an issue if a change version is invalid', () => {
-    const issues = invalidChangeVersion([
-      {
-        ...assertEntry,
-        changes: [
-          ...assertEntry.changes,
-          { version: ['v13.9.0', 'INVALID_VERSION'] },
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: yamlContent,
+          },
         ],
       },
-    ]);
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
 
-    deepEqual(issues, [
+    invalidChangeVersion(context);
+
+    strictEqual(context.report.mock.callCount(), 0);
+  });
+
+  it('should report an issue if a change version is invalid', () => {
+    const yamlContent = dedent`
+<!-- YAML
+changes:
+  - version:
+      - v13.9.0
+      - INVALID_VERSION
+  - version: v6.4.0
+  - version: v5.0.0
+-->`;
+
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: yamlContent,
+            position: {
+              start: { column: 1, line: 7, offset: 103 },
+              end: { column: 35, line: 7, offset: 137 },
+            },
+          },
+        ],
+      },
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
+
+    invalidChangeVersion(context);
+    strictEqual(context.report.mock.callCount(), 1);
+    const call = context.report.mock.calls[0];
+    deepStrictEqual(call.arguments, [
       {
         level: 'error',
-        location: {
-          path: 'doc/api/assert.md',
-          position: {
-            start: { column: 1, line: 7, offset: 103 },
-            end: { column: 35, line: 7, offset: 137 },
-          },
-        },
         message: 'Invalid version number: INVALID_VERSION',
+        position: {
+          start: { column: 1, line: 7, offset: 103 },
+          end: { column: 35, line: 7, offset: 137 },
+        },
       },
     ]);
   });
 
-  it('should return an issue if a change version contains a REPLACEME and a version', () => {
-    const issues = invalidChangeVersion([
-      {
-        ...assertEntry,
-        changes: [
-          ...assertEntry.changes,
-          { version: ['v24.0.0', 'REPLACEME'] },
+  it('should report an issue if a change version contains a REPLACEME and a version', () => {
+    const yamlContent = dedent`
+<!-- YAML
+changes:
+  - version:
+      - v24.0.0
+      - REPLACEME
+  - version: v6.4.0
+  - version: v5.0.0
+-->`;
+
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: yamlContent,
+            position: {
+              start: { column: 1, line: 7, offset: 103 },
+              end: { column: 35, line: 7, offset: 137 },
+            },
+          },
         ],
       },
-    ]);
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
 
-    deepEqual(issues, [
+    invalidChangeVersion(context);
+    strictEqual(context.report.mock.callCount(), 1);
+    const call = context.report.mock.calls[0];
+    deepStrictEqual(call.arguments, [
       {
         level: 'error',
-        location: {
-          path: 'doc/api/assert.md',
-          position: {
-            start: { column: 1, line: 7, offset: 103 },
-            end: { column: 35, line: 7, offset: 137 },
-          },
-        },
         message: 'Invalid version number: REPLACEME',
+        position: {
+          start: { column: 1, line: 7, offset: 103 },
+          end: { column: 35, line: 7, offset: 137 },
+        },
       },
     ]);
   });

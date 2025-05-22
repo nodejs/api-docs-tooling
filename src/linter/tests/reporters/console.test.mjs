@@ -7,7 +7,7 @@ const testCases = [
   {
     issue: infoIssue,
     method: 'info',
-    expected: '\x1B[90mThis is a INFO issue at doc/api/test.md\x1B[39m',
+    expected: '\x1B[90mThis is a INFO issue at doc/api/test.md (1:1)\x1B[39m',
   },
   {
     issue: warnIssue,

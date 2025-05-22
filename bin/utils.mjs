@@ -9,7 +9,7 @@ import createMarkdownParser from '../src/parsers/markdown.mjs';
  */
 export const lazy = factory => {
   let instance;
-  return () => (instance ??= factory());
+  return args => (instance ??= factory(args));
 };
 
 // Instantiate loader and parser once to reuse,
@@ -23,11 +23,12 @@ const parser = lazy(createMarkdownParser);
  * Load and parse markdown API docs.
  * @param {string[]} input - Glob patterns for input files.
  * @param {string[]} [ignore] - Glob patterns to ignore.
+ * @param {import('../src/linter/types').Linter} [linter] - Linter instance
  * @returns {Promise<ApiDocMetadataEntry[]>} - Parsed documentation objects.
  */
-export async function loadAndParse(input, ignore) {
+export async function loadAndParse(input, ignore, linter) {
   const files = await loader().loadFiles(input, ignore);
-  return parser().parseApiDocs(files);
+  return parser(linter).parseApiDocs(files);
 }
 
 /**

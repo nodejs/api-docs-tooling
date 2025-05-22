@@ -15,9 +15,9 @@ import { createNodeSlugger } from '../utils/slugger/index.mjs';
 /**
  * Creates an API doc parser for a given Markdown API doc file
  *
- * @param {import('./linter/index.mjs').Linter | undefined} linter
+ * @param {import('../linter/types').Linter} [linter]
  */
-const createParser = () => {
+const createParser = linter => {
   // Creates an instance of the Remark processor with GFM support
   // which is used for stringifying the AST tree back to Markdown
   const remarkProcessor = getRemark();
@@ -62,6 +62,8 @@ const createParser = () => {
 
     // Parses the API doc into an AST tree using `unified` and `remark`
     const apiDocTree = remarkProcessor.parse(resolvedApiDoc);
+
+    linter?.lint(resolvedApiDoc, apiDocTree);
 
     // Get all Markdown Footnote definitions from the tree
     const markdownDefinitions = selectAll('definition', apiDocTree);
