@@ -139,20 +139,16 @@ export default {
 
     const releases = await getAllMajors();
 
-    await Promise.all(
-      docs.map(async doc => {
-        const { runGenerators } = createGenerator(doc);
+    const { runGenerators } = createGenerator(docs);
 
-        await runGenerators({
-          generators: opts.target,
-          input: opts.input,
-          output: opts.output && resolve(opts.output),
-          version: coerce(opts.version),
-          releases,
-          gitRef: opts.gitRef,
-          threads: parseInt(opts.threads, 10),
-        });
-      })
-    );
+    await runGenerators({
+      generators: opts.target,
+      input: opts.input,
+      output: opts.output && resolve(opts.output),
+      version: coerce(opts.version),
+      releases,
+      gitRef: opts.gitRef,
+      threads: parseInt(opts.threads, 10),
+    });
   },
 };
