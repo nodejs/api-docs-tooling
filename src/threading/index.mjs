@@ -44,12 +44,9 @@ export default class WorkerPool {
         this.changeActiveThreadCount(1);
 
         // Create and start the worker thread
-        const worker = new Worker(
-          new URL(import.meta.resolve('./worker.mjs')),
-          {
-            workerData: { name, dependencyOutput, extra },
-          }
-        );
+        const worker = new Worker(new URL('./worker.mjs', import.meta.url), {
+          workerData: { name, dependencyOutput, extra },
+        });
 
         // Handle worker thread messages (result or error)
         worker.on('message', result => {
