@@ -21,7 +21,7 @@ export default {
 
   description: 'Generates the Orama database for the API docs.',
 
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * Generates the Orama database.
