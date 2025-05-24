@@ -2,6 +2,7 @@
 
 import { u as createTree } from 'unist-builder';
 import { valueToEstree } from 'estree-util-value-to-estree';
+import { AST_NODES } from '../constants.mjs';
 
 /**
  * Creates an MDX JSX element with support for complex attribute values.
@@ -18,19 +19,21 @@ export const createJSXElement = (
   name,
   { inline = true, children = [], ...attributes } = {}
 ) => {
-  // Process children: convert string to text node or use array as is
+  // Convert string children to text node or use array directly
   const processedChildren =
     typeof children === 'string'
       ? [createTree('text', { value: children })]
-      : (children ?? []);
+      : children;
 
-  // Create attribute nodes, handling complex objects and primitive values differently
+  const elementType = inline
+    ? AST_NODES.MDX.JSX_INLINE_ELEMENT
+    : AST_NODES.MDX.JSX_BLOCK_ELEMENT;
+
   const attrs = Object.entries(attributes).map(([key, value]) =>
     createAttributeNode(key, value)
   );
 
-  // Create and return the appropriate JSX element type
-  return createTree(inline ? 'mdxJsxTextElement' : 'mdxJsxFlowElement', {
+  return createTree(elementType, {
     name,
     attributes: attrs,
     children: processedChildren,
@@ -38,34 +41,37 @@ export const createJSXElement = (
 };
 
 /**
- * Creates an MDX JSX attribute node from the input.
+ * Creates an MDX JSX attribute node based on the value type.
  *
  * @param {string} name - The attribute name
- * @param {any} value - The attribute value (can be any valid JS value)
+ * @param {any} value - The attribute value
  * @returns {import('unist').Node} The MDX JSX attribute node
  */
 function createAttributeNode(name, value) {
-  // For objects and arrays, create expression nodes to preserve structure
+  // Use expression for objects and arrays
   if (value !== null && typeof value === 'object') {
-    return createTree('mdxJsxAttribute', {
+    return createTree(AST_NODES.MDX.JSX_ATTRIBUTE, {
       name,
-      value: createTree('mdxJsxAttributeValueExpression', {
+      value: createTree(AST_NODES.MDX.JSX_ATTRIBUTE_EXPRESSION, {
         data: {
           estree: {
-            type: 'Program',
+            type: AST_NODES.ESTREE.PROGRAM,
             body: [
               {
-                type: 'ExpressionStatement',
+                type: AST_NODES.ESTREE.EXPRESSION_STATEMENT,
                 expression: valueToEstree(value),
               },
             ],
-            sourceType: 'module',
           },
         },
       }),
     });
   }
 
-  // For primitives, use simple string conversion
-  return createTree('mdxJsxAttribute', { name, value: String(value) });
+  // For primitives, use simple string conversion.
+  // If undefined, pass nothing.
+  return createTree(AST_NODES.MDX.JSX_ATTRIBUTE, {
+    name,
+    value: value === undefined ? value : String(value),
+  });
 }

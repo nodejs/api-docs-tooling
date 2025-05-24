@@ -1,5 +1,4 @@
 import readingTime from 'reading-time';
-import { DOC_API_BLOB_EDIT_BASE_URL } from '../../../constants.mjs';
 import { visit } from 'unist-util-visit';
 
 /**
@@ -29,12 +28,12 @@ export const buildSideBarDocPages = (groupedModules, headNodes) =>
  */
 export const buildMetaBarProps = (head, entries) => {
   // Extract text content for reading time calculation
-  let textContent = '';
-  entries.forEach(entry => {
+  const textContent = entries.reduce((acc, entry) => {
     visit(entry.content, ['text', 'code'], node => {
-      textContent += node.value || '';
+      acc += node.value || '';
     });
-  });
+    return acc;
+  }, '');
 
   const headings = entries
     .filter(entry => entry.heading?.data?.name)
@@ -48,6 +47,6 @@ export const buildMetaBarProps = (head, entries) => {
     addedIn: head.introduced_in || head.added_in || '',
     readingTime: readingTime(textContent).text,
     viewAs: [['JSON', `${head.api}.json`]],
-    editThisPage: `${DOC_API_BLOB_EDIT_BASE_URL}${head.api}.md`,
+    editThisPage: `${head.edit_link}`,
   };
 };

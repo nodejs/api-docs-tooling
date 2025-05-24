@@ -30,3 +30,22 @@ export const CHANGE_TYPES = {
   removed_in: 'Removed in',
   introduced_in: 'Introduced in',
 };
+
+export const AST_NODES = {
+  MDX: {
+    // https://github.com/syntax-tree/mdast-util-mdx-jsx#mdxjsxtextelement
+    JSX_INLINE_ELEMENT: 'mdxJsxTextElement',
+    // https://github.com/syntax-tree/mdast-util-mdx-jsx#mdxjsxflowelement
+    JSX_BLOCK_ELEMENT: 'mdxJsxFlowElement',
+    // https://github.com/syntax-tree/mdast-util-mdx-jsx#mdxjsxattribute
+    JSX_ATTRIBUTE: 'mdxJsxAttribute',
+    // https://github.com/syntax-tree/mdast-util-mdx-jsx#mdxjsxattributevalueexpression
+    JSX_ATTRIBUTE_EXPRESSION: 'mdxJsxAttributeValueExpression',
+  },
+  ESTREE: {
+    // https://github.com/estree/estree/blob/master/es5.md#programs
+    PROGRAM: 'Program',
+    // https://github.com/estree/estree/blob/master/es5.md#expressionstatement
+    EXPRESSION_STATEMENT: 'ExpressionStatement',
+  },
+};
