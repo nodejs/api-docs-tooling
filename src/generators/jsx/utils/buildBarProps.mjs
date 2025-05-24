@@ -27,7 +27,7 @@ export const buildSideBarDocPages = (groupedModules, headNodes) =>
  * @param {ApiDocMetadataEntry} head - Main API metadata entry
  * @param {Array<ApiDocMetadataEntry>} entries - All API metadata entries
  */
-export function buildMetaBarProps(head, entries) {
+export const buildMetaBarProps = (head, entries) => {
   // Extract text content for reading time calculation
   let textContent = '';
   entries.forEach(entry => {
@@ -36,16 +36,18 @@ export function buildMetaBarProps(head, entries) {
     });
   });
 
+  const headings = entries
+    .filter(entry => entry.heading?.data?.name)
+    .map(entry => ({
+      depth: entry.heading.depth,
+      value: entry.heading.data.name,
+    }));
+
   return {
-    headings: entries
-      .filter(entry => entry.heading?.data?.name)
-      .map(entry => ({
-        depth: entry.heading.depth,
-        value: entry.heading.data.name,
-      })),
+    headings,
     addedIn: head.introduced_in || head.added_in || '',
     readingTime: readingTime(textContent).text,
     viewAs: [['JSON', `${head.api}.json`]],
     editThisPage: `${DOC_API_BLOB_EDIT_BASE_URL}${head.api}.md`,
   };
-}
+};

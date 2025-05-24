@@ -23,15 +23,15 @@ import { buildMetaBarProps } from './buildBarProps.mjs';
  * @param {import('unist').Parent} parent - The parent node containing the stability node
  * @returns {[typeof SKIP]} Visitor instruction to skip the node
  */
-function transformStabilityNode(node, index, parent) {
-  const { data } = node;
+const transformStabilityNode = ({ data }, index, parent) => {
   parent.children[index] = createJSXElement('AlertBox', {
     children: data.description,
     level: STABILITY_LEVELS[data.index],
     title: data.index,
   });
+
   return [SKIP];
-}
+};
 
 /**
  * Creates a history of changes for an API element
@@ -39,17 +39,18 @@ function transformStabilityNode(node, index, parent) {
  * @param {ApiDocMetadataEntry} entry - The metadata entry containing change information
  * @returns {import('unist').Node|null} JSX element representing change history or null if no changes
  */
-function createChangeElement(entry) {
+const createChangeElement = entry => {
   // Collect changes from version fields (added, deprecated, etc.)
   const changeEntries = Object.entries(CHANGE_TYPES)
+    // Do we have this field?
     .filter(([field]) => entry[field])
-    .map(([field, label]) => {
-      const versions = enforceArray(entry[field]);
-      return {
-        versions,
-        label: `${label}: ${versions.join(', ')}`,
-      };
-    });
+    // Get the versions as an array
+    .map(([field, label]) => [enforceArray(entry[field]), label])
+    // Create the change entry
+    .map(([versions, label]) => ({
+      versions,
+      label: `${label}: ${versions.join(', ')}`,
+    }));
 
   // Add explicit changes if they exist
   if (entry.changes?.length) {
@@ -61,13 +62,15 @@ function createChangeElement(entry) {
     changeEntries.push(...explicitChanges);
   }
 
-  if (!changeEntries.length) return null;
+  if (!changeEntries.length) {
+    return null;
+  }
 
   // Sort by version, newest first and create the JSX element
   return createJSXElement('ChangeHistory', {
     changes: sortChanges(changeEntries, 'versions'),
   });
-}
+};
 
 /**
  * Creates a source link element if a source link is available
@@ -75,8 +78,10 @@ function createChangeElement(entry) {
  * @param {string|undefined} sourceLink - The source link path
  * @returns {import('hastscript').Element|null} The source link element or null if no source link
  */
-function createSourceLink(sourceLink) {
-  if (!sourceLink) return null;
+const createSourceLink = sourceLink => {
+  if (!sourceLink) {
+    return null;
+  }
 
   return createElement('span', [
     'Source Code: ',
@@ -86,7 +91,7 @@ function createSourceLink(sourceLink) {
       sourceLink
     ),
   ]);
-}
+};
 
 /**
  * Enhances a heading node with metadata, source links, and styling
@@ -97,7 +102,7 @@ function createSourceLink(sourceLink) {
  * @param {import('unist').Parent} parent - The parent node containing the heading
  * @returns {[typeof SKIP]} Visitor instruction to skip the node
  */
-function transformHeadingNode(entry, node, index, parent) {
+const transformHeadingNode = (entry, node, index, parent) => {
   const { data, children } = node;
   const headerChildren = [
     createElement(`h${data.depth + 1}`, [
@@ -127,7 +132,7 @@ function transformHeadingNode(entry, node, index, parent) {
   }
 
   return [SKIP];
-}
+};
 
 /**
  * Processes an API documentation entry by applying transformations to its content
@@ -135,7 +140,7 @@ function transformHeadingNode(entry, node, index, parent) {
  * @param {ApiDocMetadataEntry} entry - The API metadata entry to process
  * @returns {import('unist').Node} The processed content
  */
-function processEntry(entry) {
+const processEntry = entry => {
   // Create a copy to avoid modifying the original
   const content = structuredClone(entry.content);
 
@@ -146,7 +151,7 @@ function processEntry(entry) {
   );
 
   return content;
-}
+};
 
 /**
  * Creates the overall content structure with processed entries
@@ -156,7 +161,7 @@ function processEntry(entry) {
  * @param {Object} metaBarProps - Props for the meta bar component
  * @returns {import('unist').Node} The root node of the content tree
  */
-function createContentStructure(entries, sideBarProps, metaBarProps) {
+const createContentStructure = (entries, sideBarProps, metaBarProps) => {
   return createTree('root', [
     createJSXElement('NavBar'),
     createJSXElement('Article', {
@@ -170,7 +175,7 @@ function createContentStructure(entries, sideBarProps, metaBarProps) {
       ],
     }),
   ]);
-}
+};
 
 /**
  * Transforms API metadata entries into processed MDX content
@@ -181,12 +186,7 @@ function createContentStructure(entries, sideBarProps, metaBarProps) {
  * @param {import('unified').Processor} remark - Remark processor instance for markdown processing
  * @returns {string} The stringified MDX content
  */
-export default function buildContent(
-  metadataEntries,
-  head,
-  sideBarProps,
-  remark
-) {
+const buildContent = (metadataEntries, head, sideBarProps, remark) => {
   const metaBarProps = buildMetaBarProps(head, metadataEntries);
 
   const root = createContentStructure(
@@ -196,4 +196,6 @@ export default function buildContent(
   );
 
   return remark.runSync(root);
-}
+};
+
+export default buildContent;

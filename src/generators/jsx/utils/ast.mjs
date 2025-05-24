@@ -67,8 +67,5 @@ function createAttributeNode(name, value) {
   }
 
   // For primitives, use simple string conversion
-  return createTree('mdxJsxAttribute', {
-    name,
-    value: String(value),
-  });
+  return createTree('mdxJsxAttribute', { name, value: String(value) });
 }
