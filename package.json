@@ -40,7 +40,7 @@
     "@orama/plugin-data-persistence": "^3.1.6",
     "acorn": "^8.14.1",
     "commander": "^13.1.0",
-    "dedent": "^1.5.3",
+    "dedent": "^1.6.0",
     "estree-util-visit": "^2.0.0",
     "github-slugger": "^2.0.0",
     "glob": "^11.0.2",
