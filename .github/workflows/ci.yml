@@ -64,7 +64,7 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
-        run: npm run test:ci
+        run: node --run test:ci
 
       - name: Upload coverage to Codecov
         if: always()
