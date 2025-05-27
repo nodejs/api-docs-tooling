@@ -4,3 +4,7 @@ npm-debug.log
 
 # Default Output Directory
 out
+
+# Tests
+lcov.info
+junit.xml
