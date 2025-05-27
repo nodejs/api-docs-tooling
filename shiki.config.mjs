@@ -1,4 +1,3 @@
-/* eslint-disable import-x/no-unresolved */
 'use strict';
 
 import cLanguage from 'shiki/langs/c.mjs';
@@ -13,7 +12,6 @@ import powershellLanguage from 'shiki/langs/powershell.mjs';
 import shellScriptLanguage from 'shiki/langs/shellscript.mjs';
 import shellSessionLanguage from 'shiki/langs/shellsession.mjs';
 import typeScriptLanguage from 'shiki/langs/typescript.mjs';
-
 import lightTheme from 'shiki/themes/catppuccin-latte.mjs';
 import darkTheme from 'shiki/themes/catppuccin-mocha.mjs';
 
