@@ -39,7 +39,7 @@ jobs:
         run: node --run lint
 
       - name: Check formatting
-        run: npm run format:check
+        run: node --run format:check
 
   test:
     name: Test & Coverage
