@@ -32,8 +32,11 @@ describe('createLinter', () => {
     assert.strictEqual(rule1.mock.callCount(), 1);
     assert.strictEqual(rule2.mock.callCount(), 1);
 
-    // assert.deepEqual(rule1.mock.calls[0].arguments, [context]);
-    // assert.deepEqual(rule2.mock.calls[0].arguments, [context]);
+    const rule1Context = rule1.mock.calls[0].arguments[0];
+    const rule2Context = rule2.mock.calls[0].arguments[0];
+
+    assert.strictEqual(rule1Context.tree, emptyTree);
+    assert.strictEqual(rule2Context.tree, emptyTree);
   });
 
   it('should return the aggregated issues from all rules', () => {
