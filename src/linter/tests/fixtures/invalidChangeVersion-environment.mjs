@@ -1,7 +1,9 @@
-import { invalidChangeVersion } from '../../rules/invalid-change-version.mjs';
 import { deepEqual } from 'node:assert';
-import dedent from 'dedent';
 import { mock } from 'node:test';
+
+import dedent from 'dedent';
+
+import { invalidChangeVersion } from '../../rules/invalid-change-version.mjs';
 
 const yamlContent = dedent`
 <!-- YAML

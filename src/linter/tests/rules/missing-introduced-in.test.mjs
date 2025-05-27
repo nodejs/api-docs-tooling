@@ -1,6 +1,7 @@
+import { deepStrictEqual, strictEqual } from 'node:assert';
 import { describe, it, mock } from 'node:test';
+
 import { missingIntroducedIn } from '../../rules/missing-introduced-in.mjs';
-import { deepStrictEqual, strictEqual } from 'assert';
 
 describe('missingIntroducedIn', () => {
   it('should not report if the introduced_in field is not missing', () => {
