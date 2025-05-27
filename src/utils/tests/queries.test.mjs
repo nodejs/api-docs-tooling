@@ -1,5 +1,6 @@
 import { strictEqual, deepStrictEqual } from 'node:assert';
 import { describe, it } from 'node:test';
+
 import createQueries from '../queries/index.mjs';
 
 describe('createQueries', () => {

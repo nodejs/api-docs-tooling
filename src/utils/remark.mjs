@@ -1,21 +1,18 @@
 'use strict';
 
-import { unified } from 'unified';
-
+import rehypeShikiji from '@node-core/rehype-shiki';
+import recmaJsx from 'recma-jsx';
+import rehypeRecma from 'rehype-recma';
+import rehypeStringify from 'rehype-stringify';
 import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
-
-import rehypeRecma from 'rehype-recma';
-import rehypeStringify from 'rehype-stringify';
-
-import recmaJsx from 'recma-jsx';
+import { unified } from 'unified';
 
 import syntaxHighlighter from './highlighter.mjs';
-import transformElements from '../generators/jsx-ast/utils/transformer.mjs';
 import { AST_NODE_TYPES } from '../generators/jsx-ast/constants.mjs';
-import rehypeShikiji from '@node-core/rehype-shiki';
+import transformElements from '../generators/jsx-ast/utils/transformer.mjs';
 
 /**
  * Retrieves an instance of Remark configured to parse GFM (GitHub Flavored Markdown)

@@ -4,7 +4,6 @@ import {
   getCompatibleVersions,
   getVersionFromSemVer,
 } from '../../../utils/generators.mjs';
-
 import {
   DOC_API_BASE_URL_VERSION,
   DOC_API_BLOB_EDIT_BASE_URL,

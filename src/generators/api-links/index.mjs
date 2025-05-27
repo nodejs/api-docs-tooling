@@ -1,10 +1,11 @@
 'use strict';
 
-import { basename, join } from 'node:path';
 import { writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
+
+import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
 import { extractExports } from './utils/extractExports.mjs';
 import { findDefinitions } from './utils/findDefinitions.mjs';
-import { checkIndirectReferences } from './utils/checkIndirectReferences.mjs';
 
 /**
  * This generator is responsible for mapping publicly accessible functions in

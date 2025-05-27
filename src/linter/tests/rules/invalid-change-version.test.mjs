@@ -1,10 +1,12 @@
-import { describe, it, mock } from 'node:test';
-import { invalidChangeVersion } from '../../rules/invalid-change-version.mjs';
 import { deepStrictEqual, strictEqual } from 'node:assert';
-import dedent from 'dedent';
 import { spawnSync } from 'node:child_process';
 import { execPath } from 'node:process';
+import { describe, it, mock } from 'node:test';
 import { fileURLToPath } from 'node:url';
+
+import dedent from 'dedent';
+
+import { invalidChangeVersion } from '../../rules/invalid-change-version.mjs';
 
 describe('invalidChangeVersion', () => {
   it('should not report if all change versions are non-empty', () => {

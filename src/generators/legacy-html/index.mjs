@@ -8,7 +8,6 @@ import { minify } from 'html-minifier-terser';
 import buildContent from './utils/buildContent.mjs';
 import dropdowns from './utils/buildDropdowns.mjs';
 import tableOfContents from './utils/tableOfContents.mjs';
-
 import { groupNodesByModule } from '../../utils/generators.mjs';
 import { getRemarkRehype } from '../../utils/remark.mjs';
 

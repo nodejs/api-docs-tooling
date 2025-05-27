@@ -1,5 +1,6 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
+
 import reporter from '../../reporters/console.mjs';
 import { errorIssue, infoIssue, warnIssue } from '../fixtures/issues.mjs';
 

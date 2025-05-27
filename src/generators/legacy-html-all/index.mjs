@@ -5,10 +5,9 @@ import { join, resolve } from 'node:path';
 
 import { minify } from 'html-minifier-terser';
 
+import { getRemarkRehype } from '../../utils/remark.mjs';
 import dropdowns from '../legacy-html/utils/buildDropdowns.mjs';
 import tableOfContents from '../legacy-html/utils/tableOfContents.mjs';
-
-import { getRemarkRehype } from '../../utils/remark.mjs';
 
 /**
  * @typedef {{

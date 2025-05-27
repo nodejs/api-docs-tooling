@@ -1,12 +1,10 @@
 'use strict';
 
-import { h as createElement } from 'hastscript';
-
-import { toString } from 'hast-util-to-string';
-import { SKIP, visit } from 'unist-util-visit';
-
 import { createHighlighterCoreSync } from '@shikijs/core';
 import { createJavaScriptRegexEngine } from '@shikijs/engine-javascript';
+import { toString } from 'hast-util-to-string';
+import { h as createElement } from 'hastscript';
+import { SKIP, visit } from 'unist-util-visit';
 
 import shikiConfig from '../../shiki.config.mjs';
 

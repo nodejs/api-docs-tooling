@@ -1,15 +1,16 @@
-import { valid, parse } from 'semver';
 import { env } from 'node:process';
+
+import { valid, parse } from 'semver';
 import { visit } from 'unist-util-visit';
 import yaml from 'yaml';
 
-import createQueries from '../../utils/queries/index.mjs';
+import { enforceArray } from '../../utils/array.mjs';
 import {
   extractYamlContent,
   normalizeYamlSyntax,
 } from '../../utils/parser/index.mjs';
+import createQueries from '../../utils/queries/index.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
-import { enforceArray } from '../../utils/array.mjs';
 
 const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
 

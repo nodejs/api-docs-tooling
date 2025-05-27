@@ -1,6 +1,7 @@
-import { describe, it } from 'node:test';
 import { readdir } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
+import { describe, it } from 'node:test';
+
 import astJs from '../../ast-js/index.mjs';
 import apiLinks from '../index.mjs';
 

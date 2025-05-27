@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import process from 'node:process';
+
 import { Argument, Command, Option } from 'commander';
 
+import commands from './commands/index.mjs';
 import interactive from './commands/interactive.mjs';
 import list, { types } from './commands/list.mjs';
-import commands from './commands/index.mjs';
 import { errorWrap } from './utils.mjs';
 
 const program = new Command()
