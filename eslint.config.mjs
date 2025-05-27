@@ -1,17 +1,46 @@
 import pluginJs from '@eslint/js';
-import eslintConfigPrettier from 'eslint-config-prettier';
 import jsdoc from 'eslint-plugin-jsdoc';
+import importX from 'eslint-plugin-import-x';
+
 import globals from 'globals';
 
 export default [
-  // @see https://eslint.org/docs/latest/use/configure/configuration-files#specifying-files-and-ignores
+  pluginJs.configs.recommended,
+  importX.flatConfigs.recommended,
+  {
+    ignores: ['out/', 'src/generators/api-links/test/fixtures/'],
+  },
   {
     files: ['src/**/*.mjs', 'bin/**/*.mjs'],
     plugins: {
       jsdoc: jsdoc,
     },
-    languageOptions: { globals: globals.node },
+    languageOptions: {
+      ecmaVersion: 'latest',
+      globals: { ...globals.node },
+    },
     rules: {
+      'import-x/namespace': 'off',
+      'import-x/no-named-as-default-member': 'off',
+      'import-x/no-unresolved': 'off',
+      'import-x/order': [
+        'error',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            ['sibling', 'parent'],
+            'index',
+            'unknown',
+          ],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-indentation': 'error',
       'jsdoc/require-jsdoc': [
@@ -39,15 +68,8 @@ export default [
       'jsdoc/require-param': 'off',
     },
   },
-  // @see https://eslint.org/docs/latest/use/configure/configuration-files#specifying-files-and-ignores
   {
     files: ['src/generators/legacy-html/assets/*.js'],
     languageOptions: { globals: { ...globals.browser } },
-  },
-  // @see https://eslint.org/docs/latest/rules to learn more about these rules
-  pluginJs.configs.recommended,
-  eslintConfigPrettier,
-  {
-    ignores: ['src/generators/api-links/test/fixtures/**'],
   },
 ];

@@ -30,6 +30,7 @@
     "@types/node": "^22.15.3",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import-x": "^4.13.3",
     "eslint-plugin-jsdoc": "^50.6.17",
     "globals": "^16.2.0",
     "husky": "^9.1.7",
