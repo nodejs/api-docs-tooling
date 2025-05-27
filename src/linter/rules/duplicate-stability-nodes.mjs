@@ -1,4 +1,4 @@
-// @ts-check
+'use strict';
 
 import createQueries from '../../utils/queries/index.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
