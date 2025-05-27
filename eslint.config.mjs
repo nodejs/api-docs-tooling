@@ -43,7 +43,7 @@ export default [
     },
     languageOptions: {
       ecmaVersion: 'latest',
-      globals: { ...globals.node },
+      globals: { ...globals.nodeBuiltin },
     },
     rules: {
       'jsdoc/check-alignment': 'error',
