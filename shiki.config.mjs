@@ -1,3 +1,4 @@
+/* eslint-disable import-x/no-unresolved */
 'use strict';
 
 import cLanguage from 'shiki/langs/c.mjs';
