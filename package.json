@@ -9,8 +9,10 @@
     "lint:fix": "eslint --fix . --no-warn-ignored",
     "format": "prettier .",
     "format:write": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "node --test",
     "test:coverage": "node --experimental-test-coverage --test",
+    "test:ci": "node --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info --test-reporter=junit --test-reporter-destination=junit.xml --test-reporter=@reporters/github --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=stdout --test",
     "test:update-snapshots": "node --test --test-update-snapshots",
     "test:watch": "node --test --watch",
     "prepare": "husky",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
+    "@reporters/github": "^1.7.2",
     "@types/mdast": "^4.0.4",
     "@types/node": "^22.15.3",
     "eslint": "^9.27.0",
