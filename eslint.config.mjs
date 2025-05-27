@@ -1,7 +1,6 @@
 import pluginJs from '@eslint/js';
-import jsdoc from 'eslint-plugin-jsdoc';
 import importX from 'eslint-plugin-import-x';
-
+import jsdoc from 'eslint-plugin-jsdoc';
 import globals from 'globals';
 
 export default [
@@ -11,16 +10,10 @@ export default [
     ignores: ['out/', 'src/generators/api-links/test/fixtures/'],
   },
   {
-    files: ['src/**/*.mjs', 'bin/**/*.mjs'],
-    plugins: {
-      jsdoc: jsdoc,
-    },
-    languageOptions: {
-      ecmaVersion: 'latest',
-      globals: { ...globals.node },
-    },
+    files: ['**/*.mjs'],
     rules: {
       'import-x/namespace': 'off',
+      'import-x/no-named-as-default': 'off',
       'import-x/no-named-as-default-member': 'off',
       'import-x/no-unresolved': 'off',
       'import-x/order': [
@@ -41,6 +34,18 @@ export default [
           },
         },
       ],
+    },
+  },
+  {
+    files: ['src/**/*.mjs', 'bin/**/*.mjs'],
+    plugins: {
+      jsdoc: jsdoc,
+    },
+    languageOptions: {
+      ecmaVersion: 'latest',
+      globals: { ...globals.node },
+    },
+    rules: {
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-indentation': 'error',
       'jsdoc/require-jsdoc': [
