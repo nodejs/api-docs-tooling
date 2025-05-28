@@ -20,3 +20,12 @@ export const DOC_API_BLOB_EDIT_BASE_URL =
 
 // Base URL for a specific Node.js version within the Node.js API docs
 export const DOC_API_BASE_URL_VERSION = 'https://nodejs.org/docs/latest-v';
+
+/**
+ * @type {import('html-minifier-terser').Options} Options for terser
+ */
+export const TERSER_MINIFY_OPTIONS = {
+  collapseWhitespace: true,
+  minifyJS: true,
+  minifyCSS: true,
+};
