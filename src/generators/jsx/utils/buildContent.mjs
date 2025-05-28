@@ -14,9 +14,9 @@ import {
   INTERNATIONALIZABLE,
 } from '../constants.mjs';
 import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
-import { enforceArray, sortChanges } from '../../../utils/generators.mjs';
+import { sortChanges } from '../../../utils/generators.mjs';
 import { buildMetaBarProps } from './buildBarProps.mjs';
-
+import { enforceArray } from '../../../utils/array.mjs';
 /**
  * Creates a history of changes for an API element
  * @param {ApiDocMetadataEntry} entry - The metadata entry containing change information
