@@ -31,6 +31,8 @@ const createParser = linter => {
     // Parses the API doc into an AST tree using `unified` and `remark`
     const apiDocTree = remarkProcessor.parse(resolvedApiDoc);
 
+    linter?.lint(resolvedApiDoc, apiDocTree);
+
     return {
       file: {
         stem: resolvedApiDoc.stem,
