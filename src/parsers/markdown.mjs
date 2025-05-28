@@ -52,9 +52,7 @@ const createParser = linter => {
   const parseApiDocs = async apiDocs => {
     // We do a Promise.all, to ensure that each API doc is resolved asynchronously
     // but all need to be resolved first before we return the result to the caller
-    const resolvedApiDocEntries = await Promise.all(apiDocs.map(parseApiDoc));
-
-    return resolvedApiDocEntries;
+    return Promise.all(apiDocs.map(parseApiDoc));
   };
 
   return { parseApiDocs, parseApiDoc };
