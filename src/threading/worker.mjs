@@ -1,4 +1,5 @@
 import { parentPort, workerData } from 'node:worker_threads';
+
 import { allGenerators } from '../generators/index.mjs';
 
 const { name, dependencyOutput, extra } = workerData;

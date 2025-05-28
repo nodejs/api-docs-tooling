@@ -1,6 +1,7 @@
-import { describe, it } from 'node:test';
-import github from '../../reporters/github.mjs';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
+
+import github from '../../reporters/github.mjs';
 import { errorIssue, infoIssue, warnIssue } from '../fixtures/issues.mjs';
 
 describe('github', () => {

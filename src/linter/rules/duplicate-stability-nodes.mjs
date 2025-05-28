@@ -1,8 +1,9 @@
 'use strict';
 
+import { visit } from 'unist-util-visit';
+
 import createQueries from '../../utils/queries/index.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
-import { visit } from 'unist-util-visit';
 
 /**
  * Checks if there are multiple stability nodes within a chain.

@@ -1,10 +1,11 @@
 import { strictEqual, deepStrictEqual } from 'node:assert';
 import { describe, it } from 'node:test';
+
 import GitHubSlugger from 'github-slugger';
+import { u } from 'unist-builder';
 import { VFile } from 'vfile';
 
 import createMetadata from '../metadata.mjs';
-import { u } from 'unist-builder';
 
 describe('createMetadata', () => {
   it('should set the heading correctly', () => {

@@ -7,12 +7,12 @@ import {
   DOC_NODE_CHANGELOG_URL,
   DOC_NODE_VERSION,
 } from '../../src/constants.mjs';
-import createGenerator from '../../src/generators.mjs';
 import { publicGenerators } from '../../src/generators/index.mjs';
-import createNodeReleases from '../../src/releases.mjs';
-import { loadAndParse } from '../utils.mjs';
+import createGenerator from '../../src/generators.mjs';
 import createLinter from '../../src/linter/index.mjs';
 import { getEnabledRules } from '../../src/linter/utils/rules.mjs';
+import createNodeReleases from '../../src/releases.mjs';
+import { loadAndParse } from '../utils.mjs';
 
 const availableGenerators = Object.keys(publicGenerators);
 

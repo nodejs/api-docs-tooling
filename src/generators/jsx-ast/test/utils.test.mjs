@@ -1,15 +1,17 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import remarkParse from 'remark-parse';
+import remarkStringify from 'remark-stringify';
+import { unified } from 'unified';
+
+import { AST_NODE_TYPES } from '../constants.mjs';
+import { createJSXElement } from '../utils/ast.mjs';
 import {
   buildSideBarDocPages,
   buildMetaBarProps,
 } from '../utils/buildBarProps.mjs';
 import buildContent from '../utils/buildContent.mjs';
-import { createJSXElement } from '../utils/ast.mjs';
-import { AST_NODE_TYPES } from '../constants.mjs';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
 
 const sampleEntry = {
   api: 'sample-api',

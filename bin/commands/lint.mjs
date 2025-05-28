@@ -3,8 +3,8 @@ import process from 'node:process';
 import createLinter from '../../src/linter/index.mjs';
 import reporters from '../../src/linter/reporters/index.mjs';
 import rules from '../../src/linter/rules/index.mjs';
-import { loadAndParse } from '../utils.mjs';
 import { getEnabledRules } from '../../src/linter/utils/rules.mjs';
+import { loadAndParse } from '../utils.mjs';
 
 const availableRules = Object.keys(rules);
 const availableReporters = Object.keys(reporters);

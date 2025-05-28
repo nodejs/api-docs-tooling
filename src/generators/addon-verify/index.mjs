@@ -5,8 +5,8 @@ import { join } from 'node:path';
 
 import { visit } from 'unist-util-visit';
 
-import { generateFileList } from './utils/generateFileList.mjs';
 import { EXTRACT_CODE_FILENAME_COMMENT } from './constants.mjs';
+import { generateFileList } from './utils/generateFileList.mjs';
 import {
   generateSectionFolderName,
   isBuildableSection,

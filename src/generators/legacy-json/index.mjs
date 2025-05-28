@@ -2,8 +2,9 @@
 
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { groupNodesByModule } from '../../utils/generators.mjs';
+
 import { createSectionBuilder } from './utils/buildSection.mjs';
+import { groupNodesByModule } from '../../utils/generators.mjs';
 
 /**
  * This generator is responsible for generating the legacy JSON files for the

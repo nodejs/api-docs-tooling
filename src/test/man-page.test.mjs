@@ -1,12 +1,14 @@
 import { strictEqual } from 'node:assert';
 import { describe, it } from 'node:test';
+
+import { u } from 'unist-builder';
+
 import {
   convertNodeToMandoc,
   flagValueToMandoc,
   convertOptionToMandoc,
   convertEnvVarToMandoc,
 } from '../generators/man-page/utils/converter.mjs';
-import { u } from 'unist-builder';
 
 const textNode = text => u('text', text);
 

@@ -1,6 +1,7 @@
 'use strict';
 
 import { u as createTree } from 'unist-builder';
+
 import { sortChanges } from './utils/generators.mjs';
 
 /**

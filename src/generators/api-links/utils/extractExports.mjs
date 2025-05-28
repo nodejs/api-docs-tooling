@@ -1,6 +1,7 @@
 'use strict';
 
 import { visit } from 'estree-util-visit';
+
 import { CONSTRUCTOR_EXPRESSION } from '../constants.mjs';
 
 /**

@@ -4,9 +4,6 @@ import { u as createTree } from 'unist-builder';
 import { SKIP } from 'unist-util-visit';
 
 import { DOC_API_STABILITY_SECTION_REF_URL } from './constants.mjs';
-
-import { transformNodesToString } from '../unist.mjs';
-
 import {
   extractYamlContent,
   parseHeadingIntoMetadata,
@@ -14,6 +11,7 @@ import {
   transformTypeToReferenceLink,
 } from '../parser/index.mjs';
 import { getRemark } from '../remark.mjs';
+import { transformNodesToString } from '../unist.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort

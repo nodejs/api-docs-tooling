@@ -4,8 +4,12 @@ import { h as createElement } from 'hastscript';
 import { u as createTree } from 'unist-builder';
 import { SKIP, visit } from 'unist-util-visit';
 
-import createQueries from '../../../utils/queries/index.mjs';
 import { createJSXElement } from './ast.mjs';
+import { buildMetaBarProps } from './buildBarProps.mjs';
+import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
+import { enforceArray } from '../../../utils/array.mjs';
+import { sortChanges } from '../../../utils/generators.mjs';
+import createQueries from '../../../utils/queries/index.mjs';
 import {
   API_ICONS,
   AST_NODE_TYPES,
@@ -13,10 +17,6 @@ import {
   LIFECYCLE_LABELS,
   INTERNATIONALIZABLE,
 } from '../constants.mjs';
-import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
-import { sortChanges } from '../../../utils/generators.mjs';
-import { buildMetaBarProps } from './buildBarProps.mjs';
-import { enforceArray } from '../../../utils/array.mjs';
 /**
  * Creates a history of changes for an API element
  * @param {ApiDocMetadataEntry} entry - The metadata entry containing change information

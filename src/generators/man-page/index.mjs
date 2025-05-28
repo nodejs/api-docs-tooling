@@ -3,12 +3,11 @@
 import { writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { DOC_SLUG_ENVIRONMENT, DOC_SLUG_OPTIONS } from './constants.mjs';
 import {
   convertOptionToMandoc,
   convertEnvVarToMandoc,
 } from './utils/converter.mjs';
-
-import { DOC_SLUG_ENVIRONMENT, DOC_SLUG_OPTIONS } from './constants.mjs';
 
 /**
  * This generator generates a man page version of the CLI.md file.
