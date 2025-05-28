@@ -1,6 +1,11 @@
 'use strict';
 
 import { h as createElement } from 'hastscript';
+import {
+  findTextPositions,
+  getTreeLength,
+  sliceMarkdown,
+} from 'mdast-util-slice-markdown';
 import { u as createTree } from 'unist-builder';
 import { SKIP, visit } from 'unist-util-visit';
 
@@ -10,49 +15,50 @@ import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
 import { enforceArray } from '../../../utils/array.mjs';
 import { sortChanges } from '../../../utils/generators.mjs';
 import createQueries from '../../../utils/queries/index.mjs';
+import { JSX_IMPORTS } from '../../web/constants.mjs';
 import {
-  API_ICONS,
-  AST_NODE_TYPES,
   STABILITY_LEVELS,
   LIFECYCLE_LABELS,
   INTERNATIONALIZABLE,
+  STABILITY_PREFIX_LENGTH,
+  TYPES_WITH_METHOD_SIGNATURES,
 } from '../constants.mjs';
+import insertSignature, {
+  createPropertyTable,
+  getFullName,
+} from './createSignatureElements.mjs';
+
 /**
  * Creates a history of changes for an API element
  * @param {ApiDocMetadataEntry} entry - The metadata entry containing change information
  * @returns {import('unist').Node|null} JSX element representing change history or null if no changes
  */
 const createChangeElement = entry => {
-  // Collect lifecycle changes (added, deprecated, etc.)
-  const changeEntries = Object.entries(LIFECYCLE_LABELS)
-    // Do we have this field?
-    .filter(([field]) => entry[field])
-    // Get the versions as an array
-    .map(([field, label]) => [enforceArray(entry[field]), label])
-    // Create the change entry
-    .map(([versions, label]) => ({
-      versions,
-      label: `${label}: ${versions.join(', ')}`,
-    }));
+  const changeEntries = [
+    // Process lifecycle changes (added, deprecated, etc.)
+    ...Object.entries(LIFECYCLE_LABELS)
+      .filter(([field]) => entry[field])
+      .map(([field, label]) => ({
+        versions: enforceArray(entry[field]),
+        label: `${label}: ${enforceArray(entry[field]).join(', ')}`,
+      })),
 
-  // Add explicit changes if they exist
-  if (entry.changes?.length) {
-    const explicitChanges = entry.changes.map(change => ({
+    // Process explicit changes if they exist
+    ...(entry.changes?.map(change => ({
       versions: enforceArray(change.version),
       label: change.description,
       url: change['pr-url'],
-    }));
-
-    changeEntries.push(...explicitChanges);
-  }
+    })) || []),
+  ];
 
   if (!changeEntries.length) {
     return null;
   }
 
   // Sort by version, newest first and create the JSX element
-  return createJSXElement(AST_NODE_TYPES.JSX.CHANGE_HISTORY, {
-    changes: sortChanges(changeEntries, 'versions'),
+  return createJSXElement(JSX_IMPORTS.ChangeHistory.name, {
+    changes: sortChanges(changeEntries, 'versions').reverse(),
+    className: 'ml-auto',
   });
 };
 
@@ -61,19 +67,55 @@ const createChangeElement = entry => {
  * @param {string|undefined} sourceLink - The source link path
  * @returns {import('hastscript').Element|null} The source link element or null if no source link
  */
-const createSourceLink = sourceLink => {
-  if (!sourceLink) {
-    return null;
+const createSourceLink = sourceLink =>
+  sourceLink
+    ? createElement('span', [
+        INTERNATIONALIZABLE.sourceCode,
+        createElement(
+          'a',
+          { href: `${DOC_NODE_BLOB_BASE_URL}${sourceLink}` },
+          sourceLink
+        ),
+      ])
+    : null;
+
+/**
+ * Creates a heading element with appropriate styling and metadata
+ * @param {import('mdast').Node} content - The content node to extract text from
+ * @param {import('unist').Node|null} changeElement - The change history element if available
+ * @returns {import('hastscript').Element} The formatted heading element
+ */
+const createHeadingElement = (content, changeElement) => {
+  const { type, depth, slug } = content.data;
+
+  const headingContent =
+    getFullName(content.data, false) ||
+    sliceMarkdown(
+      content,
+      (findTextPositions(content, ':')[0] ?? -1) + 1,
+      getTreeLength(content),
+      { trimWhitespace: true }
+    ).children;
+
+  const headingWrapper = createElement('div', [
+    createElement(`h${depth}`, [
+      createElement(`a#${slug}`, { href: `#${slug}` }, headingContent),
+    ]),
+  ]);
+
+  // Add type icon if available
+  if (type && type !== 'misc') {
+    headingWrapper.children.unshift(
+      createJSXElement(JSX_IMPORTS.DataTag.name, { kind: type, size: 'sm' })
+    );
   }
 
-  return createElement('span', [
-    INTERNATIONALIZABLE.sourceCode,
-    createElement(
-      'a',
-      { href: `${DOC_NODE_BLOB_BASE_URL}${sourceLink}` },
-      sourceLink
-    ),
-  ]);
+  // Add change history if available
+  if (changeElement) {
+    headingWrapper.children.push(changeElement);
+  }
+
+  return headingWrapper;
 };
 
 /**
@@ -83,11 +125,16 @@ const createSourceLink = sourceLink => {
  * @param {import('unist').Parent} parent - The parent node containing the stability node
  * @returns {[typeof SKIP]} Visitor instruction to skip the node
  */
-const transformStabilityNode = ({ data }, index, parent) => {
-  parent.children[index] = createJSXElement(AST_NODE_TYPES.JSX.ALERT_BOX, {
-    children: data.description,
-    level: STABILITY_LEVELS[data.index],
-    title: data.index,
+const transformStabilityNode = (node, index, parent) => {
+  const start = STABILITY_PREFIX_LENGTH + node.data.index.length;
+  const stabilityLevel = parseInt(node.data.index);
+
+  parent.children[index] = createJSXElement(JSX_IMPORTS.AlertBox.name, {
+    children: sliceMarkdown(node, start, getTreeLength(node), {
+      trimWhitespace: true,
+    }).children[0].children,
+    level: STABILITY_LEVELS[stabilityLevel],
+    title: node.data.index,
   });
 
   return [SKIP];
@@ -102,33 +149,21 @@ const transformStabilityNode = ({ data }, index, parent) => {
  * @returns {[typeof SKIP]} Visitor instruction to skip the node
  */
 const transformHeadingNode = (entry, node, index, parent) => {
-  const { data, children } = node;
-  const headerChildren = [
-    createElement(`h${data.depth + 1}`, [
-      createElement(`a#${data.slug}`, { href: `#${data.slug}` }, children),
-    ]),
-  ];
-
-  // Add type icon if available
-  if (data.type in API_ICONS) {
-    headerChildren.unshift(
-      createJSXElement(AST_NODE_TYPES.JSX.CIRCULAR_ICON, API_ICONS[data.type])
-    );
-  }
-
-  // Add change history if available
-  const changeElement = createChangeElement(entry);
-  if (changeElement) {
-    headerChildren.push(changeElement);
-  }
-
   // Replace node with new heading and anchor
-  parent.children[index] = createElement('div', headerChildren);
+  parent.children[index] = createHeadingElement(
+    node,
+    createChangeElement(entry)
+  );
 
   // Add source link if available
   const sourceLink = createSourceLink(entry.source_link);
   if (sourceLink) {
     parent.children.splice(index + 1, 0, sourceLink);
+  }
+
+  // Add method signatures for appropriate types
+  if (TYPES_WITH_METHOD_SIGNATURES.includes(node.data.type)) {
+    insertSignature(parent, node, index + 1);
   }
 
   return [SKIP];
@@ -148,51 +183,63 @@ const processEntry = entry => {
   visit(content, createQueries.UNIST.isHeading, (node, idx, parent) =>
     transformHeadingNode(entry, node, idx, parent)
   );
+  visit(
+    content,
+    createQueries.UNIST.isTypedList,
+    (node, idx, parent) => (parent.children[idx] = createPropertyTable(node))
+  );
 
   return content;
 };
 
 /**
- * Creates the overall content structure with processed entries
+ * Creates the document layout with processed content, sidebar, and metadata
  * @param {Array<ApiDocMetadataEntry>} entries - API documentation metadata entries
  * @param {Record<string, any>} sideBarProps - Props for the sidebar component
  * @param {Record<string, any>} metaBarProps - Props for the meta bar component
  * @returns {import('unist').Node} The root node of the content tree
  */
-const createContentStructure = (entries, sideBarProps, metaBarProps) => {
+const createDocumentLayout = (entries, sideBarProps, metaBarProps) => {
   return createTree('root', [
-    createJSXElement(AST_NODE_TYPES.JSX.NAV_BAR),
-    createJSXElement(AST_NODE_TYPES.JSX.ARTICLE, {
+    createJSXElement(JSX_IMPORTS.NavBar.name),
+    createJSXElement(JSX_IMPORTS.Article.name, {
       children: [
-        createJSXElement(AST_NODE_TYPES.JSX.SIDE_BAR, sideBarProps),
+        createJSXElement(JSX_IMPORTS.SideBar.name, sideBarProps),
         createElement('div', [
           createElement('main', entries.map(processEntry)),
-          createJSXElement(AST_NODE_TYPES.JSX.META_BAR, metaBarProps),
+          createJSXElement(JSX_IMPORTS.MetaBar.name, metaBarProps),
         ]),
-        createJSXElement(AST_NODE_TYPES.JSX.FOOTER),
       ],
     }),
   ]);
 };
 
 /**
+ * @typedef {import('estree').Node & { data: ApiDocMetadataEntry }} JSXContent
+ *
  * Transforms API metadata entries into processed MDX content
  * @param {Array<ApiDocMetadataEntry>} metadataEntries - API documentation metadata entries
  * @param {ApiDocMetadataEntry} head - Main API metadata entry with version information
  * @param {Object} sideBarProps - Props for the sidebar component
  * @param {import('unified').Processor} remark - Remark processor instance for markdown processing
- * @returns {string} The stringified MDX content
+ * @returns {JSXContent} The processed MDX content
  */
-const buildContent = (metadataEntries, head, sideBarProps, remark) => {
+const buildContent = async (metadataEntries, head, sideBarProps, remark) => {
   const metaBarProps = buildMetaBarProps(head, metadataEntries);
 
-  const root = createContentStructure(
+  const root = createDocumentLayout(
     metadataEntries,
     sideBarProps,
     metaBarProps
   );
 
-  return remark.runSync(root);
+  const ast = await remark.run(root);
+
+  // ast => { Program: { Expression: { JSX } } }
+  return {
+    ...ast.body[0].expression,
+    data: head,
+  };
 };
 
 export default buildContent;

@@ -1,26 +1,39 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
-import { unified } from 'unified';
+import { visit } from 'unist-util-visit';
 
 import { SAMPLE } from './utils.mjs';
-import { AST_NODE_TYPES } from '../../constants.mjs';
+import { JSX_IMPORTS } from '../../../web/constants.mjs';
 import buildContent from '../buildContent.mjs';
 
-describe('buildContent', () => {
-  it('should process entries and include JSX wrapper elements', () => {
-    const processor = unified().use(remarkParse).use(remarkStringify);
-    const tree = buildContent([SAMPLE], SAMPLE, {}, processor);
+const expectedNames = [
+  JSX_IMPORTS.NavBar.name,
+  JSX_IMPORTS.Article.name,
+  JSX_IMPORTS.SideBar.name,
+];
 
-    const article = tree.children.find(
-      child => child.name === AST_NODE_TYPES.JSX.ARTICLE
+describe('buildContent', () => {
+  it('should process entries and include JSX wrapper elements', async () => {
+    const tree = await buildContent(
+      [SAMPLE],
+      SAMPLE,
+      {},
+      {
+        runSync: x => ({ body: [{ expression: x }] }),
+      }
     );
-    assert.ok(article);
-    assert.ok(
-      article.children.some(c => c.name === AST_NODE_TYPES.JSX.SIDE_BAR)
-    );
-    assert.ok(article.children.some(c => c.name === AST_NODE_TYPES.JSX.FOOTER));
+
+    const foundNames = [];
+    visit(tree, node => node.name && foundNames.push(node.name));
+
+    expectedNames.forEach(name => {
+      assert(
+        foundNames.includes(name),
+        `Missing "${name}". Found: ${foundNames.join(', ')}`
+      );
+    });
+
+    assert.equal(tree.data, SAMPLE);
   });
 });

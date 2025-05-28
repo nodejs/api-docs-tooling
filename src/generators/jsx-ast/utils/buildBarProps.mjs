@@ -2,25 +2,11 @@ import readingTime from 'reading-time';
 import { visit } from 'unist-util-visit';
 
 import { DOC_API_BLOB_EDIT_BASE_URL } from '../../../constants.mjs';
-
-/**
- * Builds sidebar navigation for API documentation pages
- *
- * @param {Map<string, Array<ApiDocMetadataEntry>>} groupedModules - Modules grouped by API
- * @param {Array<ApiDocMetadataEntry>} headNodes - Main entry nodes for each API
- */
-export const buildSideBarDocPages = (groupedModules, headNodes) =>
-  headNodes.map(node => {
-    const moduleEntries = groupedModules.get(node.api);
-
-    return {
-      title: node.heading.data.name,
-      doc: `${node.api}.html`,
-      headings: moduleEntries
-        .filter(entry => entry.heading?.data?.name && entry.heading.depth === 2)
-        .map(entry => [entry.heading.data.name, `#${entry.heading.data.slug}`]),
-    };
-  });
+import {
+  getCompatibleVersions,
+  getVersionFromSemVer,
+  getVersionURL,
+} from '../../../utils/generators.mjs';
 
 /**
  * Builds metadata for the sidebar and meta bar
@@ -38,17 +24,59 @@ export const buildMetaBarProps = (head, entries) => {
   }, '');
 
   const headings = entries
-    .filter(entry => entry.heading?.data?.name)
+    .filter(
+      entry => entry.heading?.data?.text && entry.heading?.data?.depth < 3
+    )
     .map(entry => ({
       depth: entry.heading.depth,
-      value: entry.heading.data.name,
+      value: entry.heading.data.text
+        .replace(/`/g, '')
+        .replace(/^[^:]+:/, '')
+        .trim(),
+      slug: entry.heading.data.slug,
     }));
 
   return {
     headings,
     addedIn: head.introduced_in || head.added_in || '',
     readingTime: readingTime(textContent).text,
-    viewAs: [['JSON', `${head.api}.json`]],
+    viewAs: [
+      ['JSON', `${head.api}.json`],
+      ['MD', `${head.api}.md`],
+    ],
     editThisPage: `${DOC_API_BLOB_EDIT_BASE_URL}${head.api}.md`,
+  };
+};
+
+/**
+ * Builds the sidebar properties for a given entry.
+ * @param {ApiDocMetadataEntry} entry
+ * @param {Array<ApiDocReleaseEntry>} releases
+ * @param {import('semver').SemVer} version
+ * @param {Array<[string, string]>} docPages
+ */
+export const buildSideBarProps = (entry, releases, version, docPages) => {
+  const versions = getCompatibleVersions(entry.introduced_in, releases, true);
+
+  return {
+    versions: versions.map(({ version, isLts, isCurrent }) => {
+      const parsed = getVersionFromSemVer(version);
+
+      let label = `v${parsed}`;
+      if (isLts) {
+        label += ' (LTS)';
+      }
+      if (isCurrent) {
+        label += ' (Current)';
+      }
+
+      return {
+        value: getVersionURL(parsed, entry.api),
+        label,
+      };
+    }),
+    currentVersion: `v${version.version}`,
+    pathname: `${entry.api}.html`,
+    docPages,
   };
 };
