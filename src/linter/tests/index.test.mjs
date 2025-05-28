@@ -1,15 +1,16 @@
-import { describe, mock, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, mock, it } from 'node:test';
+
 import { VFile } from 'vfile';
 
-import createLinter from '../index.mjs';
-import { errorIssue, infoIssue, warnIssue } from './fixtures/issues.mjs';
 import createContext from '../context.mjs';
+import createLinter from '../index.mjs';
 import {
   errorDescriptor,
   infoDescriptor,
   warnDescriptor,
 } from './fixtures/descriptors.mjs';
+import { errorIssue, infoIssue, warnIssue } from './fixtures/issues.mjs';
 import { emptyTree } from './fixtures/tree.mjs';
 
 describe('createLinter', () => {
