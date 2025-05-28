@@ -1,3 +1,5 @@
+import { JSX_IMPORTS } from '../web/constants.mjs';
+
 /**
  * UI classes for Node.js API stability levels
  *
@@ -10,32 +12,18 @@ export const STABILITY_LEVELS = [
   'info', // (3) Legacy
 ];
 
+// How deep should the Table of Contents go?
+export const TOC_MAX_HEADING_DEPTH = 3;
+
+// 'Stability: '.length + ' - '.length
+export const STABILITY_PREFIX_LENGTH = 14;
+
 /**
  * HTML tag to UI component mappings
  */
 export const TAG_TRANSFORMS = {
-  pre: 'CodeBox',
-  blockquote: 'Blockquote',
-};
-
-/**
- * @see transformer.mjs's TODO comment
- */
-export const TYPE_TRANSFORMS = {
-  raw: 'text',
-};
-
-/**
- * API type icon configurations
- */
-export const API_ICONS = {
-  event: { symbol: 'E', color: 'red' },
-  method: { symbol: 'M', color: 'red' },
-  property: { symbol: 'P', color: 'red' },
-  class: { symbol: 'C', color: 'red' },
-  module: { symbol: 'M', color: 'red' },
-  classMethod: { symbol: 'S', color: 'red' },
-  ctor: { symbol: 'C', color: 'red' },
+  pre: JSX_IMPORTS.CodeBox.name,
+  blockquote: JSX_IMPORTS.Blockquote.name,
 };
 
 /**
@@ -100,16 +88,62 @@ export const AST_NODE_TYPES = {
      * @see https://github.com/estree/estree/blob/master/es5.md#expressionstatement
      */
     EXPRESSION_STATEMENT: 'ExpressionStatement',
-  },
-  // TODO(@avivkeller): These should be inherited from the elements themselves
-  JSX: {
-    ALERT_BOX: 'AlertBox',
-    CHANGE_HISTORY: 'ChangeHistory',
-    CIRCULAR_ICON: 'CircularIcon',
-    NAV_BAR: 'NavBar',
-    ARTICLE: 'Article',
-    SIDE_BAR: 'SideBar',
-    META_BAR: 'MetaBar',
-    FOOTER: 'Footer',
+
+    /**
+     * Literal value (string, number, boolean, null)
+     *
+     * @see https://github.com/estree/estree/blob/master/es5.md#literal
+     */
+    LITERAL: 'Literal',
+
+    /**
+     * Identifier (e.g., variable name)
+     *
+     * @see https://github.com/estree/estree/blob/master/es5.md#identifier
+     */
+    IDENTIFIER: 'Identifier',
+
+    /**
+     * Array expression (e.g., [1, 2, 3])
+     *
+     * @see https://github.com/estree/estree/blob/master/es5.md#arrayexpression
+     */
+    ARRAY_EXPRESSION: 'ArrayExpression',
+
+    /**
+     * Object expression (e.g., { key: value })
+     *
+     * @see https://github.com/estree/estree/blob/master/es5.md#objectexpression
+     */
+    OBJECT_EXPRESSION: 'ObjectExpression',
+
+    /**
+     * Property within an object
+     *
+     * @see https://github.com/estree/estree/blob/master/es5.md#property
+     */
+    PROPERTY: 'Property',
+
+    /**
+     * JSX fragment
+     *
+     * @see https://github.com/estree/estree/blob/master/es2020.md#jsxfragment
+     */
+    JSX_FRAGMENT: 'JSXFragment',
   },
 };
+
+// These positions are explicity before anything else
+export const OVERRIDDEN_POSITIONS = [
+  'index', // https://github.com/nodejs/node/blob/main/doc/api/index.md
+  'synopsis', // https://github.com/nodejs/node/blob/main/doc/api/synopsis.md
+  'documentation', // https://github.com/nodejs/node/blob/main/doc/api/documentation.md
+];
+
+// These types are methods, and have signatures we should enumerate
+export const TYPES_WITH_METHOD_SIGNATURES = [
+  'class',
+  'ctor',
+  'method',
+  'classMethod',
+];

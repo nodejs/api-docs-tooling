@@ -1,18 +1,35 @@
 import pluginJs from '@eslint/js';
+import { defineConfig } from 'eslint/config';
 import importX from 'eslint-plugin-import-x';
 import jsdoc from 'eslint-plugin-jsdoc';
+import react from 'eslint-plugin-react';
 import globals from 'globals';
 
-export default [
+export default defineConfig([
   pluginJs.configs.recommended,
   importX.flatConfigs.recommended,
   {
     ignores: ['out/', 'src/generators/api-links/__tests__/fixtures/'],
   },
   {
-    files: ['**/*.mjs'],
+    files: ['**/*.{mjs,jsx}'],
+    plugins: {
+      jsdoc,
+      react,
+    },
+    languageOptions: {
+      ecmaVersion: 'latest',
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: { ...globals.nodeBuiltin },
+    },
     rules: {
       'object-shorthand': 'error',
+      'react/jsx-uses-react': 'error',
+      'react/jsx-uses-vars': 'error',
       'import-x/namespace': 'off',
       'import-x/no-named-as-default': 'off',
       'import-x/no-named-as-default-member': 'off',
@@ -75,7 +92,19 @@ export default [
     },
   },
   {
-    files: ['src/generators/legacy-html/assets/*.js'],
-    languageOptions: { globals: { ...globals.browser }, ecmaVersion: 'latest' },
+    files: [
+      'src/generators/legacy-html/assets/*.js',
+      'src/generators/web/ui/**/*',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        // SERVER and CLIENT denote server-only and client-only
+        // codepaths in our web generator
+        CLIENT: 'readonly',
+        SERVER: 'readonly',
+      },
+      ecmaVersion: 'latest',
+    },
   },
-];
+]);

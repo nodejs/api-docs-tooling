@@ -53,7 +53,7 @@ tableOfContents.parseToCNode = ({ stability, api, heading }) => {
     const [firstStability] = stability.children;
 
     return (
-      `<span class="stability_${firstStability.data.index}">` +
+      `<span class="stability_${parseInt(firstStability.data.index)}">` +
       `<a href="${fullSlug}">${heading.data.text}</a></span>`
     );
   }

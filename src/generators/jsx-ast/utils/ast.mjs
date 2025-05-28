@@ -1,6 +1,3 @@
-'use strict';
-
-import { valueToEstree } from 'estree-util-value-to-estree';
 import { u as createTree } from 'unist-builder';
 
 import { AST_NODE_TYPES } from '../constants.mjs';
@@ -12,10 +9,65 @@ import { AST_NODE_TYPES } from '../constants.mjs';
  */
 
 /**
- * Creates an MDX JSX element with support for complex attribute values.
+ * Converts JavaScript values to ESTree AST nodes
+ *
+ * @param {*} value - The value to convert to an ESTree node
+ */
+export const toESTree = value => {
+  // Preserve existing ESTree nodes, since they
+  // don't need to be re-processed.
+  if (value?.type === AST_NODE_TYPES.ESTREE.JSX_FRAGMENT) {
+    return value;
+  }
+
+  // Handle undefined
+  if (value === undefined) {
+    return { type: AST_NODE_TYPES.ESTREE.IDENTIFIER, name: 'undefined' };
+  }
+
+  // Handle primitive values (null, string, number, boolean)
+  if (
+    value == null ||
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  ) {
+    return { type: AST_NODE_TYPES.ESTREE.LITERAL, value };
+  }
+
+  // Handle arrays
+  if (Array.isArray(value)) {
+    return {
+      type: AST_NODE_TYPES.ESTREE.ARRAY_EXPRESSION,
+      elements: value.map(toESTree),
+    };
+  }
+
+  // Handle plain objects
+  if (typeof value === 'object') {
+    return {
+      type: AST_NODE_TYPES.ESTREE.OBJECT_EXPRESSION,
+      properties: Object.entries(value).map(([key, val]) => ({
+        type: AST_NODE_TYPES.ESTREE.PROPERTY,
+        key: { type: AST_NODE_TYPES.ESTREE.IDENTIFIER, name: key },
+        value: toESTree(val),
+        kind: 'init',
+        method: false,
+        shorthand: false,
+        computed: false,
+      })),
+    };
+  }
+
+  // We only need to convert simple types. This should never be reached.
+  throw new Error('Unsupported value type for ESTree conversion');
+};
+
+/**
+ * Creates an MDX JSX element.
  *
  * @param {string} name - The name of the JSX element
- * @param {JSXOptions & Record<string, any>} [options={}] - Options including type, children, and JSX attributes
+ * @param {JSXOptions & Record<string, any>} [options={}] - Options and/or attributes for the JSX node.
  * @returns {import('unist').Node} The created MDX JSX element node
  */
 export const createJSXElement = (
@@ -50,7 +102,7 @@ export const createJSXElement = (
  * @param {any} value - The attribute value
  * @returns {import('unist').Node} The MDX JSX attribute node
  */
-function createAttributeNode(name, value) {
+export const createAttributeNode = (name, value) => {
   // Use expression for objects and arrays
   if (value !== null && typeof value === 'object') {
     return createTree(AST_NODE_TYPES.MDX.JSX_ATTRIBUTE, {
@@ -62,7 +114,7 @@ function createAttributeNode(name, value) {
             body: [
               {
                 type: AST_NODE_TYPES.ESTREE.EXPRESSION_STATEMENT,
-                expression: valueToEstree(value),
+                expression: toESTree(value),
               },
             ],
           },
@@ -72,9 +124,9 @@ function createAttributeNode(name, value) {
   }
 
   // For primitives, use simple string conversion.
-  // If undefined, pass nothing.
+  // If nullish, pass nothing.
   return createTree(AST_NODE_TYPES.MDX.JSX_ATTRIBUTE, {
     name,
     value: value == null ? value : String(value),
   });
-}
+};

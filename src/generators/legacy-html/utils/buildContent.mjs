@@ -53,7 +53,7 @@ const buildStability = ({ children, data }, index, parent) => {
     // Creates the `div` element with the class `api_stability` and the stability index class
     // FYI: Since the Stability Index `blockquote` node gets modified within `queries.mjs`
     // it contains the StabilityIndexMetadataEntry within the `data` property
-    `div.api_stability.api_stability_${data.index}`,
+    `div.api_stability.api_stability_${parseInt(data.index)}`,
     // Processed the Markdown nodes into HTML nodes
     children
   );

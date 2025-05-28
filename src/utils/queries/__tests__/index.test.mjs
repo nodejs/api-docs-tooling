@@ -96,14 +96,14 @@ describe('createQueries', () => {
       children: [
         {
           type: 'paragraph',
-          children: [{ type: 'text', value: 'Stability: 2 - Frozen' }],
+          children: [{ type: 'text', value: 'Stability: 1.0 - Frozen' }],
         },
       ],
     };
     const apiEntryMetadata = {
       addStability: stability => {
         deepStrictEqual(stability.data, {
-          index: 2,
+          index: '1.0',
           description: 'Frozen',
         });
       },

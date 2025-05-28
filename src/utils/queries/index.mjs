@@ -134,7 +134,7 @@ const createQueries = () => {
       // so that the original node data can also be inferred
       node.data = {
         // The 2nd match should be the group that matches the Stability Index
-        index: Number(matches[1]),
+        index: matches[1],
         // The 3rd match should be the group containing all the remaining text
         // which is used as a description (we trim it to an one liner)
         description: matches[2].replace(/\n/g, ' ').trim(),
@@ -203,13 +203,15 @@ createQueries.QUERIES = {
   // so that they can be transformed into HTML links
   linksWithTypes: /\[`<([a-zA-Z0-9.| \\[\]]+)>`\]\((\S+)\)/g,
   // ReGeX for handling Stability Indexes Metadata
-  stabilityIndex: /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s,
+  stabilityIndex: /^Stability: ([0-5](?:\.[0-3])?)(?:\s*-\s*)?(.*)$/s,
   // ReGeX for handling the Stability Index Prefix
-  stabilityIndexPrefix: /Stability: ([0-5])/,
+  stabilityIndexPrefix: /Stability: ([0-5](?:\.[0-3])?)/,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/,
   // ReGeX for finding references to Unix manuals
   unixManualPage: /\b([a-z.]+)\((\d)([a-z]?)\)/g,
+  // ReGeX for determing a typed list's non-property names
+  typedListStarters: /^(Returns|Extends|Type):?\s*/,
 };
 
 createQueries.UNIST = {
@@ -262,6 +264,51 @@ createQueries.UNIST = {
    */
   isLinkReference: ({ type, identifier }) =>
     type === 'linkReference' && !!identifier,
+
+  /**
+   * @param {import('@types/mdast').List} list
+   * @returns {boolean}
+   */
+  isTypedList: list => {
+    // Exit early if not a list node
+    if (list.type !== 'list') {
+      return false;
+    }
+
+    // Get the content nodes of the first list item's paragraph
+    const [node, ...contentNodes] =
+      list?.children?.[0]?.children?.[0]?.children ?? [];
+
+    // Exit if no content nodes
+    if (!node) {
+      return false;
+    }
+
+    // Check for other starters
+    if (
+      node.value?.trimStart().match(createQueries.QUERIES.typedListStarters)
+    ) {
+      return true;
+    }
+
+    // Check for direct type link pattern (starts with '<')
+    if (node.type === 'link' && node.children?.[0]?.value?.[0] === '<') {
+      return true;
+    }
+
+    // Check for inline code + space + type link pattern
+    if (
+      node.type === 'inlineCode' &&
+      contentNodes[0]?.value.trim() === '' &&
+      contentNodes[1]?.type === 'link' &&
+      contentNodes[1]?.children?.[0]?.value?.[0] === '<'
+    ) {
+      return true;
+    }
+
+    // Not a typed list
+    return false;
+  },
 };
 
 export default createQueries;

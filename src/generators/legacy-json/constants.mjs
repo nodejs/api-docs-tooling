@@ -1,6 +1,3 @@
-// Grabs a method's return value
-export const RETURN_EXPRESSION = /^returns?\s*:?\s*/i;
-
 // Grabs a method's name
 export const NAME_EXPRESSION = /^['`"]?([^'`": {]+)['`"]?\s*:?\s*/;
 
