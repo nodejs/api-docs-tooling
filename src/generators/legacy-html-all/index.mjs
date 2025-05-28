@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 
 import { minify } from 'html-minifier-terser';
 
+import { TERSER_MINIFY_OPTIONS } from '../../constants.mjs';
 import { getRemarkRehype } from '../../utils/remark.mjs';
 import dropdowns from '../legacy-html/utils/buildDropdowns.mjs';
 import tableOfContents from '../legacy-html/utils/tableOfContents.mjs';
@@ -95,9 +96,7 @@ export default {
       .replace('__EDIT_ON_GITHUB__', '');
 
     // We minify the html result to reduce the file size and keep it "clean"
-    const minified = await minify(generatedAllTemplate, {
-      collapseWhitespace: true,
-    });
+    const minified = await minify(generatedAllTemplate, TERSER_MINIFY_OPTIONS);
 
     if (output) {
       await writeFile(join(output, 'all.html'), minified);

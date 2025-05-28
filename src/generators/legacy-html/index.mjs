@@ -8,6 +8,7 @@ import { minify } from 'html-minifier-terser';
 import buildContent from './utils/buildContent.mjs';
 import dropdowns from './utils/buildDropdowns.mjs';
 import tableOfContents from './utils/tableOfContents.mjs';
+import { TERSER_MINIFY_OPTIONS } from '../../constants.mjs';
 import { groupNodesByModule } from '../../utils/generators.mjs';
 import { getRemarkRehype } from '../../utils/remark.mjs';
 
@@ -162,7 +163,7 @@ export default {
 
       if (output) {
         // We minify the html result to reduce the file size and keep it "clean"
-        const minified = await minify(result, { collapseWhitespace: true });
+        const minified = await minify(result, TERSER_MINIFY_OPTIONS);
 
         await writeFile(join(output, `${node.api}.html`), minified);
       }

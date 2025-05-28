@@ -1,7 +1,9 @@
-import { buildSideBarDocPages } from './utils/buildBarProps.mjs';
+import { OVERRIDDEN_POSITIONS } from './constants.mjs';
 import buildContent from './utils/buildContent.mjs';
 import {
   getCompatibleVersions,
+  getVersionFromSemVer,
+  getVersionURL,
   groupNodesByModule,
 } from '../../utils/generators.mjs';
 import { getRemarkRecma } from '../../utils/remark.mjs';
@@ -26,17 +28,31 @@ export default {
    * @param {Partial<GeneratorOptions>} options
    * @returns {Promise<Array<string>>} Array of generated content
    */
-  async generate(entries, { releases, version }) {
+  async generate(entries, { index, releases, version }) {
     const remarkRecma = getRemarkRecma();
     const groupedModules = groupNodesByModule(entries);
 
     // Get sorted primary heading nodes
     const headNodes = entries
       .filter(node => node.heading.depth === 1)
-      .sort((a, b) => a.heading.data.name.localeCompare(b.heading.data.name));
+      .sort((a, b) => {
+        const ai = OVERRIDDEN_POSITIONS.indexOf(a.api),
+          bi = OVERRIDDEN_POSITIONS.indexOf(b.api);
+        // If this is in OVERRIDDEN_POSITIONS, it must come first
+        return ai !== -1 && bi !== -1
+          ? ai - bi
+          : ai !== -1
+            ? -1
+            : bi !== -1
+              ? 1
+              : // Just compare headings
+                a.heading.data.name.localeCompare(b.heading.data.name);
+      });
 
     // Generate table of contents
-    const docPages = buildSideBarDocPages(groupedModules, headNodes);
+    const docPages = index
+      ? index.map(({ section, api }) => [section, `${api}.html`])
+      : headNodes.map(node => [node.heading.data.name, `${node.api}.html`]);
 
     // Process each head node and build content
     const results = await Promise.all(
@@ -48,9 +64,25 @@ export default {
         );
 
         const sideBarProps = {
-          versions: versions.map(({ version }) => `v${version.version}`),
+          versions: versions.map(({ version, isLts, isCurrent }) => {
+            const parsed = getVersionFromSemVer(version);
+            let label = `v${parsed}`;
+
+            if (isLts) {
+              label += ' (LTS)';
+            }
+
+            if (isCurrent) {
+              label += ' (Current)';
+            }
+
+            return {
+              value: getVersionURL(parsed, entry.api),
+              label,
+            };
+          }),
           currentVersion: `v${version.version}`,
-          currentPage: `${entry.api}.html`,
+          pathname: `${entry.api}.html`,
           docPages,
         };
 
