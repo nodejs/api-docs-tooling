@@ -15,7 +15,6 @@ import metadata from './metadata/index.mjs';
 import oramaDb from './orama-db/index.mjs';
 
 export const publicGenerators = {
-  metadata: metadata,
   'json-simple': jsonSimple,
   'legacy-html': legacyHtml,
   'legacy-html-all': legacyHtmlAll,
@@ -29,9 +28,14 @@ export const publicGenerators = {
   'jsx-ast': jsxAst,
 };
 
+// These are a bit special: we don't want them to run unless needed,
+// and we also don't want them publicly accessible via the CLI.
+const internalGenerators = {
+  metadata,
+  'ast-js': astJs,
+};
+
 export const allGenerators = {
   ...publicGenerators,
-  // This one is a little special since we don't want it to run unless we need
-  // it and we also don't want it to be publicly accessible through the CLI.
-  'ast-js': astJs,
+  ...internalGenerators,
 };
