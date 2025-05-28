@@ -50,7 +50,6 @@ export default {
         const sideBarProps = {
           versions: versions.map(({ version }) => `v${version.version}`),
           currentVersion: `v${version.version}`,
-          currentPage: `${entry.api}.html`,
           docPages,
         };
 

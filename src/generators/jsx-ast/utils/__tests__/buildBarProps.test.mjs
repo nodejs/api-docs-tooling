@@ -13,7 +13,7 @@ describe('buildBarProps utilities', () => {
       assert.equal(result.length, 1);
       assert.equal(result[0].title, 'SampleFunc');
       assert.equal(result[0].doc, 'sample-api.html');
-      assert.deepEqual(result[0].headings, [['SampleFunc', '#sample-func']]);
+      assert.deepEqual(result[0].headings, [['SampleFunc', 'sample-func']]);
     });
   });
 
@@ -22,10 +22,15 @@ describe('buildBarProps utilities', () => {
       const result = buildMetaBarProps(SAMPLE, [SAMPLE]);
 
       assert.equal(result.addedIn, 'v1.0.0');
-      assert.deepEqual(result.viewAs, [['JSON', 'sample-api.json']]);
+      assert.deepEqual(result.viewAs, [
+        ['JSON', 'sample-api.json'],
+        ['MD', 'sample-api.md'],
+      ]);
       assert.ok(result.readingTime.startsWith('1 min'));
       assert.ok(result.editThisPage.endsWith('sample-api.md'));
-      assert.deepEqual(result.headings, [{ depth: 2, value: 'SampleFunc' }]);
+      assert.deepEqual(result.headings, [
+        { depth: 2, value: 'SampleFunc', slug: 'sample-func' },
+      ]);
     });
   });
 });

@@ -1,3 +1,4 @@
+import { JSX_IMPORTS } from '../web/constants.mjs';
 /**
  * UI classes for Node.js API stability levels
  *
@@ -11,11 +12,22 @@ export const STABILITY_LEVELS = [
 ];
 
 /**
+ * UI classes for heading depths
+ */
+export const HEADER_SIZE_MAP = [
+  undefined, // h0
+  'md', // h1
+  'sm', // h2
+  'sm', // h3
+  'sm', // h4
+];
+
+/**
  * HTML tag to UI component mappings
  */
 export const TAG_TRANSFORMS = {
-  pre: 'CodeBox',
-  blockquote: 'Blockquote',
+  pre: JSX_IMPORTS.CodeBox.name,
+  blockquote: JSX_IMPORTS.Blockquote.name,
 };
 
 /**
@@ -23,19 +35,6 @@ export const TAG_TRANSFORMS = {
  */
 export const TYPE_TRANSFORMS = {
   raw: 'text',
-};
-
-/**
- * API type icon configurations
- */
-export const API_ICONS = {
-  event: { symbol: 'E', color: 'red' },
-  method: { symbol: 'M', color: 'red' },
-  property: { symbol: 'P', color: 'red' },
-  class: { symbol: 'C', color: 'red' },
-  module: { symbol: 'M', color: 'red' },
-  classMethod: { symbol: 'S', color: 'red' },
-  ctor: { symbol: 'C', color: 'red' },
 };
 
 /**
@@ -100,16 +99,5 @@ export const AST_NODE_TYPES = {
      * @see https://github.com/estree/estree/blob/master/es5.md#expressionstatement
      */
     EXPRESSION_STATEMENT: 'ExpressionStatement',
-  },
-  // TODO(@avivkeller): These should be inherited from the elements themselves
-  JSX: {
-    ALERT_BOX: 'AlertBox',
-    CHANGE_HISTORY: 'ChangeHistory',
-    CIRCULAR_ICON: 'CircularIcon',
-    NAV_BAR: 'NavBar',
-    ARTICLE: 'Article',
-    SIDE_BAR: 'SideBar',
-    META_BAR: 'MetaBar',
-    FOOTER: 'Footer',
   },
 };

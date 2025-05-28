@@ -10,10 +10,10 @@ import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
 import { enforceArray } from '../../../utils/array.mjs';
 import { sortChanges } from '../../../utils/generators.mjs';
 import createQueries from '../../../utils/queries/index.mjs';
+import { JSX_IMPORTS } from '../../web/constants.mjs';
 import {
-  API_ICONS,
-  AST_NODE_TYPES,
   STABILITY_LEVELS,
+  HEADER_SIZE_MAP,
   LIFECYCLE_LABELS,
   INTERNATIONALIZABLE,
 } from '../constants.mjs';
@@ -51,7 +51,7 @@ const createChangeElement = entry => {
   }
 
   // Sort by version, newest first and create the JSX element
-  return createJSXElement(AST_NODE_TYPES.JSX.CHANGE_HISTORY, {
+  return createJSXElement(JSX_IMPORTS.ChangeHistory.name, {
     changes: sortChanges(changeEntries, 'versions'),
   });
 };
@@ -84,9 +84,9 @@ const createSourceLink = sourceLink => {
  * @returns {[typeof SKIP]} Visitor instruction to skip the node
  */
 const transformStabilityNode = ({ data }, index, parent) => {
-  parent.children[index] = createJSXElement(AST_NODE_TYPES.JSX.ALERT_BOX, {
+  parent.children[index] = createJSXElement(JSX_IMPORTS.AlertBox.name, {
     children: data.description,
-    level: STABILITY_LEVELS[data.index],
+    level: STABILITY_LEVELS[parseInt(data.index)],
     title: data.index,
   });
 
@@ -110,9 +110,13 @@ const transformHeadingNode = (entry, node, index, parent) => {
   ];
 
   // Add type icon if available
-  if (data.type in API_ICONS) {
-    headerChildren.unshift(
-      createJSXElement(AST_NODE_TYPES.JSX.CIRCULAR_ICON, API_ICONS[data.type])
+  if (data.type && data.type !== 'misc') {
+    headerChildren[0].properties.className = 'has-datatag';
+    headerChildren[0].children.unshift(
+      createJSXElement(JSX_IMPORTS.DataTag.name, {
+        kind: data.type,
+        size: HEADER_SIZE_MAP[data.depth],
+      })
     );
   }
 
@@ -161,27 +165,28 @@ const processEntry = entry => {
  */
 const createContentStructure = (entries, sideBarProps, metaBarProps) => {
   return createTree('root', [
-    createJSXElement(AST_NODE_TYPES.JSX.NAV_BAR),
-    createJSXElement(AST_NODE_TYPES.JSX.ARTICLE, {
+    createJSXElement(JSX_IMPORTS.NavBar.name),
+    createJSXElement(JSX_IMPORTS.Article.name, {
       children: [
-        createJSXElement(AST_NODE_TYPES.JSX.SIDE_BAR, sideBarProps),
+        createJSXElement(JSX_IMPORTS.SideBar.name, sideBarProps),
         createElement('div', [
           createElement('main', entries.map(processEntry)),
-          createJSXElement(AST_NODE_TYPES.JSX.META_BAR, metaBarProps),
+          createJSXElement(JSX_IMPORTS.MetaBar.name, metaBarProps),
         ]),
-        createJSXElement(AST_NODE_TYPES.JSX.FOOTER),
       ],
     }),
   ]);
 };
 
 /**
+ * @typedef {import('estree').Node & { data: ApiDocMetadataEntry }} JSXContent
+ *
  * Transforms API metadata entries into processed MDX content
  * @param {Array<ApiDocMetadataEntry>} metadataEntries - API documentation metadata entries
  * @param {ApiDocMetadataEntry} head - Main API metadata entry with version information
  * @param {Object} sideBarProps - Props for the sidebar component
  * @param {import('unified').Processor} remark - Remark processor instance for markdown processing
- * @returns {string} The stringified MDX content
+ * @returns {JSXContent} The stringified MDX content
  */
 const buildContent = (metadataEntries, head, sideBarProps, remark) => {
   const metaBarProps = buildMetaBarProps(head, metadataEntries);
@@ -192,7 +197,12 @@ const buildContent = (metadataEntries, head, sideBarProps, remark) => {
     metaBarProps
   );
 
-  return remark.runSync(root);
+  const ast = remark.runSync(root);
+  // ast => { Program: { Expression: { JSX } } }
+  return {
+    ...ast.body[0].expression,
+    data: head,
+  };
 };
 
 export default buildContent;
