@@ -14,9 +14,9 @@ import { buildSideBarDocPages } from './utils/buildBarProps.mjs';
  * @type {GeneratorMetadata<Input, string>}
  */
 export default {
-  name: 'jsx',
+  name: 'jsx-ast',
   version: '1.0.0',
-  description: 'Generates JSX from the input AST',
+  description: 'Generates JSX AST from the input MDAST',
   dependsOn: 'ast',
 
   /**

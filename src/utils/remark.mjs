@@ -13,8 +13,8 @@ import rehypeStringify from 'rehype-stringify';
 import recmaJsx from 'recma-jsx';
 
 import syntaxHighlighter from './highlighter.mjs';
-import transformElements from '../generators/jsx/utils/transformer.mjs';
-import { AST_NODE_TYPES } from '../generators/jsx/constants.mjs';
+import transformElements from '../generators/jsx-ast/utils/transformer.mjs';
+import { AST_NODE_TYPES } from '../generators/jsx-ast/constants.mjs';
 import rehypeShikiji from '@node-core/rehype-shiki';
 
 /**
