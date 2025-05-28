@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    // This script runs before the document renders
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  </script>
+</head>
+<body>
+  <div id="root">{{{dehydrated}}}</div>
+  <script>{{{javascript}}}</script>
+</body>
+</html>
