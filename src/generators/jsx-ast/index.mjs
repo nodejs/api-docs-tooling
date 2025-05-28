@@ -1,10 +1,10 @@
+import { buildSideBarDocPages } from './utils/buildBarProps.mjs';
+import buildContent from './utils/buildContent.mjs';
 import {
   getCompatibleVersions,
   groupNodesByModule,
 } from '../../utils/generators.mjs';
-import buildContent from './utils/buildContent.mjs';
 import { getRemarkRecma } from '../../utils/remark.mjs';
-import { buildSideBarDocPages } from './utils/buildBarProps.mjs';
 
 /**
  * This generator generates a JSX AST from an input MDAST
