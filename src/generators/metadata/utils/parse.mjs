@@ -6,9 +6,9 @@ import { remove } from 'unist-util-remove';
 import { selectAll } from 'unist-util-select';
 import { SKIP, visit } from 'unist-util-visit';
 
+import { createNodeSlugger } from './slugger.mjs';
 import createQueries from '../../../utils/queries/index.mjs';
 import { getRemark } from '../../../utils/remark.mjs';
-import { createNodeSlugger } from '../../../utils/slugger/index.mjs';
 import createMetadata from '../../../metadata.mjs';
 
 /**
