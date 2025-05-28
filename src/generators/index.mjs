@@ -11,6 +11,7 @@ import apiLinks from './api-links/index.mjs';
 import oramaDb from './orama-db/index.mjs';
 import astJs from './ast-js/index.mjs';
 import llmsTxt from './llms-txt/index.mjs';
+import jsxAst from './jsx-ast/index.mjs';
 
 export const publicGenerators = {
   'json-simple': jsonSimple,
@@ -23,6 +24,7 @@ export const publicGenerators = {
   'api-links': apiLinks,
   'orama-db': oramaDb,
   'llms-txt': llmsTxt,
+  'jsx-ast': jsxAst,
 };
 
 export const allGenerators = {

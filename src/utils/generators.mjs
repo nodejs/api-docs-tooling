@@ -1,6 +1,6 @@
 'use strict';
 
-import { coerce } from 'semver';
+import { coerce, compare, major } from 'semver';
 
 /**
  * Groups all the API metadata nodes by module (`api` property) so that we can process each different file
@@ -52,4 +52,36 @@ export const coerceSemVer = version => {
   }
 
   return coercedVersion;
+};
+
+/**
+ * Gets compatible versions for an entry
+ *
+ * @param {string | import('semver').SemVer} introduced
+ * @param {Array<ApiDocReleaseEntry>} releases
+ * @param {Boolean} [includeNonMajor=false]
+ * @returns {Array<ApiDocReleaseEntry>}
+ */
+export const getCompatibleVersions = (introduced, releases) => {
+  const coercedMajor = major(coerceSemVer(introduced));
+  // All Node.js versions that support the current API; If there's no "introduced_at" field,
+  // we simply show all versions, as we cannot pinpoint the exact version
+  return releases.filter(release => release.version.major >= coercedMajor);
+};
+
+/**
+ * Maps `updates` into `changes` format, merges them and sorts them by version
+ * ç
+ * @param {Array<ApiDocMetadataChange>} changes Changes to be merged into updates
+ * @param {[string='version']} key The key where versions are stored
+ * @returns {Array<ApiDocMetadataChange>} Mapped, merged and sorted changes
+ */
+export const sortChanges = (changes, key = 'version') => {
+  // Sorts the updates and changes by the first version on a given entry
+  return changes.sort((a, b) => {
+    const aVersion = Array.isArray(a[key]) ? a[key][0] : a[key];
+    const bVersion = Array.isArray(b[key]) ? b[key][0] : b[key];
+
+    return compare(coerceSemVer(aVersion), coerceSemVer(bVersion));
+  });
 };
