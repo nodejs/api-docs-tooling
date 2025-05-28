@@ -1,156 +1,233 @@
-import { describe, it } from 'node:test';
-import { deepStrictEqual } from 'assert';
+import { describe, it, mock } from 'node:test';
+import { deepStrictEqual, strictEqual } from 'node:assert';
 import { duplicateStabilityNodes } from '../../rules/duplicate-stability-nodes.mjs';
 import { LINT_MESSAGES } from '../../constants.mjs';
 
 // Mock data structure for creating test entries
-const createEntry = (
-  depth,
-  stabilityIndex,
-  source = 'file.yaml',
-  position = { line: 1, column: 1 }
-) => ({
-  heading: { data: { depth } },
-  stability: {
-    children: [{ data: { index: stabilityIndex }, children: [{ position }] }],
+const createStabilityNode = (value, line = 1, column = 1) => ({
+  type: 'blockquote',
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        {
+          type: 'text',
+          value: `Stability: ${value}`,
+        },
+      ],
+    },
+  ],
+  position: {
+    start: { line, column },
+    end: { line, column: column + 20 },
   },
-  api_doc_source: source,
+});
+
+const createHeadingNode = (depth, line = 1, column = 1) => ({
+  type: 'heading',
+  depth,
+  children: [
+    {
+      type: 'text',
+      value: `Heading ${depth}`,
+    },
+  ],
+  position: {
+    start: { line, column },
+    end: { line, column: column + 10 },
+  },
+});
+
+const createContext = (nodes, path = 'file.md') => ({
+  tree: {
+    type: 'root',
+    children: nodes,
+  },
+  path,
+  report: mock.fn(),
 });
 
 describe('duplicateStabilityNodes', () => {
-  it('returns empty array when there are no entries', () => {
-    deepStrictEqual(duplicateStabilityNodes([]), []);
+  it('should not report when there are no stability nodes', () => {
+    const context = createContext([
+      createHeadingNode(1, 1),
+      createHeadingNode(2, 2),
+    ]);
+    duplicateStabilityNodes(context);
+    strictEqual(context.report.mock.callCount(), 0);
   });
 
-  it('returns empty array when there are no duplicate stability nodes', () => {
-    const entries = [createEntry(1, 0), createEntry(2, 1), createEntry(3, 2)];
-    deepStrictEqual(duplicateStabilityNodes(entries), []);
+  it('should not report when there are no duplicate stability nodes', () => {
+    const context = createContext([
+      createHeadingNode(1, 1),
+      createStabilityNode(0, 2),
+      createHeadingNode(2, 3),
+      createStabilityNode(1, 4),
+      createHeadingNode(3, 5),
+      createStabilityNode(2, 6),
+    ]);
+    duplicateStabilityNodes(context);
+    strictEqual(context.report.mock.callCount(), 0);
   });
 
   it('detects duplicate stability nodes within a chain', () => {
-    const entries = [
-      createEntry(1, 0),
-      createEntry(2, 0), // Duplicate stability node
-    ];
+    const duplicateNode = createStabilityNode(0, 4);
+    const context = createContext([
+      createHeadingNode(1, 1),
+      createStabilityNode(0, 2),
+      createHeadingNode(2, 3),
+      duplicateNode, // Duplicate stability node
+    ]);
 
-    deepStrictEqual(duplicateStabilityNodes(entries), [
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 1);
+
+    const call = context.report.mock.calls[0];
+
+    deepStrictEqual(call.arguments, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: 'file.yaml',
-          position: { line: 1, column: 1 },
-        },
+        position: duplicateNode.position,
       },
     ]);
   });
 
   it('resets stability tracking when depth decreases', () => {
-    const entries = [
-      createEntry(1, 0),
-      createEntry(2, 0), // This should trigger an issue
-      createEntry(1, 1),
-      createEntry(2, 1), // This should trigger another issue
-    ];
+    const duplicateNode1 = createStabilityNode(0, 4);
+    const duplicateNode2 = createStabilityNode(1, 8);
+    const context = createContext([
+      createHeadingNode(1, 1),
+      createStabilityNode(0, 2),
+      createHeadingNode(2, 3),
+      duplicateNode1, // This should trigger an issue
+      createHeadingNode(1, 5),
+      createStabilityNode(1, 6),
+      createHeadingNode(2, 7),
+      duplicateNode2, // This should trigger another issue
+    ]);
 
-    deepStrictEqual(duplicateStabilityNodes(entries), [
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 2);
+
+    const calls = context.report.mock.calls.flatMap(call => call.arguments);
+
+    deepStrictEqual(calls, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: 'file.yaml',
-          position: { line: 1, column: 1 },
-        },
+        position: duplicateNode1.position,
       },
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: 'file.yaml',
-          position: { line: 1, column: 1 },
-        },
+        position: duplicateNode2.position,
       },
     ]);
   });
 
   it('handles missing stability nodes gracefully', () => {
-    const entries = [
-      createEntry(1, -1),
-      createEntry(2, -1),
-      createEntry(3, 0),
-      createEntry(4, 0), // This should trigger an issue
-    ];
-
-    deepStrictEqual(duplicateStabilityNodes(entries), [
+    const duplicateNode = createStabilityNode(0, 6);
+    const context = createContext([
+      createHeadingNode(1, 1),
       {
-        level: 'warn',
-        message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: 'file.yaml',
-          position: { line: 1, column: 1 },
-        },
+        type: 'blockquote',
+        children: [
+          {
+            type: 'paragraph',
+            children: [{ type: 'text', value: 'Not a stability node' }],
+          },
+        ],
+        position: { start: { line: 2 }, end: { line: 2 } },
       },
+      createHeadingNode(3, 3),
+      createStabilityNode(0, 4),
+      createHeadingNode(4, 5),
+      duplicateNode, // This should trigger an issue
     ]);
-  });
 
-  it('handles entries with no stability property gracefully', () => {
-    const entries = [
-      {
-        heading: { data: { depth: 1 } },
-        stability: { children: [] },
-        api_doc_source: 'file.yaml',
-        yaml_position: { line: 2, column: 5 },
-      },
-      createEntry(2, 0),
-    ];
-    deepStrictEqual(duplicateStabilityNodes(entries), []);
-  });
+    duplicateStabilityNodes(context);
 
-  it('handles entries with undefined stability index', () => {
-    const entries = [
-      createEntry(1, undefined),
-      createEntry(2, undefined),
-      createEntry(3, 1),
-      createEntry(4, 1), // This should trigger an issue
-    ];
-    deepStrictEqual(duplicateStabilityNodes(entries), [
+    strictEqual(context.report.mock.callCount(), 1);
+
+    const call = context.report.mock.calls[0];
+
+    deepStrictEqual(call.arguments, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: 'file.yaml',
-          position: { line: 1, column: 1 },
-        },
+        position: duplicateNode.position,
       },
     ]);
   });
 
   it('handles mixed depths and stability nodes correctly', () => {
-    const entries = [
-      createEntry(1, 0),
-      createEntry(2, 1),
-      createEntry(3, 1), // This should trigger an issue
-      createEntry(2, 2),
-      createEntry(3, 2), // This should trigger another issue
-    ];
+    const duplicateNode1 = createStabilityNode(1, 6);
+    const duplicateNode2 = createStabilityNode(2, 10);
+    const context = createContext([
+      createHeadingNode(1, 1),
+      createStabilityNode(0, 2),
+      createHeadingNode(2, 3),
+      createStabilityNode(1, 4),
+      createHeadingNode(3, 5),
+      duplicateNode1, // This should trigger an issue
+      createHeadingNode(2, 7),
+      createStabilityNode(2, 8),
+      createHeadingNode(3, 9),
+      duplicateNode2, // This should trigger another issue
+    ]);
 
-    deepStrictEqual(duplicateStabilityNodes(entries), [
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 2);
+
+    const calls = context.report.mock.calls.flatMap(call => call.arguments);
+
+    deepStrictEqual(calls, [
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: 'file.yaml',
-          position: { line: 1, column: 1 },
-        },
+        position: duplicateNode1.position,
       },
       {
         level: 'warn',
         message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: 'file.yaml',
-          position: { line: 1, column: 1 },
-        },
+        position: duplicateNode2.position,
       },
     ]);
+  });
+
+  it('handles malformed blockquotes gracefully', () => {
+    const context = createContext([
+      createHeadingNode(1, 1),
+      {
+        type: 'blockquote',
+        children: [], // Empty children array
+        position: { start: { line: 2 }, end: { line: 2 } },
+      },
+      createHeadingNode(2, 3),
+      {
+        type: 'blockquote',
+        children: [{ type: 'thematicBreak' }], // No paragraph
+        position: { start: { line: 4 }, end: { line: 4 } },
+      },
+      createHeadingNode(3, 5),
+      {
+        type: 'blockquote',
+        children: [
+          {
+            type: 'paragraph',
+            children: [], // No text node
+          },
+        ],
+        position: { start: { line: 6 }, end: { line: 6 } },
+      },
+    ]);
+
+    duplicateStabilityNodes(context);
+
+    strictEqual(context.report.mock.callCount(), 0);
   });
 });

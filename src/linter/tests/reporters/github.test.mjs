@@ -18,7 +18,7 @@ describe('github', () => {
     );
 
     assert.deepStrictEqual(callsArgs, [
-      '::notice file=doc/api/test.md::This is a INFO issue',
+      '::notice file=doc/api/test.md,line=1,endLine=1::This is a INFO issue',
       '::warning file=doc/api/test.md,line=1,endLine=1::This is a WARN issue',
       '::error file=doc/api/test.md,line=1,endLine=1::This is a ERROR issue',
     ]);

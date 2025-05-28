@@ -3,14 +3,7 @@ import { getRemarkRehype } from '../../../utils/remark.mjs';
 import { transformNodesToString } from '../../../utils/unist.mjs';
 import { parseList } from './parseList.mjs';
 import { SECTION_TYPE_PLURALS, UNPROMOTED_KEYS } from '../constants.mjs';
-
-/**
- * Converts a value to an array.
- * @template T
- * @param {T | T[]} val - The value to convert.
- * @returns {T[]} The value as an array.
- */
-const enforceArray = val => (Array.isArray(val) ? val : [val]);
+import { enforceArray } from '../../../utils/array.mjs';
 
 /**
  *

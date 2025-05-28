@@ -1,52 +1,48 @@
 'use strict';
 
-import createLinterEngine from './engine.mjs';
+import createContext from './context.mjs';
 import reporters from './reporters/index.mjs';
-import rules from './rules/index.mjs';
 
 /**
- * Creates a linter instance to validate ApiDocMetadataEntry entries
+ * Creates a linter instance to validate API documentation ASTs against a
+ * defined set of rules.
  *
- * @param {boolean} dryRun Whether to run the engine in dry-run mode
- * @param {string[]} disabledRules List of disabled rules names
+ * @param {import('./types').LintRule[]} rules - Lint rules to apply
+ * @param {boolean} [dryRun] - If true, the linter runs without reporting
+ * @returns {import('./types').Linter}
  */
-const createLinter = (dryRun, disabledRules) => {
+const createLinter = (rules, dryRun = false) => {
   /**
-   * Retrieves all enabled rules
-   *
-   * @returns {import('./types').LintRule[]}
-   */
-  const getEnabledRules = () => {
-    return Object.entries(rules)
-      .filter(([ruleName]) => !disabledRules.includes(ruleName))
-      .map(([, rule]) => rule);
-  };
-
-  const engine = createLinterEngine(getEnabledRules(disabledRules));
-
-  /**
-   * Lint issues found during validations
+   * Lint issues collected during validations.
    *
    * @type {Array<import('./types').LintIssue>}
    */
   const issues = [];
 
   /**
-   * Lints all entries using the linter engine
+   * Lints a API doc and collects issues.
    *
-   * @param entries
+   * @param {import('vfile').VFile} file
+   * @param {import('mdast').Root} tree
+   * @returns {void}
    */
-  const lintAll = entries => {
-    issues.push(...engine.lintAll(entries));
+  const lint = (file, tree) => {
+    const context = createContext(file, tree);
+
+    for (const rule of rules) {
+      rule(context);
+    }
+
+    issues.push(...context.getIssues());
   };
 
   /**
-   * Reports found issues using the specified reporter
+   * Reports collected issues using the specified reporter.
    *
-   * @param {keyof typeof reporters} reporterName Reporter name
+   * @param {keyof typeof reporters} [reporterName] Reporter name
    * @returns {void}
    */
-  const report = reporterName => {
+  const report = (reporterName = 'console') => {
     if (dryRun) {
       return;
     }
@@ -59,7 +55,7 @@ const createLinter = (dryRun, disabledRules) => {
   };
 
   /**
-   * Checks if any error-level issues were found during linting
+   * Checks if any error-level issues were collected.
    *
    * @returns {boolean}
    */
@@ -68,7 +64,8 @@ const createLinter = (dryRun, disabledRules) => {
   };
 
   return {
-    lintAll,
+    issues,
+    lint,
     report,
     hasError,
   };

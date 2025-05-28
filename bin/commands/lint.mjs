@@ -4,6 +4,7 @@ import createLinter from '../../src/linter/index.mjs';
 import reporters from '../../src/linter/reporters/index.mjs';
 import rules from '../../src/linter/rules/index.mjs';
 import { loadAndParse } from '../utils.mjs';
+import { getEnabledRules } from '../../src/linter/utils/rules.mjs';
 
 const availableRules = Object.keys(rules);
 const availableReporters = Object.keys(reporters);
@@ -16,22 +17,6 @@ const availableReporters = Object.keys(reporters);
  * @property {boolean} [dryRun] - Dry-run mode.
  * @property {keyof reporters} reporter - Reporter for linter output.
  */
-
-/**
- * Run the linter on parsed documentation.
- * @param {ApiDocMetadataEntry[]} docs - Parsed documentation objects.
- * @param {LinterOptions} options - Linter configuration options.
- * @returns {boolean} - True if no errors, false otherwise.
- */
-export function runLint(
-  docs,
-  { disableRule = [], dryRun = false, reporter = 'console' } = {}
-) {
-  const linter = createLinter(dryRun, disableRule);
-  linter.lintAll(docs);
-  linter.report(reporter);
-  return !linter.hasError();
-}
 
 /**
  * @type {import('../utils.mjs').Command}
@@ -95,9 +80,14 @@ export default {
    */
   async action(opts) {
     try {
-      const docs = await loadAndParse(opts.input, opts.ignore);
-      const success = runLint(docs, opts);
-      process.exitCode = success ? 0 : 1;
+      const rules = getEnabledRules(opts.disableRule);
+      const linter = createLinter(rules, opts.dryRun);
+
+      await loadAndParse(opts.input, opts.ignore, linter);
+
+      linter.report();
+
+      process.exitCode = +linter.hasError();
     } catch (error) {
       console.error('Error running the linter:', error);
       process.exitCode = 1;

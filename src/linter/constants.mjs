@@ -1,5 +1,9 @@
 'use strict';
 
+export const INTRDOCUED_IN_REGEX = /<!--\s?introduced_in=.*-->/;
+
+export const LLM_DESCRIPTION_REGEX = /<!--\s?llm_description=.*-->/;
+
 export const LINT_MESSAGES = {
   missingIntroducedIn: "Missing 'introduced_in' field in the API doc entry",
   missingChangeVersion: 'Missing version field in the API doc entry',

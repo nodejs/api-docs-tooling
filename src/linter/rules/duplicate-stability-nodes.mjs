@@ -1,38 +1,61 @@
+'use strict';
+
+import createQueries from '../../utils/queries/index.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
+import { visit } from 'unist-util-visit';
 
 /**
  * Checks if there are multiple stability nodes within a chain.
  *
- * @param {ApiDocMetadataEntry[]} entries
- * @returns {Array<import('../types').LintIssue>}
+ * @param {import('../types.d.ts').LintContext} context
+ * @returns {void}
  */
-export const duplicateStabilityNodes = entries => {
-  const issues = [];
+export const duplicateStabilityNodes = context => {
   let currentDepth = 0;
   let currentStability = -1;
+  let currentHeaderDepth = 0;
 
-  for (const entry of entries) {
-    const { depth } = entry.heading.data;
-    const entryStability = entry.stability.children[0]?.data.index ?? -1;
-
-    if (
-      depth > currentDepth &&
-      entryStability >= 0 &&
-      entryStability === currentStability
-    ) {
-      issues.push({
-        level: 'warn',
-        message: LINT_MESSAGES.duplicateStabilityNode,
-        location: {
-          path: entry.api_doc_source,
-          position: entry.stability.children[0].children[0].position,
-        },
-      });
-    } else {
-      currentDepth = depth;
-      currentStability = entryStability;
+  visit(context.tree, node => {
+    // Track the current header depth
+    if (node.type === 'heading') {
+      currentHeaderDepth = node.depth;
     }
-  }
 
-  return issues;
+    // Process blockquotes to find stability nodes
+    if (node.type === 'blockquote') {
+      if (node.children && node.children.length > 0) {
+        const paragraph = node.children[0];
+        if (
+          paragraph.type === 'paragraph' &&
+          paragraph.children &&
+          paragraph.children.length > 0
+        ) {
+          const text = paragraph.children[0];
+          if (text.type === 'text') {
+            const match = text.value.match(
+              createQueries.QUERIES.stabilityIndex
+            );
+            if (match) {
+              const stability = parseFloat(match[1]);
+
+              if (
+                currentHeaderDepth > currentDepth &&
+                stability >= 0 &&
+                stability === currentStability
+              ) {
+                context.report({
+                  level: 'warn',
+                  message: LINT_MESSAGES.duplicateStabilityNode,
+                  position: node.position,
+                });
+              } else {
+                currentDepth = currentHeaderDepth;
+                currentStability = stability;
+              }
+            }
+          }
+        }
+      }
+    }
+  });
 };

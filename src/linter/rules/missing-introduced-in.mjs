@@ -1,26 +1,26 @@
-import { LINT_MESSAGES } from '../constants.mjs';
+'use strict';
+
+import { INTRDOCUED_IN_REGEX, LINT_MESSAGES } from '../constants.mjs';
+import { findTopLevelEntry } from '../utils/find.mjs';
 
 /**
- * Checks if `introduced_in` field is missing
+ * Checks if `introduced_in` field is missing in the top-level entry.
  *
- * @param {ApiDocMetadataEntry[]} entries
- * @returns {Array<import('../types.d.ts').LintIssue>}
+ * @param {import('../types.d.ts').LintContext} context
+ * @returns {void}
  */
-export const missingIntroducedIn = entries => {
-  const issues = [];
+export const missingIntroducedIn = context => {
+  const introducedIn = findTopLevelEntry(
+    context.tree,
+    node => node.type === 'html' && INTRDOCUED_IN_REGEX.test(node.value)
+  );
 
-  for (const entry of entries) {
-    // Early continue if not a top-level heading or if introduced_in exists
-    if (entry.heading.depth !== 1 || entry.introduced_in) continue;
-
-    issues.push({
-      level: 'info',
-      message: LINT_MESSAGES.missingIntroducedIn,
-      location: {
-        path: entry.api_doc_source,
-      },
-    });
+  if (introducedIn) {
+    return;
   }
 
-  return issues;
+  return context.report({
+    level: 'info',
+    message: LINT_MESSAGES.missingIntroducedIn,
+  });
 };

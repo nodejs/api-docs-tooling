@@ -1,40 +1,81 @@
-import { describe, it } from 'node:test';
+import { deepStrictEqual, strictEqual } from 'node:assert';
+import { describe, it, mock } from 'node:test';
+
 import { missingIntroducedIn } from '../../rules/missing-introduced-in.mjs';
-import { deepEqual } from 'assert';
-import { assertEntry } from '../fixtures/entries.mjs';
 
 describe('missingIntroducedIn', () => {
-  it('should return an empty array if the introduced_in field is not missing', () => {
-    const issues = missingIntroducedIn([assertEntry]);
+  it('should not report if the introduced_in field is not missing', () => {
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: '<!--introduced_in=12.0.0-->',
+          },
+        ],
+      },
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
 
-    deepEqual(issues, []);
+    missingIntroducedIn(context);
+
+    strictEqual(context.report.mock.callCount(), 0);
   });
 
-  it('should return an empty array if the heading depth is not equal to 1', () => {
-    const issues = missingIntroducedIn([
-      {
-        ...assertEntry,
-        heading: { ...assertEntry.heading, depth: 2 },
+  it('should report an issue if the introduced_in field is missing in the first entry', () => {
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'heading',
+            depth: 2,
+          },
+          {
+            type: 'html',
+            value: '<!--introduced_in=12.0.0-->',
+          },
+        ],
       },
-    ]);
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
 
-    deepEqual(issues, []);
-  });
+    missingIntroducedIn(context);
 
-  it('should return an issue if the introduced_in property is missing', () => {
-    const issues = missingIntroducedIn([
-      {
-        ...assertEntry,
-        introduced_in: undefined,
-      },
-    ]);
+    strictEqual(context.report.mock.callCount(), 1);
 
-    deepEqual(issues, [
+    const call = context.report.mock.calls[0];
+
+    deepStrictEqual(call.arguments, [
       {
         level: 'info',
-        location: {
-          path: 'doc/api/assert.md',
-        },
+        message: "Missing 'introduced_in' field in the API doc entry",
+      },
+    ]);
+  });
+
+  it('should report an issue if the introduced_in property is missing', () => {
+    const context = {
+      tree: {
+        type: 'root',
+        children: [],
+      },
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
+
+    missingIntroducedIn(context);
+
+    strictEqual(context.report.mock.callCount(), 1);
+
+    const call = context.report.mock.calls[0];
+
+    deepStrictEqual(call.arguments, [
+      {
+        level: 'info',
         message: "Missing 'introduced_in' field in the API doc entry",
       },
     ]);
