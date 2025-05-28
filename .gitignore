@@ -8,3 +8,10 @@ out
 # Tests
 coverage
 junit.xml
+
+# Debugging
+.clinic
+isolate-*
+
+# Node's Source Folder
+node
