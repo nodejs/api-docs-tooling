@@ -1,17 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
-import { unified } from 'unified';
-
 import { AST_NODE_TYPES } from '../constants.mjs';
 import { createJSXElement } from '../utils/ast.mjs';
 import {
   buildSideBarDocPages,
   buildMetaBarProps,
 } from '../utils/buildBarProps.mjs';
-import buildContent from '../utils/buildContent.mjs';
 
 const sampleEntry = {
   api: 'sample-api',
@@ -53,7 +48,9 @@ test('buildMetaBarProps includes expected fields', () => {
   assert.deepEqual(result.viewAs, [['JSON', 'sample-api.json']]);
   assert.ok(result.readingTime.startsWith('1 min'));
   assert.ok(result.editThisPage.endsWith('sample-api.md'));
-  assert.deepEqual(result.headings, [{ depth: 2, value: 'SampleFunc' }]);
+  assert.deepEqual(result.headings, [
+    { depth: 2, value: 'SampleFunc', data: { id: 'sample-func' } },
+  ]);
 });
 
 test('createJSXElement builds correct JSX tree', () => {
@@ -67,16 +64,4 @@ test('createJSXElement builds correct JSX tree', () => {
   assert.equal(el.name, 'TestComponent');
   assert.ok(Array.isArray(el.children));
   assert.ok(el.attributes.some(attr => attr.name === 'dataAttr'));
-});
-
-test('buildContent processes entries and includes JSX wrapper elements', () => {
-  const processor = unified().use(remarkParse).use(remarkStringify);
-  const tree = buildContent([sampleEntry], sampleEntry, {}, processor);
-
-  const article = tree.children.find(
-    child => child.name === AST_NODE_TYPES.JSX.ARTICLE
-  );
-  assert.ok(article);
-  assert.ok(article.children.some(c => c.name === AST_NODE_TYPES.JSX.SIDE_BAR));
-  assert.ok(article.children.some(c => c.name === AST_NODE_TYPES.JSX.FOOTER));
 });

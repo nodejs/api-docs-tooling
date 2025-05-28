@@ -12,6 +12,7 @@ import legacyJsonAll from './legacy-json-all/index.mjs';
 import llmsTxt from './llms-txt/index.mjs';
 import manPage from './man-page/index.mjs';
 import oramaDb from './orama-db/index.mjs';
+import web from './web/index.mjs';
 
 export const publicGenerators = {
   'json-simple': jsonSimple,
@@ -25,6 +26,7 @@ export const publicGenerators = {
   'orama-db': oramaDb,
   'llms-txt': llmsTxt,
   'jsx-ast': jsxAst,
+  web,
 };
 
 export const allGenerators = {

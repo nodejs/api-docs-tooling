@@ -42,6 +42,7 @@ export const buildMetaBarProps = (head, entries) => {
     .map(entry => ({
       depth: entry.heading.depth,
       value: entry.heading.data.name,
+      data: { id: entry.heading.data.slug },
     }));
 
   return {

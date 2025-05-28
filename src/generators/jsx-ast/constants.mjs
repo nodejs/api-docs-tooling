@@ -1,3 +1,4 @@
+import { JSX_IMPORTS } from '../web/constants.mjs';
 /**
  * UI classes for Node.js API stability levels
  *
@@ -14,8 +15,8 @@ export const STABILITY_LEVELS = [
  * HTML tag to UI component mappings
  */
 export const TAG_TRANSFORMS = {
-  pre: 'CodeBox',
-  blockquote: 'Blockquote',
+  pre: JSX_IMPORTS.CodeBox.name,
+  blockquote: JSX_IMPORTS.Blockquote.name,
 };
 
 /**
@@ -100,16 +101,5 @@ export const AST_NODE_TYPES = {
      * @see https://github.com/estree/estree/blob/master/es5.md#expressionstatement
      */
     EXPRESSION_STATEMENT: 'ExpressionStatement',
-  },
-  // TODO(@avivkeller): These should be inherited from the elements themselves
-  JSX: {
-    ALERT_BOX: 'AlertBox',
-    CHANGE_HISTORY: 'ChangeHistory',
-    CIRCULAR_ICON: 'CircularIcon',
-    NAV_BAR: 'NavBar',
-    ARTICLE: 'Article',
-    SIDE_BAR: 'SideBar',
-    META_BAR: 'MetaBar',
-    FOOTER: 'Footer',
   },
 };

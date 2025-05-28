@@ -10,7 +10,7 @@ interface NodeWithData<T extends Node, J extends Data> extends T {
 
 declare global {
   export interface StabilityIndexMetadataEntry {
-    index: number;
+    index: string;
     description: string;
   }
 
