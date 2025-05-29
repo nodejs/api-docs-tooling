@@ -1,6 +1,6 @@
 'use strict';
 
-import { create } from '@orama/orama';
+import { create, insert } from '@orama/orama';
 import { persistToFile } from '@orama/plugin-data-persistence/server';
 
 import { groupNodesByModule } from '../../utils/generators.mjs';
@@ -65,7 +65,7 @@ export default {
       const section = buildSection(head, nodes);
 
       // Insert data into the Orama instance
-      db.insert({
+      insert(db, {
         name: section.name,
         type: section.type,
         desc: section.desc,
