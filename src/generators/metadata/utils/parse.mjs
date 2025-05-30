@@ -7,9 +7,9 @@ import { selectAll } from 'unist-util-select';
 import { SKIP, visit } from 'unist-util-visit';
 
 import { createNodeSlugger } from './slugger.mjs';
+import createMetadata from '../../../metadata.mjs';
 import createQueries from '../../../utils/queries/index.mjs';
 import { getRemark } from '../../../utils/remark.mjs';
-import createMetadata from '../../../metadata.mjs';
 
 /**
  * This generator generates a flattened list of metadata entries from a API doc
