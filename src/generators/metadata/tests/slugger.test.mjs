@@ -1,7 +1,7 @@
 import { strictEqual } from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { createNodeSlugger } from '../slugger/index.mjs';
+import { createNodeSlugger } from '../utils/slugger.mjs';
 
 describe('createNodeSlugger', () => {
   it('should create a new instance of the GitHub Slugger', () => {

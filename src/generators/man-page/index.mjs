@@ -24,7 +24,7 @@ export default {
 
   description: 'Generates the Node.js man-page.',
 
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * Generates the Node.js man-page

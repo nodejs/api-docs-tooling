@@ -135,15 +135,18 @@ export default {
       process.exit(1);
     }
 
-    const { runGenerators } = createGenerator(docs);
     const { getAllMajors } = createNodeReleases(opts.changelog);
+
+    const releases = await getAllMajors();
+
+    const { runGenerators } = createGenerator(docs);
 
     await runGenerators({
       generators: opts.target,
       input: opts.input,
       output: opts.output && resolve(opts.output),
       version: coerce(opts.version),
-      releases: await getAllMajors(),
+      releases,
       gitRef: opts.gitRef,
       threads: parseInt(opts.threads, 10),
     });

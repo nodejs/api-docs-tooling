@@ -62,7 +62,8 @@ export default {
   name: 'orama-db',
   version: '1.0.0',
   description: 'Generates the Orama database for the API docs.',
-  dependsOn: 'ast',
+
+  dependsOn: 'metadata',
 
   /**
    * Generates the Orama database.

@@ -91,7 +91,7 @@ const createMetadata = slugger => {
      * The Navigation entries has a dedicated separate method for retrieval
      * as it can be manipulated outside of the scope of the generation of the content
      *
-     * @param {import('vfile').VFile} apiDoc The API doc file being parsed
+     * @param {{stem?: string, basename?: string}} apiDoc The API doc file being parsed
      * @param {ApiDocMetadataEntry['content']} section An AST tree containing the Nodes of the API doc entry section
      * @returns {ApiDocMetadataEntry} The locally created Metadata entries
      */
