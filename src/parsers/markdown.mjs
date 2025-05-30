@@ -47,7 +47,7 @@ const createParser = linter => {
    * and it simply wraps parseApiDoc with the given API docs
    *
    * @param {Array<import('vfile').VFile | Promise<import('vfile').VFile>>} apiDocs List of API doc files to be parsed
-   * @returns {Promise<ParserOutput<import('mdast').Root>[]>}
+   * @returns {Promise<Array<ParserOutput<import('mdast').Root>>>}
    */
   const parseApiDocs = async apiDocs => {
     // We do a Promise.all, to ensure that each API doc is resolved asynchronously

@@ -5,9 +5,9 @@ import { parseApiDoc } from './utils/parse.mjs';
 /**
  * This generator generates a flattened list of metadata entries from a API doc
  *
- * @typedef {ParserOutput<import('mdast').Root>[]} Input
+ * @typedef {Array<ParserOutput<import('mdast').Root>>} Input
  *
- * @type {GeneratorMetadata<Input, ApiDocMetadataEntry[]>}
+ * @type {GeneratorMetadata<Input, Array<ApiDocMetadataEntry>>}
  */
 export default {
   name: 'metadata',
@@ -20,7 +20,7 @@ export default {
 
   /**
    * @param {Input} inputs
-   * @returns {Promise<ApiDocMetadataEntry[]>}
+   * @returns {Promise<Array<ApiDocMetadataEntry>>}
    */
   async generate(inputs) {
     return inputs.flatMap(input => parseApiDoc(input));

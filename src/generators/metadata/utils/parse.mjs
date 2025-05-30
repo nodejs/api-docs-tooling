@@ -15,7 +15,7 @@ import createMetadata from '../../../metadata.mjs';
  * This generator generates a flattened list of metadata entries from a API doc
  *
  * @param {ParserOutput<import('mdast').Root>} input
- * @returns {Promise<ApiDocMetadataEntry[]>}
+ * @returns {Promise<Array<ApiDocMetadataEntry>>}
  */
 export const parseApiDoc = ({ file, tree }) => {
   /**
