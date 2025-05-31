@@ -24,10 +24,6 @@ export const JSX_IMPORTS = {
     name: 'MetaBar',
     source: './components/MetaBar.jsx',
   },
-  Footer: {
-    name: 'Footer',
-    source: './components/Footer.jsx',
-  },
   ChangeHistory: {
     name: 'ChangeHistory',
     source: './components/ChangeHistory.jsx',

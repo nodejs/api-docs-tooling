@@ -110,7 +110,9 @@ export default {
 
     // Process all entries in parallel
     const results = await Promise.all(
-      entries.map(entry => processEntry(entry, template, astBuilders, require))
+      entries.map(entry =>
+        processEntry(entry, template, astBuilders, require, output)
+      )
     );
 
     if (output) {
@@ -120,6 +122,6 @@ export default {
       );
     }
 
-    return results.map(result => result.html);
+    return results;
   },
 };

@@ -169,7 +169,6 @@ const createContentStructure = (entries, sideBarProps, metaBarProps) => {
           createElement('main', entries.map(processEntry)),
           createJSXElement(JSX_IMPORTS.MetaBar.name, metaBarProps),
         ]),
-        createJSXElement(JSX_IMPORTS.Footer.name),
       ],
     }),
   ]);
