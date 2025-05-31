@@ -7,6 +7,7 @@ import stylePlugin from 'esbuild-style-plugin';
 import postcssCalc from 'postcss-calc';
 
 import { ESBUILD_RESOLVE_DIR } from '../constants.mjs';
+import staticData from './staticData.mjs';
 
 const uiComponentsResolver = {
   name: 'ui-components-resolver',
@@ -53,10 +54,10 @@ const uiComponentsResolver = {
 /**
  * Bundles JavaScript code and returns JS/CSS content
  * @param {string} code - Source code to bundle
- * @param {boolean} server
+ * @param {import('esbuild').BuildOptions} options
  * @returns {Promise<{js: string, css: string}>}
  */
-export default async (code, server) => {
+export default async (code, options) => {
   const result = await esbuild.build({
     stdin: {
       contents: code,
@@ -64,14 +65,16 @@ export default async (code, server) => {
       loader: 'jsx',
     },
     bundle: true,
-    minify: false,
-    sourcemap: 'inline',
+    minify: true,
     format: 'iife',
     target: 'es2020',
-    platform: server ? 'node' : 'browser',
+    platform: 'browser',
     jsx: 'automatic',
     write: false,
-    // This output file is a pseudo-file. It's never written to (`write: false`),
+    define: {
+      __STATIC_DATA__: staticData,
+    },
+    // This output file is a pseudo-file. It's never written (`write: false`),
     // but it gives ESLint a basename for the output.
     outfile: 'output.js',
     plugins: [
@@ -82,6 +85,7 @@ export default async (code, server) => {
       }),
       uiComponentsResolver,
     ],
+    ...options,
   });
 
   const [jsFile, cssFile] = result.outputFiles;

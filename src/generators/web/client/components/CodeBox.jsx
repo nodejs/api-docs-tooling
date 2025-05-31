@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import BaseCodeBox from '@node-core/ui-components/Common/BaseCodeBox';
-import { getLanguageDisplayName } from '@node-core/rehype-shiki';
+import { staticData } from '../data.mjs';
+
+const languageDisplayNameMap = new Map(staticData.shikiDisplayNameMap);
+
+/**
+ * Get the display name of a language
+ * @param {string} language The language ID
+ */
+export const getLanguageDisplayName = language => {
+  const entry = Array.from(languageDisplayNameMap.entries()).find(([aliases]) =>
+    aliases.includes(language.toLowerCase())
+  );
+
+  return entry?.[1] ?? language.toLowerCase();
+};
 
 const MDXCodeBox = ({ className, ...props }) => {
   const matches = className?.match(/language-(?<language>[a-zA-Z]+)/);

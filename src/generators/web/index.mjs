@@ -6,7 +6,7 @@ import { estreeToBabel } from 'estree-to-babel';
 import Mustache from 'mustache';
 
 import { ESBUILD_RESOLVE_DIR } from './constants.mjs';
-import createASTBuilder from './utils/build.mjs';
+import createASTBuilder from './utils/astBuilder.mjs';
 import bundleCode from './utils/bundle.mjs';
 
 /**
@@ -17,7 +17,9 @@ import bundleCode from './utils/bundle.mjs';
  */
 async function executeServerCode(serverCode, require) {
   // Bundle the server code for execution
-  const { js: bundledServer } = await bundleCode(serverCode, true);
+  const { js: bundledServer } = await bundleCode(serverCode, {
+    platform: 'node',
+  });
 
   // Create a safe execution context that returns the rendered content
   const executedFunction = new Function(
