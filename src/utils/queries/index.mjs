@@ -134,7 +134,7 @@ const createQueries = () => {
       // so that the original node data can also be inferred
       node.data = {
         // The 2nd match should be the group that matches the Stability Index
-        index: Number(matches[1]),
+        index: matches[1],
         // The 3rd match should be the group containing all the remaining text
         // which is used as a description (we trim it to an one liner)
         description: matches[2].replace(/\n/g, ' ').trim(),
@@ -190,9 +190,9 @@ createQueries.QUERIES = {
   // so that they can be transformed into HTML links
   linksWithTypes: /\[`<([a-zA-Z0-9.| \\[\]]+)>`\]\((\S+)\)/g,
   // ReGeX for handling Stability Indexes Metadata
-  stabilityIndex: /^Stability: ([0-5])(?:\s*-\s*)?(.*)$/s,
+  stabilityIndex: /^Stability: ([0-5](?:\.[0-3])?)(?:\s*-\s*)?(.*)$/s,
   // ReGeX for handling the Stability Index Prefix
-  stabilityIndexPrefix: /Stability: ([0-5])/,
+  stabilityIndexPrefix: /Stability: ([0-5](?:\.[0-3])?)/,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/,
 };

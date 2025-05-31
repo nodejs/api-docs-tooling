@@ -74,7 +74,10 @@ export default [
     },
   },
   {
-    files: ['src/generators/legacy-html/assets/*.js'],
+    files: [
+      'src/generators/legacy-html/assets/*.js',
+      'src/generators/web/client/**/*',
+    ],
     languageOptions: { globals: { ...globals.browser } },
   },
 ];
