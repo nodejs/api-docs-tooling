@@ -4,6 +4,12 @@ export const ESBUILD_RESOLVE_DIR = fileURLToPath(
   new URL('./client', import.meta.url)
 );
 
+export const TEMPLATE_PLACEHOLDERS = {
+  TITLE: '__TITLE__',
+  DEHYDRATED: '__DEHYDRATED__',
+  JAVASCRIPT: '__JAVASCRIPT__',
+};
+
 // Imports are relative to ESBUILD_RESOLVE_DIR
 export const JSX_IMPORTS = {
   NavBar: {

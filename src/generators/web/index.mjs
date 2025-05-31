@@ -3,25 +3,24 @@ import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
 import { estreeToBabel } from 'estree-to-babel';
-import Mustache from 'mustache';
+import { minify } from 'html-minifier-terser';
 
-import { ESBUILD_RESOLVE_DIR } from './constants.mjs';
+import { ESBUILD_RESOLVE_DIR, TEMPLATE_PLACEHOLDERS } from './constants.mjs';
+import { TERSER_MINIFY_OPTIONS } from '../../constants.mjs';
 import createASTBuilder from './utils/astBuilder.mjs';
 import bundleCode from './utils/bundle.mjs';
 
 /**
  * Executes server-side code in a safe, isolated context
  * @param {string} serverCode - The server code to execute
- * @param {Function} require - Node.js require function for dependencies
+ * @param {ReturnType<createRequire>} require - Node.js require function for dependencies
  * @returns {Promise<string>} The rendered HTML output
  */
 async function executeServerCode(serverCode, require) {
-  // Bundle the server code for execution
   const { js: bundledServer } = await bundleCode(serverCode, {
     platform: 'node',
   });
 
-  // Create a safe execution context that returns the rendered content
   const executedFunction = new Function(
     'require',
     `
@@ -32,6 +31,53 @@ async function executeServerCode(serverCode, require) {
   );
 
   return executedFunction(require);
+}
+
+/**
+ * Processes a single entry and writes the HTML file immediately
+ * @param {import('../jsx-ast/utils/buildContent.mjs').JSXContent} entry - JSX AST entry
+ * @param {string} template - HTML template
+ * @param {ReturnType<createASTBuilder>} astBuilders - AST builder functions
+ * @param {ReturnType<createRequire>} require - Node.js require function
+ * @param {string} output - Output directory path
+ * @returns {Promise<{html: string, css?: string}>}
+ */
+async function processEntry(
+  entry,
+  template,
+  { buildServerProgram, buildClientProgram },
+  require,
+  output
+) {
+  // Convert JSX AST to Babel AST
+  const { program } = estreeToBabel(entry);
+
+  // Generate and execute server-side code for SSR
+  const serverCode = buildServerProgram(program);
+  const serverRenderedHTML = await executeServerCode(serverCode, require);
+
+  // Generate and bundle client-side code
+  const clientCode = buildClientProgram(program);
+  const clientBundle = await bundleCode(clientCode);
+
+  // Render the final HTML using the template
+  const finalHTML = await minify(
+    template
+      .replace(TEMPLATE_PLACEHOLDERS.TITLE, entry.data.heading.data.name)
+      .replace(TEMPLATE_PLACEHOLDERS.DEHYDRATED, serverRenderedHTML)
+      .replace(TEMPLATE_PLACEHOLDERS.JAVASCRIPT, clientBundle.js),
+    TERSER_MINIFY_OPTIONS
+  );
+
+  // Write HTML file immediately if output directory is specified
+  if (output) {
+    await writeFile(join(output, `${entry.data.api}.html`), finalHTML, 'utf-8');
+  }
+
+  return {
+    html: finalHTML,
+    css: clientBundle.css,
+  };
 }
 
 /**
@@ -54,57 +100,26 @@ export default {
    * @param {Partial<GeneratorOptions>} options
    */
   async generate(entries, { output }) {
-    // Load the HTML template
+    // Load template and set up dependencies
     const template = await readFile(
       new URL('template.html', import.meta.url),
       'utf-8'
     );
-
-    // Set up AST builders for server and client code
-    const { buildServerProgram, buildClientProgram } = createASTBuilder();
+    const astBuilders = createASTBuilder();
     const require = createRequire(ESBUILD_RESOLVE_DIR);
 
-    let css; // Will store CSS from the first bundle
-
-    // Process each entry in parallel
-    const bundles = await Promise.all(
-      entries.map(async entry => {
-        // Convert JSX AST to Babel AST
-        const { program } = estreeToBabel(entry);
-
-        // Generate and execute server-side code for SSR
-        const serverCode = buildServerProgram(program);
-        const serverRenderedHTML = await executeServerCode(serverCode, require);
-
-        // Generate and bundle client-side code
-        const clientCode = buildClientProgram(program);
-        const clientBundle = await bundleCode(clientCode);
-
-        // Extract CSS only from the first bundle to avoid duplicates
-        css ??= clientBundle.css;
-
-        // Render the final HTML using the template
-        const finalHTML = Mustache.render(template, {
-          title: entry.data.heading.data.name,
-          javascript: clientBundle.js,
-          dehydrated: serverRenderedHTML,
-        });
-
-        // Write individual HTML file if output directory is specified
-        if (output) {
-          const filename = `${entry.data.api}.html`;
-          await writeFile(join(output, filename), finalHTML);
-        }
-
-        return finalHTML;
-      })
+    // Process all entries in parallel
+    const results = await Promise.all(
+      entries.map(entry => processEntry(entry, template, astBuilders, require))
     );
 
-    // Write shared CSS file if we have CSS and an output directory
-    if (output && css) {
-      await writeFile(join(output, 'styles.css'), css);
+    if (output) {
+      await writeFile(
+        join(output, 'styles.css'),
+        results.find(result => result.css).css
+      );
     }
 
-    return bundles;
+    return results.map(result => result.html);
   },
 };
