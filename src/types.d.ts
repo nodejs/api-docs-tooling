@@ -21,6 +21,7 @@ declare global {
   export interface HeadingMetadataEntry {
     type:
       | 'event'
+      | 'global'
       | 'method'
       | 'property'
       | 'class'
