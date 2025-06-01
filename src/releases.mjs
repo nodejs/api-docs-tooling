@@ -35,11 +35,11 @@ const getChangelogFromFileSystem = async changelogUrl =>
  * @param {string} changelogPath The given URL to the Node.js CHANGELOG.md file
  */
 const createNodeReleases = changelogPath => {
-  const changelogUrl = new URL(changelogPath);
+  const changelogUrl = URL.parse(changelogPath);
 
   const changelogStrategy =
-    changelogUrl.protocol === 'file:'
-      ? getChangelogFromFileSystem(changelogUrl)
+    !changelogUrl || changelogUrl.protocol === 'file:'
+      ? getChangelogFromFileSystem(changelogUrl ?? changelogPath)
       : getChangelogFromNetwork(changelogUrl);
 
   /**
