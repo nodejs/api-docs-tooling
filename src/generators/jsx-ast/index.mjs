@@ -17,7 +17,7 @@ export default {
   name: 'jsx-ast',
   version: '1.0.0',
   description: 'Generates JSX AST from the input MDAST',
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * Generates a JSX AST
