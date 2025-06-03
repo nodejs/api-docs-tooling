@@ -4,11 +4,6 @@ import { allGenerators } from './generators/index.mjs';
 import WorkerPool from './threading/index.mjs';
 
 /**
- * @typedef {{ ast: GeneratorMetadata<ApiDocMetadataEntry, ApiDocMetadataEntry>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
- * @typedef {AvailableGenerators & AstGenerator} AllGenerators A complete set of the available generators, including the AST one
- * @param markdownInput
- * @param jsInput
- *
  * This method creates a system that allows you to register generators
  * and then execute them in a specific order, keeping track of the
  * generation process, and handling errors that may occur from the
@@ -21,10 +16,12 @@ import WorkerPool from './threading/index.mjs';
  * Generators can also write to files. These would usually be considered
  * the final generators in the chain.
  *
- * @param {ApiDocMetadataEntry} markdownInput The parsed API doc metadata entries
- * @param {Array<import('acorn').Program>} parsedJsFiles
+ * @typedef {{ ast: GeneratorMetadata<ParserOutput, ParserOutput>}} AstGenerator The AST "generator" is a facade for the AST tree and it isn't really a generator
+ * @typedef {AvailableGenerators & AstGenerator} AllGenerators A complete set of the available generators, including the AST one
+ *
+ * @param {ParserOutput} input The API doc AST tree
  */
-const createGenerator = markdownInput => {
+const createGenerator = input => {
   /**
    * We store all the registered generators to be processed
    * within a Record, so we can access their results at any time whenever needed
@@ -32,7 +29,7 @@ const createGenerator = markdownInput => {
    *
    * @type {{ [K in keyof AllGenerators]: ReturnType<AllGenerators[K]['generate']> }}
    */
-  const cachedGenerators = { ast: Promise.resolve(markdownInput) };
+  const cachedGenerators = { ast: Promise.resolve(input) };
 
   const threadPool = new WorkerPool();
 

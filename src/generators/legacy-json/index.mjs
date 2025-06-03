@@ -26,7 +26,7 @@ export default {
 
   description: 'Generates the legacy version of the JSON API docs.',
 
-  dependsOn: 'ast',
+  dependsOn: 'metadata',
 
   /**
    * Generates a legacy JSON file.
