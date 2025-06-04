@@ -11,3 +11,7 @@ coverage:
         # TODO(@avivkeller): Once our coverage > 50%,
         # increase this to 50%, and increase on increments
         target: 40%
+
+ignore:
+  - "eslint.config.mjs"
+  - "**/fixtures/**"
