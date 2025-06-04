@@ -13,6 +13,8 @@ import llmsTxt from './llms-txt/index.mjs';
 import manPage from './man-page/index.mjs';
 import metadata from './metadata/index.mjs';
 import oramaDb from './orama-db/index.mjs';
+import json from './json/index.mjs';
+import jsonAll from './json-all/index.mjs';
 
 export const publicGenerators = {
   'json-simple': jsonSimple,
@@ -26,6 +28,8 @@ export const publicGenerators = {
   'orama-db': oramaDb,
   'llms-txt': llmsTxt,
   'jsx-ast': jsxAst,
+  json,
+  'json-all': jsonAll,
 };
 
 // These are a bit special: we don't want them to run unless needed,
