@@ -17,7 +17,7 @@ const updateDepth = (char, depth) =>
  * @param {number} optionalDepth
  * @returns {[string, number, boolean]}
  */
-function parseNameAndOptionalStatus(parameterName, optionalDepth) {
+export function parseNameAndOptionalStatus(parameterName, optionalDepth) {
   // Let's check if the parameter is optional & grab its name at the same time.
   //  We need to see if there's any leading brackets in front of the parameter
   //  name. While we're doing that, we can also get the index where the
@@ -56,7 +56,7 @@ function parseNameAndOptionalStatus(parameterName, optionalDepth) {
  * @param {string} parameterName
  * @returns {[string, string | undefined]}
  */
-function parseDefaultValue(parameterName) {
+export function parseDefaultValue(parameterName) {
   /**
    * @type {string | undefined}
    */
@@ -80,7 +80,7 @@ function parseDefaultValue(parameterName) {
  * @param {Array<import('../types.d.ts').ParameterList>} markdownParameters
  * @returns {import('../types.d.ts').Parameter}
  */
-function findParameter(parameterName, index, markdownParameters) {
+export function findParameter(parameterName, index, markdownParameters) {
   const parameter = markdownParameters[index];
   if (parameter?.name === parameterName) {
     return parameter;
@@ -110,7 +110,7 @@ function findParameter(parameterName, index, markdownParameters) {
  * @param {string[]} declaredParameters
  * @param {Array<import('../types.d.ts').ParameterList>} markdownParameters
  */
-function parseParameters(declaredParameters, markdownParameters) {
+export function parseParameters(declaredParameters, markdownParameters) {
   /**
    * @type {Array<import('../types.d.ts').Parameter>}
    */

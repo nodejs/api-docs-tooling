@@ -6,7 +6,7 @@
  * @param {number} startIdx
  * @returns {import('../types.d.ts').HierarchizedEntry}
  */
-function findParent(entry, entries, startIdx) {
+export function findParent(entry, entries, startIdx) {
   // Base case: if we're at the beginning of the list, no valid parent exists.
   if (startIdx < 0) {
     throw new Error(
