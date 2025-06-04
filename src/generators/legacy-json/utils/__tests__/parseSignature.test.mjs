@@ -88,7 +88,6 @@ describe('parseSignature', () => {
   it('parses method with parameters', () => {
     const markdown = [{ name: 'param1' }, { name: 'param2' }];
     const result = parseSignature('`method(param1, param2)`', markdown);
-    console.log(result);
 
     assert.equal(result.params.length, 2);
   });
