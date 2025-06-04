@@ -7,7 +7,7 @@ export default [
   pluginJs.configs.recommended,
   importX.flatConfigs.recommended,
   {
-    ignores: ['out/', 'src/generators/api-links/test/fixtures/'],
+    ignores: ['out/', 'src/generators/api-links/__tests__/fixtures/'],
   },
   {
     files: ['**/*.mjs'],

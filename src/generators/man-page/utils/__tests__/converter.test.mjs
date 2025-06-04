@@ -8,7 +8,7 @@ import {
   flagValueToMandoc,
   convertOptionToMandoc,
   convertEnvVarToMandoc,
-} from '../generators/man-page/utils/converter.mjs';
+} from '../converter.mjs';
 
 const textNode = text => u('text', text);
 

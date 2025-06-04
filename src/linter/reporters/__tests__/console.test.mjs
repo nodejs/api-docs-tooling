@@ -1,8 +1,12 @@
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import reporter from '../../reporters/console.mjs';
-import { errorIssue, infoIssue, warnIssue } from '../fixtures/issues.mjs';
+import {
+  errorIssue,
+  infoIssue,
+  warnIssue,
+} from '../../__tests__/fixtures/issues.mjs';
+import reporter from '../console.mjs';
 
 const testCases = [
   {
@@ -30,8 +34,8 @@ describe('console', () => {
 
       reporter(issue);
 
-      assert.strictEqual(mock.callCount(), 1);
-      assert.deepStrictEqual(mock.calls[0].arguments, [expected]);
+      assert.equal(mock.callCount(), 1);
+      assert.deepEqual(mock.calls[0].arguments, [expected]);
     });
   });
 });
