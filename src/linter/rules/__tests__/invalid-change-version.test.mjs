@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import dedent from 'dedent';
 
-import { invalidChangeVersion } from '../../rules/invalid-change-version.mjs';
+import { invalidChangeVersion } from '../invalid-change-version.mjs';
 
 describe('invalidChangeVersion', () => {
   it('should not report if all change versions are non-empty', () => {
@@ -92,7 +92,7 @@ changes:
       [
         fileURLToPath(
           new URL(
-            '../fixtures/invalidChangeVersion-environment.mjs',
+            './fixtures/invalid-change-version-subprocess.mjs',
             import.meta.url
           )
         ),
