@@ -1,0 +1,13 @@
+coverage:
+  # https://docs.codecov.com/docs/commit-status
+  status:
+    patch:
+      default:
+        # TODO(@avivkeller): Once our coverage > 80%,
+        # increase this to 80%, and move it to `default_rules`
+        target: 80%
+    project:
+      default:
+        # TODO(@avivkeller): Once our coverage > 50%,
+        # increase this to 50%, and increase on increments
+        target: 40%
