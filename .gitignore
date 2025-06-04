@@ -6,5 +6,5 @@ npm-debug.log
 out
 
 # Tests
-lcov.info
+coverage
 junit.xml
