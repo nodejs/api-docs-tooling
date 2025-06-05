@@ -1,15 +1,46 @@
-# # Node.js `api-docs-tooling` Contributing Guide
+# Node.js `api-docs-tooling` Contributing Guide
 
 Thank you for your interest in contributing to the Node.js `api-docs-tooling` project! We welcome contributions from everyone, and we appreciate your help in making this project better.
 
-## Getting started
+## Table of Contents
 
-The steps below will give you a general idea of how to prepare your local environment for the Node.js Website and general steps
-for getting things done and landing your contribution.
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Setting Up Your Development Environment](#setting-up-your-development-environment)
+- [Development Workflow](#development-workflow)
+  - [Making Changes](#making-changes)
+  - [Submitting Your Changes](#submitting-your-changes)
+- [Writing Tests](#writing-tests)
+  - [Test File Organization](#test-file-organization)
+  - [Writing Test Code](#writing-test-code)
+    - [Use Node.js Built-in Test Runner](#use-nodejs-built-in-test-runner)
+    - [Test Structure](#test-structure)
+    - [Best Practices](#best-practices)
+    - [Example Test File](#example-test-file)
+  - [Running Tests](#running-tests)
+- [Code Quality](#code-quality)
+  - [Linting and Formatting](#linting-and-formatting)
+  - [Pre-commit Hooks](#pre-commit-hooks)
+- [Commit Guidelines](#commit-guidelines)
+- [Developer's Certificate of Origin 1.1](#developers-certificate-of-origin-11)
 
-1. Click the fork button in the top right to clone the [Node.js `api-docs-tooling` Repository](https://github.com/nodejs/api-docs-tooling/fork)
+## Getting Started
 
-2. Clone your fork using SSH, GitHub CLI, or HTTPS.
+The steps below will give you a general idea of how to prepare your local environment for the Node.js `api-docs-tooling` project and general steps for getting things done and landing your contribution.
+
+### Prerequisites
+
+- Node.js (latest LTS version, check the [`.nvmrc` file](/.nvmrc))
+- [Git][]
+- A GitHub account
+
+### Setting Up Your Development Environment
+
+1. **Fork the repository**
+
+   Click the fork button in the top right, or the link in this paragraph, to clone the [Node.js `api-docs-tooling` Repository](https://github.com/nodejs/api-docs-tooling/fork)
+
+2. **Clone your fork**
 
    ```bash
    git clone git@github.com:<YOUR_GITHUB_USERNAME>/api-docs-tooling.git # SSH
@@ -17,13 +48,13 @@ for getting things done and landing your contribution.
    gh repo clone <YOUR_GITHUB_USERNAME>/api-docs-tooling # GitHub CLI
    ```
 
-3. Change into the `api-docs-tooling` directory.
+3. **Navigate to the project directory**
 
    ```bash
    cd api-docs-tooling
    ```
 
-4. Create a remote to keep your fork and local clone up-to-date.
+4. **Set up upstream remote**
 
    ```bash
    git remote add upstream git@github.com:nodejs/api-docs-tooling # SSH
@@ -31,67 +62,202 @@ for getting things done and landing your contribution.
    gh repo sync nodejs/api-docs-tooling # GitHub CLI
    ```
 
-5. Create a new branch for your work.
-
-   ```bash
-   git checkout -b <name-of-your-branch>
-   ```
-
-6. Run the following to install the dependencies.
+5. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-7. Perform your changes.
+## Development Workflow
 
-8. Perform a merge to sync your current branch with the upstream branch.
+### Making Changes
+
+1. **Create a new branch for your work**
+
+   ```bash
+   git checkout -b <name-of-your-branch>
+   ```
+
+2. **Perform your changes**
+
+   Make your code changes, add features, fix bugs, or improve documentation.
+
+3. **Keep your branch up-to-date**
 
    ```bash
    git fetch upstream
    git merge upstream/main
    ```
 
-9. Run `node --run format` and `node --run lint` to confirm that linting and formatting are passing.
+4. **Test your changes**
 
    ```bash
-    node --run format
-    node --run lint
+   node --run test
+   node -- run test:coverage # To check code coverage
    ```
 
-10. Once you're happy with your changes, add and commit them to your branch, then push the branch to your fork.
+5. **Check code quality**
 
-    ```bash
-    cd ~/api-docs-tooling
-    git add .
-    git commit -m "describe your changes"
-    git push -u origin name-of-your-branch
-    ```
+   ```bash
+   node --run format
+   node --run lint
+   ```
 
-> [!IMPORTANT]\
-> Before committing and opening a Pull Request, please go first through our [Commit](#commit-guidelines);
+### Submitting Your Changes
 
-11. Create a Pull Request.
+1. **Add and commit your changes**
 
-## Commit Guidelines
+   ```bash
+   git add .
+   git commit -m "describe your changes"
+   ```
 
-This project follows the [Conventional Commits][] specification.
+2. **Push to your fork**
 
-### Commit Message Guidelines
+   ```bash
+   git push -u origin <name-of-your-branch>
+   ```
 
-- Commit messages must include a "type" as described on Conventional Commits
-- Commit messages **must** start with a capital letter
-- Commit messages **must not** end with a period `.`
+3. **Create a Pull Request**
+
+   Go to your fork on GitHub and create a Pull Request to the main repository.
+
+> [!IMPORTANT]
+> Before committing and opening a Pull Request, please go through our [Commit Guidelines](#commit-guidelines) and ensure your code passes all tests and quality checks.
+
+## Writing Tests
+
+Testing is a crucial part of maintaining code quality and ensuring reliability. All contributions should include appropriate tests.
+
+### Test Coverage
+
+- **Patches (PRs) are required to maintain 80% coverage minimum**
+- **Contributors are encouraged to strive for 95-100% coverage**
+- New features and bug fixes should include corresponding tests
+- Tests should cover both happy path and edge cases
+
+### Test File Organization
+
+Tests should be organized to mirror the source code structure:
+
+- For a source file at `/src/index.mjs`, create a test file at `/src/__tests__/index.test.mjs`
+- For a source file at `/src/utils/parser.mjs`, create a test file at `/src/utils/__tests__/parser.test.mjs`
+- Test files should use the `.test.mjs` extension
+
+- For a fixture used in `/src/__tests__/some.test.mjs`, place the fixture at `/src/__tests__/fixtures/some-fixture.mjs`.
+- When fixtures are used in multiple tests, place them in the test directory of the closest shared ancestor. For instance, if a fixture is used by both `/src/__tests__/some.test.mjs`, and `/src/utils/__tests__/parser.test.mjs`, the fixture belongs in `/src/__tests__/fixtures/`.
+
+### Writing Test Code
+
+Tests should follow these guidelines:
+
+#### Use Node.js Built-in Test Runner
+
+```javascript
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+```
+
+#### Test Structure
+
+Use `describe` and `it` syntax for organizing tests:
+
+```javascript
+describe('MyModule', () => {
+  describe('myFunction', () => {
+    it('should return expected result for valid input', () => {
+      // Test implementation
+      assert.strictEqual(actual, expected);
+    });
+
+    it('should throw error for invalid input', () => {
+      assert.throws(() => {
+        // Code that should throw
+      });
+    });
+  });
+});
+```
+
+#### Best Practices
+
+- **Use strict assertions**: Always use `node:assert/strict` over `node:assert`.
+- **Focused testing**: Tests should ideally only test the specific file they are intended for
+- **Use mocking**: Mock external dependencies to isolate the code under test
+- **Code splitting**: Encourage breaking down complex functionality for easier testing
+
+#### Example Test File
+
+```javascript
+// tests/index.test.mjs
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import { myFunction } from '../index.mjs';
+
+describe('index.mjs', () => {
+  describe('myFunction', () => {
+    it('should process valid input correctly', () => {
+      const input = 'test input';
+      const result = myFunction(input);
+      assert.strictEqual(result, 'expected output');
+    });
+
+    it('should handle edge cases', () => {
+      assert.strictEqual(myFunction(''), '');
+      assert.strictEqual(myFunction(null), null);
+    });
+
+    it('should throw for invalid input', () => {
+      assert.throws(() => myFunction(undefined), {
+        name: 'TypeError',
+        message: 'Input cannot be undefined',
+      });
+    });
+  });
+});
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+node --run test
+
+# Run tests with coverage
+node --run test:coverage
+
+# Run specific test file
+node --test src/test/index.test.mjs
+```
+
+## Code Quality
+
+### Linting and Formatting
+
+This project uses automated code quality tools:
+
+```bash
+# Format code
+node --run format # To apply changes, use `format:write`
+
+# Lint code
+node --run lint # To apply changes, use `lint:fix`
+```
 
 ### Pre-commit Hooks
 
-This project uses [Husky][] for Git pre-commit hooks.
-It's lint and format stages your code before committing.
-You can disable the pre-commit hooks by using the `--no-verify` flag.
+This project uses [Husky][] for Git pre-commit hooks that automatically lint and format your code before committing.
+
+You can bypass pre-commit hooks if necessary (not recommended):
 
 ```bash
 git commit -m "describe your changes" --no-verify
 ```
+
+## Commit Guidelines
+
+This project follows the [Conventional Commits][] specification.
 
 ## Developer's Certificate of Origin 1.1
 
@@ -114,5 +280,5 @@ By contributing to this project, I certify that:
 ```
 
 [Conventional Commits]: https://www.conventionalcommits.org/
-[Commit Signing]: https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits
+[Git]: https://git-scm.com/downloads
 [Husky]: https://typicode.github.io/husky/
