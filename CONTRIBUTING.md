@@ -93,7 +93,7 @@ The steps below will give you a general idea of how to prepare your local enviro
 
    ```bash
    node --run test
-   node -- run test:coverage # To check code coverage
+   node --run test:coverage # To check code coverage
    ```
 
 5. **Check code quality**
