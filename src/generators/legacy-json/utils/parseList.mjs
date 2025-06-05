@@ -14,7 +14,7 @@ import { transformNodesToString } from '../../../utils/unist.mjs';
  * @param {string} string
  * @returns {string}
  */
-function transformTypeReferences(string) {
+export function transformTypeReferences(string) {
   return string.replace(/`<([^>]+)>`/g, '{$1}').replaceAll('} | {', '|');
 }
 
@@ -26,7 +26,7 @@ function transformTypeReferences(string) {
  * @param {Object} current
  * @returns {string}
  */
-const extractPattern = (text, pattern, key, current) => {
+export const extractPattern = (text, pattern, key, current) => {
   const match = text.match(pattern)?.[1]?.trim().replace(/\.$/, '');
 
   if (!match) {
@@ -43,7 +43,7 @@ const extractPattern = (text, pattern, key, current) => {
  * @param {import('@types/mdast').ListItem} child
  * @returns {import('../types').ParameterList}
  */
-function parseListItem(child) {
+export function parseListItem(child) {
   const current = {};
 
   // Extract and clean raw text from the node, excluding nested lists
