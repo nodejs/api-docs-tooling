@@ -1,12 +1,13 @@
 import { deepStrictEqual, strictEqual } from 'node:assert';
 import { spawnSync } from 'node:child_process';
 import { execPath } from 'node:process';
-import { describe, it, mock } from 'node:test';
+import { describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import dedent from 'dedent';
 
 import { invalidChangeVersion } from '../invalid-change-version.mjs';
+import { createContext } from './utils.mjs';
 
 describe('invalidChangeVersion', () => {
   it('should not report if all change versions are non-empty', () => {
@@ -20,19 +21,12 @@ changes:
   - version: v5.0.0
 -->`;
 
-    const context = {
-      tree: {
-        type: 'root',
-        children: [
-          {
-            type: 'html',
-            value: yamlContent,
-          },
-        ],
+    const context = createContext([
+      {
+        type: 'html',
+        value: yamlContent,
       },
-      report: mock.fn(),
-      getIssues: mock.fn(),
-    };
+    ]);
 
     invalidChangeVersion(context);
 
@@ -50,23 +44,16 @@ changes:
   - version:
 -->`;
 
-    const context = {
-      tree: {
-        type: 'root',
-        children: [
-          {
-            type: 'html',
-            value: yamlContent,
-            position: {
-              start: { line: 1, column: 1, offset: 1 },
-              end: { line: 1, column: 1, offset: 1 },
-            },
-          },
-        ],
+    const context = createContext([
+      {
+        type: 'html',
+        value: yamlContent,
+        position: {
+          start: { line: 1, column: 1, offset: 1 },
+          end: { line: 1, column: 1, offset: 1 },
+        },
       },
-      report: mock.fn(),
-      getIssues: mock.fn(),
-    };
+    ]);
 
     invalidChangeVersion(context);
 
@@ -126,19 +113,12 @@ changes:
   - version: v5.0.0
 -->`;
 
-    const context = {
-      tree: {
-        type: 'root',
-        children: [
-          {
-            type: 'html',
-            value: yamlContent,
-          },
-        ],
+    const context = createContext([
+      {
+        type: 'html',
+        value: yamlContent,
       },
-      report: mock.fn(),
-      getIssues: mock.fn(),
-    };
+    ]);
 
     invalidChangeVersion(context);
 
@@ -156,23 +136,16 @@ changes:
   - version: v5.0.0
 -->`;
 
-    const context = {
-      tree: {
-        type: 'root',
-        children: [
-          {
-            type: 'html',
-            value: yamlContent,
-            position: {
-              start: { column: 1, line: 7, offset: 103 },
-              end: { column: 35, line: 7, offset: 137 },
-            },
-          },
-        ],
+    const context = createContext([
+      {
+        type: 'html',
+        value: yamlContent,
+        position: {
+          start: { column: 1, line: 7, offset: 103 },
+          end: { column: 35, line: 7, offset: 137 },
+        },
       },
-      report: mock.fn(),
-      getIssues: mock.fn(),
-    };
+    ]);
 
     invalidChangeVersion(context);
     strictEqual(context.report.mock.callCount(), 1);
@@ -200,23 +173,16 @@ changes:
   - version: v5.0.0
 -->`;
 
-    const context = {
-      tree: {
-        type: 'root',
-        children: [
-          {
-            type: 'html',
-            value: yamlContent,
-            position: {
-              start: { column: 1, line: 7, offset: 103 },
-              end: { column: 35, line: 7, offset: 137 },
-            },
-          },
-        ],
+    const context = createContext([
+      {
+        type: 'html',
+        value: yamlContent,
+        position: {
+          start: { column: 1, line: 7, offset: 103 },
+          end: { column: 35, line: 7, offset: 137 },
+        },
       },
-      report: mock.fn(),
-      getIssues: mock.fn(),
-    };
+    ]);
 
     invalidChangeVersion(context);
     strictEqual(context.report.mock.callCount(), 1);

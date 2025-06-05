@@ -2,8 +2,7 @@
 
 import { duplicateStabilityNodes } from './duplicate-stability-nodes.mjs';
 import { invalidChangeVersion } from './invalid-change-version.mjs';
-import { missingIntroducedIn } from './missing-introduced-in.mjs';
-import { missingLlmDescription } from './missing-llm-description.mjs';
+import { missingMetadata } from './missing-metadata.mjs';
 
 /**
  * @type {Record<string, import('../types').LintRule>}
@@ -11,6 +10,5 @@ import { missingLlmDescription } from './missing-llm-description.mjs';
 export default {
   'duplicate-stability-nodes': duplicateStabilityNodes,
   'invalid-change-version': invalidChangeVersion,
-  'missing-introduced-in': missingIntroducedIn,
-  'missing-llm-description': missingLlmDescription,
+  'missing-metadata': missingMetadata,
 };
