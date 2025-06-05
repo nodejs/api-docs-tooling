@@ -4,7 +4,7 @@ import { find } from 'unist-util-find';
 import { findBefore } from 'unist-util-find-before';
 
 import {
-  INTRDOCUED_IN_REGEX,
+  INTRODUCED_IN_REGEX,
   LINT_MESSAGES,
   LLM_DESCRIPTION_REGEX,
 } from '../constants.mjs';
@@ -25,7 +25,7 @@ const findTopLevelEntry = (node, condition) => {
 const METADATA_CHECKS = Object.freeze([
   {
     name: 'introducedIn',
-    regex: INTRDOCUED_IN_REGEX,
+    regex: INTRODUCED_IN_REGEX,
     level: 'info',
     message: LINT_MESSAGES.missingIntroducedIn,
   },
