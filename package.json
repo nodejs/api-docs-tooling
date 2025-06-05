@@ -34,7 +34,7 @@
     "eslint-plugin-jsdoc": "^50.6.17",
     "globals": "^16.2.0",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.1",
+    "lint-staged": "^16.1.0",
     "prettier": "3.5.3"
   },
   "dependencies": {
