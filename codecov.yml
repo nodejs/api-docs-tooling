@@ -1,0 +1,18 @@
+coverage:
+  # https://docs.codecov.com/docs/commit-status
+  status:
+    patch:
+      default:
+        # TODO(@avivkeller): Once our coverage > 80%,
+        # remove this, since we can easily rely on
+        # project coverage to cover patches as well
+        target: 80%
+    project:
+      default:
+        # TODO(@avivkeller): Once our coverage > 50%,
+        # increase this to 50%, and increase on increments
+        target: 40%
+
+ignore:
+  - 'eslint.config.mjs'
+  - '**/fixtures/'
