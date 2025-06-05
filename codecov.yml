@@ -4,7 +4,8 @@ coverage:
     patch:
       default:
         # TODO(@avivkeller): Once our coverage > 80%,
-        # increase this to 80%, and move it to `default_rules`
+        # remove this, since we can easily rely on
+        # project coverage to cover patches as well
         target: 80%
     project:
       default:
@@ -13,5 +14,5 @@ coverage:
         target: 40%
 
 ignore:
-  - "eslint.config.mjs"
-  - "**/fixtures/"
+  - 'eslint.config.mjs'
+  - '**/fixtures/'
