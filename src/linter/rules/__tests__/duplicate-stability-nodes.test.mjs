@@ -1,8 +1,9 @@
 import { deepStrictEqual, strictEqual } from 'node:assert';
-import { describe, it, mock } from 'node:test';
+import { describe, it } from 'node:test';
 
 import { LINT_MESSAGES } from '../../constants.mjs';
 import { duplicateStabilityNodes } from '../duplicate-stability-nodes.mjs';
+import { createContext } from './utils.mjs';
 
 // Mock data structure for creating test entries
 const createStabilityNode = (value, line = 1, column = 1) => ({
@@ -37,15 +38,6 @@ const createHeadingNode = (depth, line = 1, column = 1) => ({
     start: { line, column },
     end: { line, column: column + 10 },
   },
-});
-
-const createContext = (nodes, path = 'file.md') => ({
-  tree: {
-    type: 'root',
-    children: nodes,
-  },
-  path,
-  report: mock.fn(),
 });
 
 describe('duplicateStabilityNodes', () => {

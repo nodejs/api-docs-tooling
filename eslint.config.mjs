@@ -65,7 +65,7 @@ export default [
   },
   // Override rules for test files to disable JSDoc rules
   {
-    files: ['src/**/*.test.mjs'],
+    files: ['**/__tests__/**'],
     rules: {
       'jsdoc/check-alignment': 'off',
       'jsdoc/check-indentation': 'off',
