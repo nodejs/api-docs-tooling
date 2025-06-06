@@ -45,7 +45,7 @@
     "@clack/prompts": "^0.11.0",
     "@heroicons/react": "^2.2.0",
     "@node-core/rehype-shiki": "1.0.1-1ccb8ae3260e261531c3f44674b8a98ff8918c30",
-    "@node-core/ui-components": "1.0.1-76b9440b92d63dfcc72150e14795f6958c55c2ce",
+    "@node-core/ui-components": "1.0.1-0bb5d49b96e1f11e1ef6cf965861929693053ca6",
     "@orama/orama": "^3.1.7",
     "@orama/plugin-data-persistence": "^3.1.7",
     "@orama/react-components": "^0.8.0",

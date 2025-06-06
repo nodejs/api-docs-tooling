@@ -1,3 +1,4 @@
+import Select from '@node-core/ui-components/Common/Select/index.js';
 import SideBar from '@node-core/ui-components/Containers/SideBar';
 import { useEffect, useState } from 'react';
 
@@ -26,16 +27,20 @@ const getCurrentDoc = () => {
 };
 
 /**
+ * Redirect to a URL
+ * @param {string} url URL
+ */
+const redirect = url => (window.location.href = url);
+
+/**
  * Sidebar component for MDX documentation with version selection and page navigation
  * @param {SideBarProps} props - Component props
- * @param {Array<string>} props.versions - Available documentation versions
+ * @param {Array<{ value: string, label: string }>} props.versions - Available documentation versions
  * @param {string} props.currentVersion - Currently selected version
  * @param {Array<DocPage>} props.docPages - Documentation pages structure
  * @returns {JSX.Element} The rendered sidebar component
  */
-export default function DocumentationSideBar({
-  /* versions, currentVersion, */ docPages,
-}) {
+export default ({ versions, currentVersion, docPages }) => {
   const [pathname, setPathname] = useState(CLIENT ? getCurrentDoc() : '');
 
   useEffect(() => {
@@ -54,12 +59,15 @@ export default function DocumentationSideBar({
   }));
 
   return (
-    <SideBar
-      pathname={pathname}
-      groups={groups}
-      onSelect={url => {
-        window.location.href = url;
-      }}
-    />
+    <SideBar pathname={pathname} groups={groups} onSelect={redirect}>
+      <div>
+        <Select
+          label="Node.js version"
+          values={versions}
+          placeholder={currentVersion}
+          onChange={redirect}
+        />
+      </div>
+    </SideBar>
   );
-}
+};
