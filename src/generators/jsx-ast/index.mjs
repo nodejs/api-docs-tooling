@@ -2,6 +2,8 @@ import { buildSideBarDocPages } from './utils/buildBarProps.mjs';
 import buildContent from './utils/buildContent.mjs';
 import {
   getCompatibleVersions,
+  getVersionFromSemVer,
+  getVersionURL,
   groupNodesByModule,
 } from '../../utils/generators.mjs';
 import { getRemarkRecma } from '../../utils/remark.mjs';
@@ -48,9 +50,14 @@ export default {
         );
 
         const sideBarProps = {
-          versions: versions.map(({ version }) => `v${version.version}`),
+          versions: versions.map(({ version }) => {
+            const parsed = getVersionFromSemVer(version);
+            return {
+              value: getVersionURL(parsed, entry.api),
+              label: `v${parsed}`,
+            };
+          }),
           currentVersion: `v${version.version}`,
-          currentPage: `${entry.api}.html`,
           docPages,
         };
 

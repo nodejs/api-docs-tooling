@@ -16,3 +16,7 @@ coverage:
 ignore:
   - 'eslint.config.mjs'
   - '**/fixtures/'
+  # These are browser-specific implementations
+  - 'src/generators/legacy-html/assets'
+  # These components have been tested in `nodejs/nodejs.org`
+  - 'src/generators/web/client'

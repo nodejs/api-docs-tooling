@@ -1,0 +1,7 @@
+@import '@node-core/ui-components/styles/index.css';
+
+.has-datatag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

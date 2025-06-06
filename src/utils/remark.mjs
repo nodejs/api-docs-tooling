@@ -1,6 +1,6 @@
 'use strict';
 
-import rehypeShikiji from '@node-core/rehype-shiki';
+import rehypeShikiji from '@node-core/rehype-shiki/plugin';
 import recmaJsx from 'recma-jsx';
 import rehypeRecma from 'rehype-recma';
 import rehypeStringify from 'rehype-stringify';

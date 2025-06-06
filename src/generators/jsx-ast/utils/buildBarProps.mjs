@@ -18,7 +18,7 @@ export const buildSideBarDocPages = (groupedModules, headNodes) =>
       doc: `${node.api}.html`,
       headings: moduleEntries
         .filter(entry => entry.heading?.data?.name && entry.heading.depth === 2)
-        .map(entry => [entry.heading.data.name, `#${entry.heading.data.slug}`]),
+        .map(entry => [entry.heading.data.name, entry.heading.data.slug]),
     };
   });
 
@@ -42,13 +42,17 @@ export const buildMetaBarProps = (head, entries) => {
     .map(entry => ({
       depth: entry.heading.depth,
       value: entry.heading.data.name,
+      slug: entry.heading.data.slug,
     }));
 
   return {
     headings,
     addedIn: head.introduced_in || head.added_in || '',
     readingTime: readingTime(textContent).text,
-    viewAs: [['JSON', `${head.api}.json`]],
+    viewAs: [
+      ['JSON', `${head.api}.json`],
+      ['MD', `${head.api}.md`],
+    ],
     editThisPage: `${DOC_API_BLOB_EDIT_BASE_URL}${head.api}.md`,
   };
 };
