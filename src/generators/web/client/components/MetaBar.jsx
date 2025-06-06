@@ -1,4 +1,4 @@
-import { CodeBracketIcon, DocumentIcon  } from '@heroicons/react/24/outline';
+import { CodeBracketIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import MetaBar from '@node-core/ui-components/Containers/MetaBar';
 import GitHubIcon from '@node-core/ui-components/Icons/Social/GitHub';
 import { useEffect, useState } from 'react';
