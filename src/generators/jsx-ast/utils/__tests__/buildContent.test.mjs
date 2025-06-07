@@ -1,9 +1,17 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import { visit } from 'unist-util-visit';
+
 import { SAMPLE } from './utils.mjs';
 import { JSX_IMPORTS } from '../../../web/constants.mjs';
 import buildContent from '../buildContent.mjs';
+
+const expectedNames = [
+  JSX_IMPORTS.NavBar.name,
+  JSX_IMPORTS.Article.name,
+  JSX_IMPORTS.SideBar.name,
+];
 
 describe('buildContent', () => {
   it('should process entries and include JSX wrapper elements', () => {
@@ -12,16 +20,20 @@ describe('buildContent', () => {
       SAMPLE,
       {},
       {
-        runSync: x => ({
-          body: [{ expression: x }],
-        }),
+        runSync: x => ({ body: [{ expression: x }] }),
       }
     );
 
-    assert.deepStrictEqual(
-      tree.children.map(child => child.name),
-      [JSX_IMPORTS.NavBar.name, JSX_IMPORTS.Article.name]
-    );
+    const foundNames = [];
+    visit(tree, node => node.name && foundNames.push(node.name));
+
+    expectedNames.forEach(name => {
+      assert(
+        foundNames.includes(name),
+        `Missing "${name}". Found: ${foundNames.join(', ')}`
+      );
+    });
+
     assert.equal(tree.data, SAMPLE);
   });
 });
