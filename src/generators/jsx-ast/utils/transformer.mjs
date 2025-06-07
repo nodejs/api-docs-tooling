@@ -1,6 +1,6 @@
 import { visit } from 'unist-util-visit';
 
-import { TYPE_TRANSFORMS, TAG_TRANSFORMS } from '../constants.mjs';
+import { TAG_TRANSFORMS } from '../constants.mjs';
 
 /**
  * @template {import('unist').Node} T
@@ -8,20 +8,24 @@ import { TYPE_TRANSFORMS, TAG_TRANSFORMS } from '../constants.mjs';
  * @returns {T}
  */
 const transformer = tree => {
-  visit(tree, ['raw', 'element'], node => {
-    // TODO(@avivkeller): Our parsers shouldn't return raw nodes
-    // when they mistake "<Type>" for an HTML node, rather, they
-    // should return the string type that it is.
-    node.type =
-      node.type in TYPE_TRANSFORMS ? TYPE_TRANSFORMS[node.type] : node.type;
-    node.tagName =
-      node.tagName in TAG_TRANSFORMS
-        ? TAG_TRANSFORMS[node.tagName]
-        : node.tagName;
+  visit(tree, 'element', node => {
+    node.tagName = TAG_TRANSFORMS[node.tagName] || node.tagName;
   });
+
+  // Are there footnotes?
+  if (tree.children.at(-1).tagName === 'section') {
+    const section = tree.children.pop();
+    // If so, move it into the proper location
+    // Root -> Article -> Main content
+    tree.children[2]?.children[1]?.children[0]?.children?.push(
+      ...section.children
+    );
+  }
 };
 
 /**
  * Transforms elements in a syntax tree by replacing tag names according to the mapping.
+ *
+ * Also moves any generated root section into its proper location in the AST.
  */
 export default () => transformer;

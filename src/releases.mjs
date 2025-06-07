@@ -10,6 +10,9 @@ const NODE_VERSIONS_REGEX = /\* \[Node\.js ([0-9.]+)\]\S+ (.*)\r?\n/g;
 // A ReGeX for checking if a Node.js version is an LTS release
 const NODE_LTS_VERSION_REGEX = /Long Term Support/i;
 
+// A ReGeX for checking if a Node.js version is the Current release
+const NODE_CURRENT_VERSION_REGEX = /Current/i;
+
 /**
  * Retrieves the Node.js CHANGELOG.md via a Network Request,
  * used when a non-file protocol is provided
@@ -56,6 +59,7 @@ const createNodeReleases = changelogPath => {
     return nodeMajors.map(match => ({
       version: coerce(match[1]),
       isLts: NODE_LTS_VERSION_REGEX.test(match[2]),
+      isCurrent: NODE_CURRENT_VERSION_REGEX.test(match[2]),
     }));
   };
 

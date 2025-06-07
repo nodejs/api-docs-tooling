@@ -13,6 +13,7 @@ import llmsTxt from './llms-txt/index.mjs';
 import manPage from './man-page/index.mjs';
 import metadata from './metadata/index.mjs';
 import oramaDb from './orama-db/index.mjs';
+import web from './web/index.mjs';
 
 export const publicGenerators = {
   'json-simple': jsonSimple,
@@ -25,13 +26,14 @@ export const publicGenerators = {
   'api-links': apiLinks,
   'orama-db': oramaDb,
   'llms-txt': llmsTxt,
-  'jsx-ast': jsxAst,
+  web,
 };
 
-// These are a bit special: we don't want them to run unless needed,
-// and we also don't want them publicly accessible via the CLI.
+// These ones are special since they don't produce standard output,
+// and hence, we don't expose them to the CLI.
 const internalGenerators = {
   metadata,
+  'jsx-ast': jsxAst,
   'ast-js': astJs,
 };
 
