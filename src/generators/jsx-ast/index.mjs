@@ -1,4 +1,3 @@
-import { buildSideBarDocPages } from './utils/buildBarProps.mjs';
 import buildContent from './utils/buildContent.mjs';
 import {
   getCompatibleVersions,
@@ -38,7 +37,10 @@ export default {
       .sort((a, b) => a.heading.data.name.localeCompare(b.heading.data.name));
 
     // Generate table of contents
-    const docPages = buildSideBarDocPages(groupedModules, headNodes);
+    const docPages = headNodes.map(node => [
+      node.heading.data.name,
+      `${node.api}.html`,
+    ]);
 
     // Process each head node and build content
     const results = await Promise.all(
@@ -58,6 +60,7 @@ export default {
             };
           }),
           currentVersion: `v${version.version}`,
+          pathname: `${entry.api}.html`,
           docPages,
         };
 

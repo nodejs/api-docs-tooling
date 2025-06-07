@@ -31,13 +31,6 @@ export const TAG_TRANSFORMS = {
 };
 
 /**
- * @see transformer.mjs's TODO comment
- */
-export const TYPE_TRANSFORMS = {
-  raw: 'text',
-};
-
-/**
  * API lifecycle change labels
  */
 export const LIFECYCLE_LABELS = {

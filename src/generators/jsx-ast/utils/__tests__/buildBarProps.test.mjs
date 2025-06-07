@@ -2,21 +2,9 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { SAMPLE } from './utils.mjs';
-import { buildSideBarDocPages, buildMetaBarProps } from '../buildBarProps.mjs';
+import { buildMetaBarProps } from '../buildBarProps.mjs';
 
 describe('buildBarProps utilities', () => {
-  describe('buildSideBarDocPages', () => {
-    it('should return expected format', () => {
-      const grouped = new Map([['sample-api', [SAMPLE]]]);
-      const result = buildSideBarDocPages(grouped, [SAMPLE]);
-
-      assert.equal(result.length, 1);
-      assert.equal(result[0].title, 'SampleFunc');
-      assert.equal(result[0].doc, 'sample-api.html');
-      assert.deepEqual(result[0].headings, [['SampleFunc', 'sample-func']]);
-    });
-  });
-
   describe('buildMetaBarProps', () => {
     it('should include expected fields', () => {
       const result = buildMetaBarProps(SAMPLE, [SAMPLE]);

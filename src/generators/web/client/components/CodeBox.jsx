@@ -50,7 +50,7 @@ export default ({ className, ...props }) => {
       onCopy={handleCopy}
       language={getLanguageDisplayName(language)}
       {...props}
-      copyText={copyText}
+      buttonText={copyText}
     />
   );
 };

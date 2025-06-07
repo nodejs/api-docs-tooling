@@ -4,25 +4,6 @@ import { visit } from 'unist-util-visit';
 import { DOC_API_BLOB_EDIT_BASE_URL } from '../../../constants.mjs';
 
 /**
- * Builds sidebar navigation for API documentation pages
- *
- * @param {Map<string, Array<ApiDocMetadataEntry>>} groupedModules - Modules grouped by API
- * @param {Array<ApiDocMetadataEntry>} headNodes - Main entry nodes for each API
- */
-export const buildSideBarDocPages = (groupedModules, headNodes) =>
-  headNodes.map(node => {
-    const moduleEntries = groupedModules.get(node.api);
-
-    return {
-      title: node.heading.data.name,
-      doc: `${node.api}.html`,
-      headings: moduleEntries
-        .filter(entry => entry.heading?.data?.name && entry.heading.depth === 2)
-        .map(entry => [entry.heading.data.name, entry.heading.data.slug]),
-    };
-  });
-
-/**
  * Builds metadata for the sidebar and meta bar
  *
  * @param {ApiDocMetadataEntry} head - Main API metadata entry
@@ -38,10 +19,14 @@ export const buildMetaBarProps = (head, entries) => {
   }, '');
 
   const headings = entries
-    .filter(entry => entry.heading?.data?.name)
+    .filter(
+      entry => entry.heading?.data?.text && entry.heading?.data?.depth < 3
+    )
     .map(entry => ({
       depth: entry.heading.depth,
-      value: entry.heading.data.name,
+      // TODO(@avivkeller): This should strip the `Type:` prefix,
+      // and maybe also be HTML?
+      value: entry.heading.data.text.replace(/`/g, ''),
       slug: entry.heading.data.slug,
     }));
 
