@@ -9,14 +9,23 @@ import { TAG_TRANSFORMS } from '../constants.mjs';
  */
 const transformer = tree => {
   visit(tree, 'element', node => {
-    node.tagName =
-      node.tagName in TAG_TRANSFORMS
-        ? TAG_TRANSFORMS[node.tagName]
-        : node.tagName;
+    node.tagName = TAG_TRANSFORMS[node.tagName] || node.tagName;
   });
+
+  // Are there footnotes?
+  if (tree.children.at(-1).tagName === 'section') {
+    const section = tree.children.pop();
+    // If so, move it into the proper location
+    // Root -> Article -> Main content
+    tree.children[2]?.children[1]?.children[0]?.children?.push(
+      ...section.children
+    );
+  }
 };
 
 /**
  * Transforms elements in a syntax tree by replacing tag names according to the mapping.
+ *
+ * Also moves any generated root section into its proper location in the AST.
  */
 export default () => transformer;
