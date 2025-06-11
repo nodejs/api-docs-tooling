@@ -62,6 +62,7 @@ const isInvalid = NODE_RELEASED_VERSIONS
       !(isValidReplaceMe(version.value, length) || valid(version.value));
 
 /**
+ * Validates and extracts versions of a change node
  *
  * @param {object} root0
  * @param {import('../types.d.ts').LintContext} root0.context
@@ -77,7 +78,7 @@ export const extractVersions = ({ context, node, report }) => {
       )
     );
 
-    return;
+    return [];
   }
 
   const versionNode = findPropertyByName(node, 'version');
@@ -85,7 +86,7 @@ export const extractVersions = ({ context, node, report }) => {
   if (!versionNode) {
     context.report(report(LINT_MESSAGES.missingChangeVersion, node));
 
-    return;
+    return [];
   }
 
   return normalizeNode(versionNode.value);
@@ -134,13 +135,7 @@ export const invalidChangeVersion = context => {
     }
 
     changesNode.value.items.forEach(node => {
-      const versions = extractVersions({ context, node, report });
-
-      if (!versions) {
-        return;
-      }
-
-      versions
+      extractVersions({ context, node, report })
         .filter(Boolean) // Filter already reported empt items,
         .filter(isInvalid)
         .forEach(version =>

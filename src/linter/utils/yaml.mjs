@@ -17,7 +17,7 @@ export const findPropertyByName = (node, propertyName) => {
       return;
     }
 
-    return pair.key.value == propertyName;
+    return pair.key.value === propertyName;
   });
 };
 
