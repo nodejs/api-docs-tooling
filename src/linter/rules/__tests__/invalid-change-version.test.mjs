@@ -69,9 +69,11 @@ changes:
 
     strictEqual(context.report.mock.callCount(), 2);
 
-    const first_call = context.report.mock.calls[0];
+    const callArguments = context.report.mock.calls.flatMap(
+      call => call.arguments
+    );
 
-    deepStrictEqual(first_call.arguments, [
+    deepStrictEqual(callArguments, [
       {
         level: 'error',
         message: 'Missing version field in the API doc entry',
@@ -80,11 +82,6 @@ changes:
           end: { line: 3 },
         },
       },
-    ]);
-
-    const second_call = context.report.mock.calls[1];
-
-    deepStrictEqual(second_call.arguments, [
       {
         level: 'error',
         message: 'Missing version field in the API doc entry',

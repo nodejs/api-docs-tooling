@@ -46,20 +46,20 @@ const isIgnoredVersion = version => {
 /**
  * Determines if a given version is invalid.
  *
- * @param {Scalar} version - The version to check.
+ * @param {import('yaml').Scalar} version - The version to check.
  * @param {unknown} _ - Unused parameter.
  * @param {{ length: number }} context - Array containing the length property.
  * @returns {boolean} True if the version is invalid, otherwise false.
  */
 const isInvalid = NODE_RELEASED_VERSIONS
-  ? (version, _, { length }) =>
+  ? ({ value }, _, { length }) =>
       !(
-        isValidReplaceMe(version.value, length) ||
-        isIgnoredVersion(version.value) ||
-        NODE_RELEASED_VERSIONS.includes(version.value.replace(/^v/, ''))
+        isValidReplaceMe(value, length) ||
+        isIgnoredVersion(value) ||
+        NODE_RELEASED_VERSIONS.includes(value.replace(/^v/, ''))
       )
-  : (version, _, { length }) =>
-      !(isValidReplaceMe(version.value, length) || valid(version.value));
+  : ({ value }, _, { length }) =>
+      !(isValidReplaceMe(value, length) || valid(value));
 
 /**
  * Validates and extracts versions of a change node
@@ -67,12 +67,12 @@ const isInvalid = NODE_RELEASED_VERSIONS
  * @param {object} root0
  * @param {import('../types.d.ts').LintContext} root0.context
  * @param {import('yaml').Node} root0.node
- * @param {(message: string, node: import('yaml').Node<unknown>) => import('../types.d.ts').IssueDescriptor} root0.report
+ * @param {(message: string, node: import('yaml').Node<unknown>) => import('../types.d.ts').IssueDescriptor} root0.createYamlIssue
  */
-export const extractVersions = ({ context, node, report }) => {
+export const extractVersions = ({ context, node, createYamlIssue }) => {
   if (!isMap(node)) {
     context.report(
-      report(
+      createYamlIssue(
         LINT_MESSAGES.invalidChangeProperty.replace('{{type}}', node.type),
         node
       )
@@ -84,7 +84,7 @@ export const extractVersions = ({ context, node, report }) => {
   const versionNode = findPropertyByName(node, 'version');
 
   if (!versionNode) {
-    context.report(report(LINT_MESSAGES.missingChangeVersion, node));
+    context.report(createYamlIssue(LINT_MESSAGES.missingChangeVersion, node));
 
     return [];
   }
@@ -107,7 +107,7 @@ export const invalidChangeVersion = context => {
     const lineCounter = new LineCounter();
     const document = parseDocument(normalizedYaml, { lineCounter });
 
-    const report = createYamlIssueReporter(node, lineCounter);
+    const createYamlIssue = createYamlIssueReporter(node, lineCounter);
 
     // Skip if yaml isn't a mapping
     if (!isMap(document.contents)) {
@@ -124,7 +124,7 @@ export const invalidChangeVersion = context => {
     // Validate changes node is a sequence
     if (!isSeq(changesNode.value)) {
       return context.report(
-        report(
+        createYamlIssue(
           LINT_MESSAGES.invalidChangeProperty.replace(
             '{{type}}',
             changesNode.value.type
@@ -135,12 +135,12 @@ export const invalidChangeVersion = context => {
     }
 
     changesNode.value.items.forEach(node => {
-      extractVersions({ context, node, report })
+      extractVersions({ context, node, createYamlIssue })
         .filter(Boolean) // Filter already reported empt items,
         .filter(isInvalid)
         .forEach(version =>
           context.report(
-            report(
+            createYamlIssue(
               version?.value
                 ? LINT_MESSAGES.invalidChangeVersion.replace(
                     '{{version}}',
