@@ -76,8 +76,8 @@ changes:
         level: 'error',
         message: 'Missing version field in the API doc entry',
         position: {
-          start: { line: 4 },
-          end: { line: 4 },
+          start: { line: 3 },
+          end: { line: 3 },
         },
       },
     ]);
@@ -89,8 +89,8 @@ changes:
         level: 'error',
         message: 'Missing version field in the API doc entry',
         position: {
-          start: { line: 3 },
-          end: { line: 3 },
+          start: { line: 4 },
+          end: { line: 4 },
         },
       },
     ]);

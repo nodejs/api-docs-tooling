@@ -72,12 +72,12 @@ export const extractVersions = ({ context, node, report }) => {
   if (!isMap(node)) {
     context.report(
       report(
-        LINT_MESSAGES.invalidChangeProperty.replace('{{type}}', node.NODE_TYPE),
+        LINT_MESSAGES.invalidChangeProperty.replace('{{type}}', node.type),
         node
       )
     );
 
-    return null;
+    return;
   }
 
   const versionNode = findPropertyByName(node, 'version');
@@ -85,7 +85,7 @@ export const extractVersions = ({ context, node, report }) => {
   if (!versionNode) {
     context.report(report(LINT_MESSAGES.missingChangeVersion, node));
 
-    return null;
+    return;
   }
 
   return normalizeNode(versionNode.value);
@@ -126,16 +126,22 @@ export const invalidChangeVersion = context => {
         report(
           LINT_MESSAGES.invalidChangeProperty.replace(
             '{{type}}',
-            changesNode.value.NODE_TYPE
+            changesNode.value.type
           ),
           changesNode.key
         )
       );
     }
 
-    changesNode.value.items.forEach(node =>
-      extractVersions({ context, node, report })
-        .filter(Boolean) // Filter already reported empt items
+    changesNode.value.items.forEach(node => {
+      const versions = extractVersions({ context, node, report });
+
+      if (!versions) {
+        return;
+      }
+
+      versions
+        .filter(Boolean) // Filter already reported empt items,
         .filter(isInvalid)
         .forEach(version =>
           context.report(
@@ -149,7 +155,7 @@ export const invalidChangeVersion = context => {
               version
             )
           )
-        )
-    );
+        );
+    });
   });
 };
