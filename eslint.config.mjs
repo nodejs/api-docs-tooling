@@ -12,6 +12,7 @@ export default [
   {
     files: ['**/*.mjs'],
     rules: {
+      'object-shorthand': 'error',
       'import-x/namespace': 'off',
       'import-x/no-named-as-default': 'off',
       'import-x/no-named-as-default-member': 'off',
@@ -39,7 +40,7 @@ export default [
   {
     files: ['src/**/*.mjs', 'bin/**/*.mjs'],
     plugins: {
-      jsdoc: jsdoc,
+      jsdoc,
     },
     languageOptions: {
       ecmaVersion: 'latest',
