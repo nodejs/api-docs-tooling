@@ -322,4 +322,61 @@ changes:
       },
     ]);
   });
+
+  it("should skip validations if yaml root node isn't a mapping", () => {
+    const yamlContent = dedent`
+<!-- YAML
+- abc
+- def
+-->`;
+
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: yamlContent,
+            position: {
+              start: { column: 1, line: 7, offset: 103 },
+              end: { column: 35, line: 7, offset: 137 },
+            },
+          },
+        ],
+      },
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
+
+    invalidChangeVersion(context);
+    strictEqual(context.report.mock.callCount(), 0);
+  });
+
+  it('should skip validations if changes node is missing', () => {
+    const yamlContent = dedent`
+<!-- YAML
+added: v0.1.91
+-->`;
+
+    const context = {
+      tree: {
+        type: 'root',
+        children: [
+          {
+            type: 'html',
+            value: yamlContent,
+            position: {
+              start: { column: 1, line: 7, offset: 103 },
+              end: { column: 35, line: 7, offset: 137 },
+            },
+          },
+        ],
+      },
+      report: mock.fn(),
+      getIssues: mock.fn(),
+    };
+
+    invalidChangeVersion(context);
+    strictEqual(context.report.mock.callCount(), 0);
+  });
 });
