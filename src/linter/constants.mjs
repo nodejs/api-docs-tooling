@@ -1,6 +1,6 @@
 'use strict';
 
-export const INTRDOCUED_IN_REGEX = /<!--\s?introduced_in=.*-->/;
+export const INTRODUCED_IN_REGEX = /<!--\s?introduced_in=.*-->/;
 
 export const LLM_DESCRIPTION_REGEX = /<!--\s?llm_description=.*-->/;
 
