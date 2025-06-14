@@ -16,7 +16,7 @@ import createQueries from '../queries/index.mjs';
 /**
  * Extracts raw YAML content from a node
  *
- * @param {import('mdast').Html} node A HTML node containing the YAML content
+ * @param {import('mdast').Node} node A HTML node containing the YAML content
  * @returns {string} The extracted raw YAML content
  */
 export const extractYamlContent = node => {
