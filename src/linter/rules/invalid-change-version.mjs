@@ -71,12 +71,7 @@ const isInvalid = NODE_RELEASED_VERSIONS
  */
 export const extractVersions = ({ context, node, createYamlIssue }) => {
   if (!isMap(node)) {
-    context.report(
-      createYamlIssue(
-        LINT_MESSAGES.invalidChangeProperty.replace('{{type}}', node.type),
-        node
-      )
-    );
+    context.report(createYamlIssue(LINT_MESSAGES.invalidChangeProperty, node));
 
     return [];
   }
@@ -124,13 +119,7 @@ export const invalidChangeVersion = context => {
     // Validate changes node is a sequence
     if (!isSeq(changesNode.value)) {
       return context.report(
-        createYamlIssue(
-          LINT_MESSAGES.invalidChangeProperty.replace(
-            '{{type}}',
-            changesNode.value.type
-          ),
-          changesNode.key
-        )
+        createYamlIssue(LINT_MESSAGES.invalidChangeProperty, changesNode.key)
       );
     }
 

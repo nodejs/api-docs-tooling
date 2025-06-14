@@ -6,7 +6,7 @@ export const LLM_DESCRIPTION_REGEX = /<!--\s?llm_description=.*-->/;
 
 export const LINT_MESSAGES = {
   missingIntroducedIn: "Missing 'introduced_in' field in the API doc entry",
-  invalidChangeProperty: 'Invalid change property type: {{type}}',
+  invalidChangeProperty: 'Invalid change property type',
   missingChangeVersion: 'Missing version field in the API doc entry',
   invalidChangeVersion: 'Invalid version number: {{version}}',
   duplicateStabilityNode: 'Duplicate stability node',

@@ -272,7 +272,7 @@ describe('invalidChangeVersion', () => {
     deepStrictEqual(call.arguments, [
       {
         level: 'error',
-        message: 'Invalid change property type: PLAIN',
+        message: 'Invalid change property type',
         position: {
           start: { line: 8 },
           end: { line: 8 },
@@ -314,7 +314,7 @@ describe('invalidChangeVersion', () => {
     deepStrictEqual(call.arguments, [
       {
         level: 'error',
-        message: 'Invalid change property type: PLAIN',
+        message: 'Invalid change property type',
         position: {
           start: { line: 8 },
           end: { line: 8 },
