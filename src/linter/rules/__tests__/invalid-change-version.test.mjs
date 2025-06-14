@@ -11,14 +11,14 @@ import { invalidChangeVersion } from '../invalid-change-version.mjs';
 describe('invalidChangeVersion', () => {
   it('should not report if all change versions are non-empty', () => {
     const yamlContent = dedent`
-<!-- YAML
-changes:
-  - version:
-      - v15.7.0
-      - v14.18.0
-  - version: v6.4.0
-  - version: v5.0.0
--->`;
+      <!-- YAML
+      changes:
+        - version:
+            - v15.7.0
+            - v14.18.0
+        - version: v6.4.0
+        - version: v5.0.0
+      -->`;
 
     const context = {
       tree: {
@@ -41,11 +41,11 @@ changes:
 
   it('should report an issue if a change version is missing', () => {
     const yamlContent = dedent`
-<!-- YAML
-changes:
-  - version:
-  - pr-url: https://github.com/nodejs/node/pull/1
--->`;
+      <!-- YAML
+      changes:
+        - version:
+        - pr-url: https://github.com/nodejs/node/pull/1
+      -->`;
 
     const context = {
       tree: {
@@ -124,14 +124,14 @@ changes:
 
   it('should not report if all change versions are valid', () => {
     const yamlContent = dedent`
-<!-- YAML
-changes:
-  - version:
-      - v15.7.0
-      - v14.18.0
-  - version: v6.4.0
-  - version: v5.0.0
--->`;
+      <!-- YAML
+      changes:
+        - version:
+            - v15.7.0
+            - v14.18.0
+        - version: v6.4.0
+        - version: v5.0.0
+      -->`;
 
     const context = {
       tree: {
@@ -154,14 +154,14 @@ changes:
 
   it('should report an issue if a change version is invalid', () => {
     const yamlContent = dedent`
-<!-- YAML
-changes:
-  - version:
-      - v13.9.0
-      - INVALID_VERSION
-  - version: v6.4.0
-  - version: v5.0.0
--->`;
+      <!-- YAML
+      changes:
+        - version:
+            - v13.9.0
+            - INVALID_VERSION
+        - version: v6.4.0
+        - version: v5.0.0
+      -->`;
 
     const context = {
       tree: {
@@ -198,14 +198,14 @@ changes:
 
   it('should report an issue if a change version contains a REPLACEME and a version', () => {
     const yamlContent = dedent`
-<!-- YAML
-changes:
-  - version:
-      - v24.0.0
-      - REPLACEME
-  - version: v6.4.0
-  - version: v5.0.0
--->`;
+      <!-- YAML
+      changes:
+        - version:
+            - v24.0.0
+            - REPLACEME
+        - version: v6.4.0
+        - version: v5.0.0
+      -->`;
 
     const context = {
       tree: {
@@ -242,11 +242,11 @@ changes:
 
   it('should report an issue if changes is not a sequence', () => {
     const yamlContent = dedent`
-<!-- YAML
-changes:
-  abc:
-  def:
--->`;
+      <!-- YAML
+      changes:
+        abc:
+        def:
+      -->`;
 
     const context = {
       tree: {
@@ -283,12 +283,12 @@ changes:
 
   it('should report an issue if version is not a mapping', () => {
     const yamlContent = dedent`
-<!-- YAML
-changes:
-  version:
-    - abc
-    - def
--->`;
+      <!-- YAML
+      changes:
+        version:
+          - abc
+          - def
+      -->`;
 
     const context = {
       tree: {
@@ -325,10 +325,10 @@ changes:
 
   it("should skip validations if yaml root node isn't a mapping", () => {
     const yamlContent = dedent`
-<!-- YAML
-- abc
-- def
--->`;
+      <!-- YAML
+      - abc
+      - def
+      -->`;
 
     const context = {
       tree: {
@@ -354,9 +354,9 @@ changes:
 
   it('should skip validations if changes node is missing', () => {
     const yamlContent = dedent`
-<!-- YAML
-added: v0.1.91
--->`;
+      <!-- YAML
+      added: v0.1.91
+      -->`;
 
     const context = {
       tree: {
