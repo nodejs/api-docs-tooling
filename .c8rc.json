@@ -1,3 +1,9 @@
 {
-  "all": true
+  "all": true,
+  "exclude": [
+    "eslint.config.mjs",
+    "**/fixtures/**",
+    "src/generators/legacy-html/assets/**",
+    "src/generators/web/ui/**"
+  ]
 }

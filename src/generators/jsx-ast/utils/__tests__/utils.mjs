@@ -8,6 +8,11 @@ export const SAMPLE = {
     type: 'root',
     children: [
       { type: 'text', value: 'Example text for testing reading time.' },
+      {
+        type: 'blockquote',
+        children: [{ type: 'text', value: 'Stability: 0 - Zero' }],
+        data: { index: '0' },
+      },
     ],
   },
   added_in: 'v1.0.0',
