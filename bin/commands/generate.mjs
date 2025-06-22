@@ -11,7 +11,7 @@ import { publicGenerators } from '../../src/generators/index.mjs';
 import createGenerator from '../../src/generators.mjs';
 import createLinter from '../../src/linter/index.mjs';
 import { getEnabledRules } from '../../src/linter/utils/rules.mjs';
-import createNodeReleases from '../../src/releases.mjs';
+import { parseChangelog, parseIndex } from '../../src/parsers/markdown.mjs';
 import { loadAndParse } from '../utils.mjs';
 
 const availableGenerators = Object.keys(publicGenerators);
@@ -107,6 +107,14 @@ export default {
         })),
       },
     },
+    index: {
+      flags: ['--index <path>'],
+      desc: 'The index document, for getting the titles of various API docs',
+      prompt: {
+        message: 'Path to doc/api/index.md',
+        type: 'text',
+      },
+    },
     skipLint: {
       flags: ['--skip-lint'],
       desc: 'Skip lint before generate',
@@ -135,9 +143,8 @@ export default {
       process.exit(1);
     }
 
-    const { getAllMajors } = createNodeReleases(opts.changelog);
-
-    const releases = await getAllMajors();
+    const releases = await parseChangelog(opts.changelog);
+    const index = opts.index && (await parseIndex(opts.index));
 
     const { runGenerators } = createGenerator(docs);
 
@@ -149,6 +156,7 @@ export default {
       releases,
       gitRef: opts.gitRef,
       threads: parseInt(opts.threads, 10),
+      index,
     });
   },
 };

@@ -31,6 +31,9 @@ declare global {
     // A list of all Node.js major versions and their respective release information
     releases: Array<ApiDocReleaseEntry>;
 
+    // A list of all the titles of all the documentation files
+    index: Array<{ section: string; api: string }>;
+
     // An URL containing a git ref URL pointing to the commit or ref that was used
     // to generate the API docs. This is used to link to the source code of the
     // i.e. https://github.com/nodejs/node/tree/2cb1d07e0f6d9456438016bab7db4688ab354fd2

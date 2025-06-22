@@ -47,7 +47,7 @@ export default {
    * @param {Input} input
    * @param {Partial<GeneratorOptions>} options
    */
-  async generate(input, { releases, version, output }) {
+  async generate(input, { index, releases, version, output }) {
     // This array holds all the generated values for each module
     const generatedValues = [];
 
@@ -68,9 +68,16 @@ export default {
       .filter(node => node.heading.depth === 1)
       .sort((a, b) => a.heading.data.name.localeCompare(b.heading.data.name));
 
+    const indexOfFiles = index
+      ? index.map(entry => ({
+          api: entry.api,
+          heading: { data: { depth: 1, name: entry.section } },
+        }))
+      : headNodes;
+
     // Generates the global Table of Contents (Sidebar Navigation)
     const parsedSideNav = remarkRehypeProcessor.processSync(
-      tableOfContents(headNodes, {
+      tableOfContents(indexOfFiles, {
         maxDepth: 1,
         parser: tableOfContents.parseNavigationNode,
       })
