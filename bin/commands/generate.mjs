@@ -108,7 +108,7 @@ export default {
       },
     },
     skipLint: {
-      flags: ['--no-lint'],
+      flags: ['--skip-lint'],
       desc: 'Skip lint before generate',
       prompt: {
         type: 'confirm',
