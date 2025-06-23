@@ -1,9 +1,13 @@
 import { Root } from 'mdast';
-import { Position } from 'unist';
 import reporters from './reporters/index.mjs';
 import { VFile } from 'vfile';
 
 export type IssueLevel = 'info' | 'warn' | 'error';
+
+export interface Position {
+  start: { line: number };
+  end: { line: number };
+}
 
 export interface LintIssueLocation {
   path: string; // The absolute path to the file

@@ -2,15 +2,19 @@ import { env } from 'node:process';
 
 import { valid, parse } from 'semver';
 import { visit } from 'unist-util-visit';
-import yaml from 'yaml';
+import { isMap, isSeq, LineCounter, parseDocument } from 'yaml';
 
-import { enforceArray } from '../../utils/array.mjs';
 import {
   extractYamlContent,
   normalizeYamlSyntax,
 } from '../../utils/parser/index.mjs';
 import createQueries from '../../utils/queries/index.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
+import {
+  createYamlIssueReporter,
+  findPropertyByName,
+  normalizeNode,
+} from '../utils/yaml.mjs';
 
 const NODE_RELEASED_VERSIONS = env.NODE_RELEASED_VERSIONS?.split(',');
 
@@ -42,20 +46,46 @@ const isIgnoredVersion = version => {
 /**
  * Determines if a given version is invalid.
  *
- * @param {string} version - The version to check.
+ * @param {import('yaml').Scalar} version - The version to check.
  * @param {unknown} _ - Unused parameter.
  * @param {{ length: number }} context - Array containing the length property.
  * @returns {boolean} True if the version is invalid, otherwise false.
  */
 const isInvalid = NODE_RELEASED_VERSIONS
-  ? (version, _, { length }) =>
+  ? ({ value }, _, { length }) =>
       !(
-        isValidReplaceMe(version, length) ||
-        isIgnoredVersion(version) ||
-        NODE_RELEASED_VERSIONS.includes(version.replace(/^v/, ''))
+        isValidReplaceMe(value, length) ||
+        isIgnoredVersion(value) ||
+        NODE_RELEASED_VERSIONS.includes(value.replace(/^v/, ''))
       )
-  : (version, _, { length }) =>
-      !(isValidReplaceMe(version, length) || valid(version));
+  : ({ value }, _, { length }) =>
+      !(isValidReplaceMe(value, length) || valid(value));
+
+/**
+ * Validates and extracts versions of a change node
+ *
+ * @param {object} root0
+ * @param {import('../types.d.ts').LintContext} root0.context
+ * @param {import('yaml').Node} root0.node
+ * @param {(message: string, node: import('yaml').Node<unknown>) => import('../types.d.ts').IssueDescriptor} root0.createYamlIssue
+ */
+export const extractVersions = ({ context, node, createYamlIssue }) => {
+  if (!isMap(node)) {
+    context.report(createYamlIssue(LINT_MESSAGES.invalidChangeProperty, node));
+
+    return [];
+  }
+
+  const versionNode = findPropertyByName(node, 'version');
+
+  if (!versionNode) {
+    context.report(createYamlIssue(LINT_MESSAGES.missingChangeVersion, node));
+
+    return [];
+  }
+
+  return normalizeNode(versionNode.value);
+};
 
 /**
  * Identifies invalid change versions from metadata entries.
@@ -69,31 +99,47 @@ export const invalidChangeVersion = context => {
 
     const normalizedYaml = normalizeYamlSyntax(yamlContent);
 
-    // TODO: Use YAML AST to provide better issues positions
-    /**
-     * @type {ApiDocRawMetadataEntry}
-     */
-    const { changes } = yaml.parse(normalizedYaml);
+    const lineCounter = new LineCounter();
+    const document = parseDocument(normalizedYaml, { lineCounter });
 
-    if (!changes) {
+    const createYamlIssue = createYamlIssueReporter(node, lineCounter);
+
+    // Skip if yaml isn't a mapping
+    if (!isMap(document.contents)) {
       return;
     }
 
-    changes.forEach(({ version }) =>
-      enforceArray(version)
+    const changesNode = findPropertyByName(document.contents, 'changes');
+
+    // Skip if changes node is not present
+    if (!changesNode) {
+      return;
+    }
+
+    // Validate changes node is a sequence
+    if (!isSeq(changesNode.value)) {
+      return context.report(
+        createYamlIssue(LINT_MESSAGES.invalidChangeProperty, changesNode.key)
+      );
+    }
+
+    changesNode.value.items.forEach(node => {
+      extractVersions({ context, node, createYamlIssue })
+        .filter(Boolean) // Filter already reported empt items,
         .filter(isInvalid)
         .forEach(version =>
-          context.report({
-            level: 'error',
-            message: version
-              ? LINT_MESSAGES.invalidChangeVersion.replace(
-                  '{{version}}',
-                  version
-                )
-              : LINT_MESSAGES.missingChangeVersion,
-            position: node.position,
-          })
-        )
-    );
+          context.report(
+            createYamlIssue(
+              version?.value
+                ? LINT_MESSAGES.invalidChangeVersion.replace(
+                    '{{version}}',
+                    version.value
+                  )
+                : LINT_MESSAGES.missingChangeVersion,
+              version
+            )
+          )
+        );
+    });
   });
 };
