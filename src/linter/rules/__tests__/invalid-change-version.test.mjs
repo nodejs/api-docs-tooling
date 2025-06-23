@@ -1,7 +1,7 @@
 import { deepStrictEqual, strictEqual } from 'node:assert';
 import { spawnSync } from 'node:child_process';
 import { execPath } from 'node:process';
-import { describe, it } from 'node:test';
+import { describe, it, mock } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import dedent from 'dedent';
