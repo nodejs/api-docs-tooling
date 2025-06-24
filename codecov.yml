@@ -9,9 +9,9 @@ coverage:
         target: 80%
     project:
       default:
-        # TODO(@avivkeller): Once our coverage > 50%,
-        # increase this to 50%, and increase on increments
-        target: 40%
+        # TODO(@avivkeller): Once our coverage > 70%,
+        # increase this to 70%, and increase on increments
+        target: 60%
 
 ignore:
   - 'eslint.config.mjs'
