@@ -1,7 +1,7 @@
 'use strict';
 
 import { createHighlighterCoreSync } from '@shikijs/core';
-import { createJavaScriptRegexEngine } from '@shikijs/engine-javascript';
+import { createOnigurumaEngine } from '@shikijs/engine-oniguruma';
 import { toString } from 'hast-util-to-string';
 import { h as createElement } from 'hastscript';
 import { SKIP, visit } from 'unist-util-visit';
@@ -15,7 +15,7 @@ const languagePrefix = 'language-';
 // Creates a Singleton instance for Shiki's syntax highlighter using WASM
 const shikiHighlighter = createHighlighterCoreSync({
   ...shikiConfig,
-  engine: createJavaScriptRegexEngine(),
+  engine: await createOnigurumaEngine(import('shiki/wasm')),
 });
 
 // Creates a static button element which is used for the "copy" button
