@@ -38,6 +38,25 @@ export const extractPattern = (text, pattern, key, current) => {
 };
 
 /**
+ * Determines if the input List node is a typed list
+ * @param {import('@types/mdast').List} list
+ */
+export const isTypedList = list => {
+  const children = list?.children?.[0]?.children?.[0]?.children;
+
+  // The first element must be a code block
+  return (
+    children?.[0]?.type === 'inlineCode' &&
+    // Followed by a space
+    children?.[1]?.value.trim() === '' &&
+    // Followed by a link (type)
+    children?.[2]?.type === 'link' &&
+    // Types start with `<`
+    children?.[2]?.children?.[0]?.value?.[0] === '<'
+  );
+};
+
+/**
  * Parses an individual list item node to extract its properties
  *
  * @param {import('@types/mdast').ListItem} child
@@ -71,7 +90,7 @@ export function parseListItem(child) {
 
   // Parse nested lists (options) recursively if present
   const optionsNode = child.children.find(node => node.type === 'list');
-  if (optionsNode) {
+  if (isTypedList(optionsNode)) {
     current.options = optionsNode.children.map(parseListItem);
   }
 
