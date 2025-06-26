@@ -123,4 +123,50 @@ describe('parseList', () => {
     parseList(section, nodes);
     assert.ok(Array.isArray(section.params));
   });
+
+  it('processes recursive lists', () => {
+    const section = { type: 'event' };
+    const nodes = [
+      {
+        type: 'list',
+        children: [
+          {
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  { type: 'text', value: 'param1 {string} first parameter' },
+                ],
+              },
+              // This is a nested typed list
+              {
+                type: 'list',
+                children: [
+                  {
+                    children: [
+                      {
+                        type: 'paragraph',
+                        children: [
+                          { type: 'inlineCode', value: 'option' }, // inline code
+                          { type: 'text', value: ' ' }, // space
+                          {
+                            type: 'link',
+                            children: [{ type: 'text', value: '<boolean>' }], // link with < value
+                          },
+                          { type: 'text', value: ' option description' },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    parseList(section, nodes);
+    assert.equal(section.params[0].options.length, 1);
+  });
 });
