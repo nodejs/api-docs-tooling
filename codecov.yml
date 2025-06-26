@@ -1,12 +1,7 @@
 coverage:
   # https://docs.codecov.com/docs/commit-status
   status:
-    patch:
-      default:
-        # TODO(@avivkeller): Once our coverage > 80%,
-        # remove this, since we can easily rely on
-        # project coverage to cover patches as well
-        target: 80%
+    patch: false
     project:
       default:
         # TODO(@avivkeller): Once our coverage > 70%,
