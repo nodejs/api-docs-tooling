@@ -162,11 +162,7 @@ export default {
 
       if (output) {
         // We minify the html result to reduce the file size and keep it "clean"
-        const minified = await minify(result, {
-          collapseWhitespace: true,
-          minifyJS: true,
-          minifyCSS: true,
-        });
+        const minified = await minify(result, { collapseWhitespace: true });
 
         await writeFile(join(output, `${node.api}.html`), minified);
       }
