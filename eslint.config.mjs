@@ -76,6 +76,6 @@ export default [
   },
   {
     files: ['src/generators/legacy-html/assets/*.js'],
-    languageOptions: { globals: { ...globals.browser } },
+    languageOptions: { globals: { ...globals.browser }, ecmaVersion: 'latest' },
   },
 ];

@@ -97,8 +97,6 @@ export default {
     // We minify the html result to reduce the file size and keep it "clean"
     const minified = await minify(generatedAllTemplate, {
       collapseWhitespace: true,
-      minifyJS: true,
-      minifyCSS: true,
     });
 
     if (output) {
