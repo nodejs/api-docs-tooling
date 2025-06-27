@@ -38,6 +38,30 @@ export const extractPattern = (text, pattern, key, current) => {
 };
 
 /**
+ * Determines if the input List node is a typed list
+ * @param {import('@types/mdast').List} list
+ */
+export const isTypedList = list => {
+  if (list.type !== 'list') {
+    // Exit early if not a list
+    return false;
+  }
+
+  const children = list?.children?.[0]?.children?.[0]?.children;
+
+  return (
+    // The first element must be a code block
+    children?.[0]?.type === 'inlineCode' &&
+    // Followed by a space
+    children?.[1]?.value.trim() === '' &&
+    // Followed by a link (type)
+    children?.[2]?.type === 'link' &&
+    // Types start with `<`
+    children?.[2]?.children?.[0]?.value?.[0] === '<'
+  );
+};
+
+/**
  * Parses an individual list item node to extract its properties
  *
  * @param {import('@types/mdast').ListItem} child
@@ -46,9 +70,11 @@ export const extractPattern = (text, pattern, key, current) => {
 export function parseListItem(child) {
   const current = {};
 
+  const subList = child.children.find(isTypedList);
+
   // Extract and clean raw text from the node, excluding nested lists
   current.textRaw = transformTypeReferences(
-    transformNodesToString(child.children.filter(node => node.type !== 'list'))
+    transformNodesToString(child.children.filter(node => node !== subList))
       .replace(/\s+/g, ' ')
       .replace(/<!--.*?-->/gs, '')
   );
@@ -70,9 +96,8 @@ export function parseListItem(child) {
   current.desc = text.replace(LEADING_HYPHEN, '').trim() || undefined;
 
   // Parse nested lists (options) recursively if present
-  const optionsNode = child.children.find(node => node.type === 'list');
-  if (optionsNode) {
-    current.options = optionsNode.children.map(parseListItem);
+  if (subList) {
+    current.options = subList.children.map(parseListItem);
   }
 
   return current;
