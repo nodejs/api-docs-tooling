@@ -2,14 +2,14 @@
 
 import { PARAM_EXPRESSION } from '../constants.mjs';
 
-const OPTIONAL_LEVEL_CHANGES = { '[': 1, ']': -1, ' ': 0 };
+const OPTIONAL_LEVEL_CHANGES = { '[': 1, ']': -1 };
 
 /**
- * @param {String} char
  * @param {Number} depth
+ * @param {String} char
  * @returns {Number}
  */
-const updateDepth = (char, depth) =>
+const updateDepth = (depth, char) =>
   depth + (OPTIONAL_LEVEL_CHANGES[char] || 0);
 
 /**
