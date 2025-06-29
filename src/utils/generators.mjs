@@ -2,6 +2,8 @@
 
 import { coerce, compare, major } from 'semver';
 
+import { DOC_API_BASE_URL_VERSION } from '../constants.mjs';
+
 /**
  * Groups all the API metadata nodes by module (`api` property) so that we can process each different file
  * based on the module it belongs to.
@@ -32,6 +34,15 @@ export const getVersionFromSemVer = version =>
   version.minor === 0
     ? `${version.major}.x`
     : `${version.major}.${version.minor}.x`;
+
+/**
+ * Gets the documentation URL for an API and version
+ *
+ * @param {string} version The version to be parsed
+ * @param {string} api The document
+ */
+export const getVersionURL = (version, api) =>
+  `${DOC_API_BASE_URL_VERSION}${version}/api/${api}.html`;
 
 /**
  * @TODO: This should not be necessary, and indicates errors within the API docs
