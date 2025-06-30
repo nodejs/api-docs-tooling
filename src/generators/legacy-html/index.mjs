@@ -3,7 +3,7 @@
 import { cp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { minify } from 'html-minifier-terser';
+import HTMLMinifier from '@minify-html/node';
 
 import buildContent from './utils/buildContent.mjs';
 import dropdowns from './utils/buildDropdowns.mjs';
@@ -162,7 +162,7 @@ export default {
 
       if (output) {
         // We minify the html result to reduce the file size and keep it "clean"
-        const minified = await minify(result, { collapseWhitespace: true });
+        const minified = HTMLMinifier.minify(Buffer.from(result), {});
 
         await writeFile(join(output, `${node.api}.html`), minified);
       }
