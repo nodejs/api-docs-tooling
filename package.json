@@ -40,6 +40,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@clack/prompts": "^0.11.0",
+    "@minify-html/node": "^0.16.4",
     "@node-core/rehype-shiki": "1.0.1-1815fa769361b836fa52cfab9c5bd4991f571c95",
     "@orama/orama": "^3.1.7",
     "@orama/plugin-data-persistence": "^3.1.7",
@@ -52,7 +53,6 @@
     "glob": "^11.0.2",
     "hast-util-to-string": "^3.0.1",
     "hastscript": "^9.0.1",
-    "html-minifier-terser": "^7.2.0",
     "reading-time": "^1.5.0",
     "recma-jsx": "^1.0.0",
     "rehype-recma": "^1.0.0",
