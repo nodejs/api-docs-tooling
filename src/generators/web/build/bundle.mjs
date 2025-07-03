@@ -46,6 +46,7 @@ const createConfig = (code, { server, debug }) => ({
     react: 'preact/compat',
     'react-dom': 'preact/compat',
   },
+  external: server ? ['preact'] : [],
   plugins: getPlugins(server),
   // We silence warnings since ESBuild will warn that Tailwind's CSS isn't valid,
   // but if something actually goes wrong, errors are still reported.
