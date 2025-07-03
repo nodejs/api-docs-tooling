@@ -358,7 +358,6 @@ export const DOC_TYPES_MAPPING_OTHER = {
   Iterable: `${DOC_MDN_BASE_URL_JS}Reference/Iteration_protocols#The_iterable_protocol`,
   Iterator: `${DOC_MDN_BASE_URL_JS}Reference/Iteration_protocols#The_iterator_protocol`,
 
-  
   CloseEvent: `${DOC_MDN_BASE_URL}/API/CloseEvent`,
   EventSource: `${DOC_MDN_BASE_URL}/API/EventSource`,
   MessageEvent: `${DOC_MDN_BASE_URL}/API/MessageEvent`,
