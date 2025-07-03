@@ -20,7 +20,7 @@ describe('buildContent', () => {
       SAMPLE,
       {},
       {
-        runSync: x => ({ body: [{ expression: x }] }),
+        run: async x => ({ body: [{ expression: x }] }),
       }
     );
 
