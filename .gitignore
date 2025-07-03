@@ -8,3 +8,7 @@ out
 # Tests
 coverage
 junit.xml
+
+# Debugging
+.clinic
+isolate-*
