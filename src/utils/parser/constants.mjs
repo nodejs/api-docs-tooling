@@ -343,8 +343,7 @@ export const DOC_TYPES_MAPPING_OTHER = {
   any: `${DOC_MDN_BASE_URL_JS_PRIMITIVES}#Data_types`,
   this: `${DOC_MDN_BASE_URL_JS}Reference/Operators/this`,
 
-  ArrayBufferView:
-    'https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView',
+  ArrayBufferView: `${DOC_MDN_BASE_URL}/API/ArrayBufferView`,
 
   AsyncIterator: 'https://tc39.github.io/ecma262/#sec-asynciterator-interface',
   AsyncIterable: 'https://tc39.github.io/ecma262/#sec-asynciterable-interface',
@@ -358,6 +357,15 @@ export const DOC_TYPES_MAPPING_OTHER = {
 
   Iterable: `${DOC_MDN_BASE_URL_JS}Reference/Iteration_protocols#The_iterable_protocol`,
   Iterator: `${DOC_MDN_BASE_URL_JS}Reference/Iteration_protocols#The_iterator_protocol`,
+
+  
+  CloseEvent: `${DOC_MDN_BASE_URL}/API/CloseEvent`,
+  EventSource: `${DOC_MDN_BASE_URL}/API/EventSource`,
+  MessageEvent: `${DOC_MDN_BASE_URL}/API/MessageEvent`,
+
+  DOMException: `${DOC_MDN_BASE_URL}/API/DOMException`,
+  Storage: `${DOC_MDN_BASE_URL}/API/Storage`,
+  WebSocket: `${DOC_MDN_BASE_URL}/API/WebSocket`,
 
   FormData: `${DOC_MDN_BASE_URL}API/FormData`,
   Headers: `${DOC_MDN_BASE_URL}/API/Headers`,
