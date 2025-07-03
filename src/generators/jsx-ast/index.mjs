@@ -38,7 +38,7 @@ const getSortedHeadNodes = entries => {
     });
 };
 
-const jsxAstGenerator = {
+export default {
   name: 'jsx-ast',
   version: '1.0.0',
   description: 'Generates JSX AST from the input MDAST',
@@ -84,5 +84,3 @@ const jsxAstGenerator = {
     return results;
   },
 };
-
-export default jsxAstGenerator;
