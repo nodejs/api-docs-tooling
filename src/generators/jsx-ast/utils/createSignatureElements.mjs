@@ -132,8 +132,9 @@ export const createPropertyTable = (node, withHeading = true) => {
  * Generates all valid function signatures based on optional parameters
  * @param {string} functionName - Name of the function
  * @param {import('../../legacy-json/types.d.ts').MethodSignature} signature - Signature object
+ * @param {string} prefix - `'new '` or `''`
  */
-export const generateSignatures = (functionName, signature) => {
+export const generateSignatures = (functionName, signature, prefix = '') => {
   const { params, return: returnType } = signature;
   const returnStr = returnType ? `: ${returnType.type}` : '';
 
@@ -141,7 +142,7 @@ export const generateSignatures = (functionName, signature) => {
   const optionalParams = params.filter(param => param.optional);
   if (!optionalParams.length) {
     const paramsStr = params.map(param => param.name).join(', ');
-    return [`${functionName}(${paramsStr})${returnStr}`];
+    return [`${prefix}${functionName}(${paramsStr})${returnStr}`];
   }
 
   // Find indexes of optional parameters
@@ -175,7 +176,7 @@ export const generateSignatures = (functionName, signature) => {
       })
       .join(', ');
 
-    signatures.push(`${functionName}(${paramsStr})${returnStr}`);
+    signatures.push(`${prefix}${functionName}(${paramsStr})${returnStr}`);
   }
 
   return signatures;
@@ -185,11 +186,13 @@ export const generateSignatures = (functionName, signature) => {
  * Creates a code block with function signatures
  * @param {string} functionName - Name of the function
  * @param {import('../../legacy-json/types.d.ts').MethodSignature} signature - Signature object
+ * @param {string} prefix - `'new '` or `''`
  */
-export const createSignatureCodeBlock = (functionName, signature) => {
-  const signatures = generateSignatures(functionName, signature);
+export const createSignatureCodeBlock = (functionName, signature, prefix) => {
+  const signatures = generateSignatures(functionName, signature, prefix);
   const codeContent = signatures.join('\n');
-  return highlightToHast(codeContent, 'typescript');
+  const highlighted = highlightToHast(codeContent, 'typescript');
+  return createElement('div', { class: 'signature' }, [highlighted]);
 };
 
 /**
@@ -226,5 +229,13 @@ export default ({ children }, { data }, idx) => {
   const signature = parseSignature(data.text, params);
   const displayName = getFullName(data);
 
-  children.splice(idx, 0, createSignatureCodeBlock(displayName, signature));
+  children.splice(
+    idx,
+    0,
+    createSignatureCodeBlock(
+      displayName,
+      signature,
+      data.type === 'ctor' ? 'new ' : ''
+    )
+  );
 };

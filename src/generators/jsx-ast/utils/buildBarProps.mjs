@@ -1,6 +1,7 @@
 import readingTime from 'reading-time';
 import { visit } from 'unist-util-visit';
 
+import { getFullName } from './createSignatureElements.mjs';
 import { DOC_API_BLOB_EDIT_BASE_URL } from '../../../constants.mjs';
 import {
   getCompatibleVersions,
@@ -27,14 +28,25 @@ export const buildMetaBarProps = (head, entries) => {
     .filter(
       entry => entry.heading?.data?.text && entry.heading?.data?.depth < 3
     )
-    .map(entry => ({
-      depth: entry.heading.depth,
-      value: entry.heading.data.text
-        .replace(/`/g, '')
-        .replace(/^[^:]+:/, '')
-        .trim(),
-      slug: entry.heading.data.slug,
-    }));
+    .map(entry => {
+      let heading = getFullName(
+        entry.heading.data,
+        entry.heading.data.name
+          .replace(/`/g, '')
+          .replace(/^[^:]+:/, '')
+          .trim()
+      );
+
+      if (entry.heading.data.type === 'ctor') {
+        heading += ' Constructor';
+      }
+
+      return {
+        depth: entry.heading.depth,
+        value: heading,
+        slug: entry.heading.data.slug,
+      };
+    });
 
   return {
     headings,

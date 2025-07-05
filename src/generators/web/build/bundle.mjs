@@ -21,7 +21,7 @@ const createConfig = (code, { server, debug }) => ({
     loader: 'jsx',
   },
   bundle: true,
-  minify: true,
+  minify: !debug,
   format: 'iife',
   platform: server ? 'node' : 'browser',
   jsx: 'automatic',

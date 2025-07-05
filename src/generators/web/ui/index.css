@@ -14,3 +14,12 @@ code {
 a {
   padding-right: unset;
 }
+
+/* No line numbers on signatures */
+.signature .line::after {
+  all: unset !important;
+}
+
+.signature .line {
+  padding-left: unset !important;
+}

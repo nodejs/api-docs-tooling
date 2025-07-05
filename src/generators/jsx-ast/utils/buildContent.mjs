@@ -88,7 +88,7 @@ const createSourceLink = sourceLink =>
 const createHeadingElement = (content, changeElement) => {
   const { type, depth, slug } = content.data;
 
-  const headingContent =
+  let headingContent =
     getFullName(content.data, false) ||
     sliceMarkdown(
       content,
@@ -96,6 +96,10 @@ const createHeadingElement = (content, changeElement) => {
       getTreeLength(content),
       { trimWhitespace: true }
     ).children;
+
+  if (type === 'ctor') {
+    headingContent += ' Constructor';
+  }
 
   const headingWrapper = createElement('div', [
     createElement(`h${depth}`, [
