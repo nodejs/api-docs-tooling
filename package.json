@@ -44,7 +44,7 @@
     "@node-core/rehype-shiki": "1.0.1-1815fa769361b836fa52cfab9c5bd4991f571c95",
     "@orama/orama": "^3.1.7",
     "@orama/plugin-data-persistence": "^3.1.7",
-    "acorn": "^8.14.1",
+    "acorn": "^8.15.0",
     "commander": "^14.0.0",
     "dedent": "^1.6.0",
     "estree-util-value-to-estree": "^3.4.0",
