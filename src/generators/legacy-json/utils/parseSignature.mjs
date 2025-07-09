@@ -39,15 +39,16 @@ export function parseNameAndOptionalStatus(parameterName, optionalDepth) {
     char => !OPTIONAL_LEVEL_CHANGES[char]
   );
 
+  // Extract the actual parameter name
+  const actualName = parameterName.slice(startingIdx, endingIdx + 1);
+  const isParameterOptional = optionalDepth > 0;
+
   // Update optionalDepth based on trailing brackets
+  // These apply to the NEXT parameter
   optionalDepth = [...parameterName.slice(endingIdx + 1)].reduce(
     updateDepth,
     optionalDepth
   );
-
-  // Extract the actual parameter name
-  const actualName = parameterName.slice(startingIdx, endingIdx + 1);
-  const isParameterOptional = optionalDepth > 0;
 
   return [actualName, optionalDepth, isParameterOptional];
 }
