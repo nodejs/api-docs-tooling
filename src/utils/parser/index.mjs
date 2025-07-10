@@ -10,6 +10,7 @@ import {
   DOC_TYPES_MAPPING_NODE_MODULES,
   DOC_TYPES_MAPPING_OTHER,
   DOC_TYPES_MAPPING_PRIMITIVES,
+  DOC_MAN_BASE_URL,
 } from './constants.mjs';
 import createQueries from '../queries/index.mjs';
 
@@ -42,6 +43,21 @@ export const normalizeYamlSyntax = yamlContent => {
     .replace('name=', 'name: ')
     .replace('llm_description=', 'llm_description: ')
     .replace(/^[\r\n]+|[\r\n]+$/g, ''); // Remove initial and final line breaks
+};
+
+/**
+ * @param {string} text The inner text
+ * @param {string} command The manual page
+ * @param {string} sectionNumber The manual section
+ * @param {string} sectionLetter The manual section number
+ */
+export const transformUnixManualToLink = (
+  text,
+  command,
+  sectionNumber,
+  sectionLetter
+) => {
+  return `[\`${text}\`](${DOC_MAN_BASE_URL}${sectionNumber}/${command}.${sectionNumber}${sectionLetter}.html)`;
 };
 
 /**

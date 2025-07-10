@@ -9,6 +9,7 @@ import {
   parseHeadingIntoMetadata,
   parseYAMLIntoMetadata,
   transformTypeToReferenceLink,
+  transformUnixManualToLink,
 } from '../parser/index.mjs';
 import { getRemark } from '../remark.mjs';
 import { transformNodesToString } from '../unist.mjs';
@@ -64,18 +65,17 @@ const createQueries = () => {
   };
 
   /**
-   * Updates a Markdown text containing an API type reference
-   * into a Markdown link referencing to the correct API docs
+   * Updates a reference
    *
-   * @param {import('@types/mdast').Text} node A Markdown link node
+   * @param {import('@types/mdast').Text} node The current node
    * @param {import('@types/mdast').Parent} parent The parent node
+   * @param {string|RegExp} query The search query
+   * @param {Function} transformer The function to transform the reference
+   *
    */
-  const updateTypeReference = (node, parent) => {
+  const updateReferences = (query, transformer, node, parent) => {
     const replacedTypes = node.value
-      .replace(
-        createQueries.QUERIES.normalizeTypes,
-        transformTypeToReferenceLink
-      )
+      .replace(query, transformer)
       // Remark doesn't handle leading / trailing spaces, so replace them with
       // HTML entities.
       .replace(/^\s/, '&nbsp;')
@@ -172,7 +172,20 @@ const createQueries = () => {
     addYAMLMetadata,
     setHeadingMetadata,
     updateMarkdownLink,
-    updateTypeReference,
+    /** @param {Array<import('@types/mdast').Node>} args */
+    updateTypeReference: (...args) =>
+      updateReferences(
+        createQueries.QUERIES.normalizeTypes,
+        transformTypeToReferenceLink,
+        ...args
+      ),
+    /** @param {Array<import('@types/mdast').Node>} args */
+    updateUnixManualReference: (...args) =>
+      updateReferences(
+        createQueries.QUERIES.unixManualPage,
+        transformUnixManualToLink,
+        ...args
+      ),
     updateLinkReference,
     addStabilityMetadata,
     updateStabilityPrefixToLink,
@@ -195,6 +208,8 @@ createQueries.QUERIES = {
   stabilityIndexPrefix: /Stability: ([0-5])/,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/,
+  // RegEX for finding references to Unix manuals
+  unixManualPage: /\b([a-z.]+)\((\d)([a-z]?)\)/gm,
 };
 
 createQueries.UNIST = {
@@ -217,6 +232,12 @@ createQueries.UNIST = {
    */
   isTextWithType: ({ type, value }) =>
     type === 'text' && createQueries.QUERIES.normalizeTypes.test(value),
+  /**
+   * @param {import('@types/mdast').Text} text
+   * @returns {boolean}
+   */
+  isTextWithUnixManual: ({ type, value }) =>
+    type === 'text' && createQueries.QUERIES.unixManualPage.test(value),
   /**
    * @param {import('@types/mdast').Html} html
    * @returns {boolean}

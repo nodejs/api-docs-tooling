@@ -35,6 +35,7 @@ export const parseApiDoc = ({ file, tree }) => {
     addYAMLMetadata,
     updateMarkdownLink,
     updateTypeReference,
+    updateUnixManualReference,
     updateLinkReference,
     addStabilityMetadata,
   } = createQueries();
@@ -125,6 +126,13 @@ export const parseApiDoc = ({ file, tree }) => {
     // any API doc type reference and then updates the type reference to be a Markdown link
     visit(subTree, createQueries.UNIST.isTextWithType, (node, _, parent) =>
       updateTypeReference(node, parent)
+    );
+
+    // Visits all Unix manual references, and replaces them with links
+    visit(
+      subTree,
+      createQueries.UNIST.isTextWithUnixManual,
+      (node, _, parent) => updateUnixManualReference(node, parent)
     );
 
     // Removes already parsed items from the subtree so that they aren't included in the final content
