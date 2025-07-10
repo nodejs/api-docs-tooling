@@ -55,7 +55,7 @@ export const transformUnixManualToLink = (
   text,
   command,
   sectionNumber,
-  sectionLetter
+  sectionLetter = ''
 ) => {
   return `[\`${text}\`](${DOC_MAN_BASE_URL}${sectionNumber}/${command}.${sectionNumber}${sectionLetter}.html)`;
 };

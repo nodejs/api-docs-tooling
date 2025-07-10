@@ -208,8 +208,8 @@ createQueries.QUERIES = {
   stabilityIndexPrefix: /Stability: ([0-5])/,
   // ReGeX for retrieving the inner content from a YAML block
   yamlInnerContent: /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/,
-  // RegEX for finding references to Unix manuals
-  unixManualPage: /\b([a-z.]+)\((\d)([a-z]?)\)/gm,
+  // ReGeX for finding references to Unix manuals
+  unixManualPage: /\b([a-z.]+)\((\d)([a-z]?)\)/g,
 };
 
 createQueries.UNIST = {

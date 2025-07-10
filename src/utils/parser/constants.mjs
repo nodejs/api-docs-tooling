@@ -3,7 +3,7 @@
 // This is the base URL of the MDN Web documentation
 export const DOC_MDN_BASE_URL = 'https://developer.mozilla.org/en-US/docs/Web/';
 
-// The is the base URL of the Man7 documentation
+// This is the base URL of the Man7 documentation
 export const DOC_MAN_BASE_URL = 'http://man7.org/linux/man-pages/man';
 
 // This is the base URL for the MDN JavaScript documentation
