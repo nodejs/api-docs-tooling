@@ -1,3 +1,9 @@
 # Tests files
 src/generators/api-links/__tests__/fixtures/
 *.snapshot
+
+# Templates
+src/generators/web/template.html
+
+# Output
+out/
