@@ -77,7 +77,7 @@ export default {
       .replace('__ENVIRONMENT__', output.env);
 
     if (options.output) {
-      await writeFile(options.output, filledTemplate);
+      await writeFile(join(options.output, 'node.1'), filledTemplate);
     }
 
     return filledTemplate;

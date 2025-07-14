@@ -1,0 +1,84 @@
+name: Generate Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: man-page
+            input: './node/doc/api/cli.md'
+          - target: addon-verify
+            input: './node/doc/api/addons.md'
+          - target: api-links
+            input: './node/lib/*.js'
+          - target: orama-db
+            input: './node/doc/api/*.md'
+          - target: json-simple
+            input: './node/doc/api/*.md'
+          - target: legacy-json
+            input: './node/doc/api/*.md'
+          - target: legacy-html
+            input: './node/doc/api/*.md'
+          - target: llms-txt
+            input: './node/doc/api/*.md'
+      fail-fast: false
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
+      - name: Git Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Git Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          repository: nodejs/node
+          path: node
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prod
+
+      - name: Create output directory
+        run: mkdir -p out/${{ matrix.target }}
+
+      - name: Generate ${{ matrix.target }}
+        run: |
+          node bin/cli.mjs generate \
+            -t ${{ matrix.target }} \
+            -i "${{ matrix.input }}" \
+            -o "out/${{ matrix.target }}" \
+            --index ./node/doc/api/index.md \
+            --skip-lint
+
+      - name: Upload ${{ matrix.target }} artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ matrix.target }}-${{ github.run_id }}
+          path: ${{ matrix.output }}
