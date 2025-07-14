@@ -1,7 +1,6 @@
 'use strict';
 
 import { h as createElement } from 'hastscript';
-import { toHast } from 'mdast-util-to-hast';
 import { u as createTree } from 'unist-builder';
 import { SKIP, visit } from 'unist-util-visit';
 
@@ -89,15 +88,12 @@ const createHistoryTableRow = (
 ) => {
   const descriptionNode = remark.parse(description);
 
-  // Convert node to hast to make it compatible with createElement
-  const descriptionHast = toHast(descriptionNode);
-
   return createElement('tr', [
     createElement(
       'td',
       Array.isArray(changeVersions) ? changeVersions.join(', ') : changeVersions
     ),
-    createElement('td', descriptionHast),
+    createElement('td', descriptionNode),
   ]);
 };
 
