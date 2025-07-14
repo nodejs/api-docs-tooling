@@ -1,6 +1,7 @@
 'use strict';
 
 import { h as createElement } from 'hastscript';
+import { toHast } from 'mdast-util-to-hast';
 import { u as createTree } from 'unist-builder';
 import { SKIP, visit } from 'unist-util-visit';
 
@@ -77,12 +78,37 @@ const buildHtmlTypeLink = node => {
 };
 
 /**
+ * Creates a history table row.
+ *
+ * @param {ApiDocMetadataChange} change
+ * @param {import('unified').Processor} remark
+ */
+const createHistoryTableRow = (
+  { version: changeVersions, description },
+  remark
+) => {
+  const descriptionNode = remark.parse(description);
+
+  // Convert node to hast to make it compatible with createElement
+  const descriptionHast = toHast(descriptionNode);
+
+  return createElement('tr', [
+    createElement(
+      'td',
+      Array.isArray(changeVersions) ? changeVersions.join(', ') : changeVersions
+    ),
+    createElement('td', descriptionHast),
+  ]);
+};
+
+/**
  * Builds the Metadata Properties into content
  *
  * @param {ApiDocMetadataEntry} node The node to build to build the properties from
+ * @param {import('unified').Processor} remark The Remark instance to be used to process changes table
  * @returns {import('unist').Parent} The HTML AST tree of the properties content
  */
-const buildMetadataElement = node => {
+const buildMetadataElement = (node, remark) => {
   const metadataElement = createElement('div.api_metadata');
 
   // We use a `span` element to display the source link as a clickable link to the source within Node.js
@@ -159,17 +185,8 @@ const buildMetadataElement = node => {
   if (typeof node.changes !== 'undefined' && node.changes.length) {
     // Maps the changes into a `tr` element with the version and the description
     // An array containing hast nodes for the history entries if any
-    const historyEntries = node.changes.map(
-      ({ version: changeVersions, description }) =>
-        createElement('tr', [
-          createElement(
-            'td',
-            Array.isArray(changeVersions)
-              ? changeVersions.join(', ')
-              : changeVersions
-          ),
-          createElement('td', description),
-        ])
+    const historyEntries = node.changes.map(change =>
+      createHistoryTableRow(change, remark)
     );
 
     const historyDetailsElement = createElement('details.changelog', [
@@ -227,7 +244,7 @@ export default (headNodes, metadataEntries, remark) => {
       // Concatenates all the strings and parses with remark into an AST tree
       return createElement('section', [
         headingNode,
-        buildMetadataElement(entry),
+        buildMetadataElement(entry, remark),
         buildExtraContent(headNodes, entry),
         ...restNodes,
       ]);
