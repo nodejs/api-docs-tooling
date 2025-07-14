@@ -63,7 +63,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --prod
+        run: npm ci
 
       - name: Create output directory
         run: mkdir -p out/${{ matrix.target }}
