@@ -104,7 +104,7 @@ const createHistoryTableRow = (
 /**
  * Builds the Metadata Properties into content
  *
- * @param {ApiDocMetadataEntry} node The node to build to build the properties from
+ * @param {ApiDocMetadataEntry} node The node to build the properties from
  * @param {import('unified').Processor} remark The Remark instance to be used to process changes table
  * @returns {import('unist').Parent} The HTML AST tree of the properties content
  */
