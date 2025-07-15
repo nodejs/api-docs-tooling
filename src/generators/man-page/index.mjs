@@ -3,7 +3,11 @@
 import { writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { DOC_SLUG_ENVIRONMENT, DOC_SLUG_OPTIONS } from './constants.mjs';
+import {
+  DOC_SLUG_ENVIRONMENT,
+  DOC_SLUG_OPTIONS,
+  OUTPUT_FILENAME,
+} from './constants.mjs';
 import {
   convertOptionToMandoc,
   convertEnvVarToMandoc,
@@ -77,7 +81,7 @@ export default {
       .replace('__ENVIRONMENT__', output.env);
 
     if (options.output) {
-      await writeFile(join(options.output, 'node.1'), filledTemplate);
+      await writeFile(join(options.output, OUTPUT_FILENAME), filledTemplate);
     }
 
     return filledTemplate;
