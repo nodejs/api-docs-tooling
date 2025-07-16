@@ -54,6 +54,8 @@ jobs:
         with:
           persist-credentials: false
           repository: nodejs/node
+          sparse-checkout: |
+            doc/api
           path: node
 
       - name: Setup Node.js
