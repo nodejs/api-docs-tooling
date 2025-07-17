@@ -2,7 +2,6 @@ import pluginJs from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import importX from 'eslint-plugin-import-x';
 import jsdoc from 'eslint-plugin-jsdoc';
-import react from 'eslint-plugin-react';
 import globals from 'globals';
 
 export default defineConfig([
@@ -13,10 +12,7 @@ export default defineConfig([
   },
   {
     files: ['**/*.{mjs,jsx}'],
-    plugins: {
-      jsdoc,
-      react,
-    },
+    plugins: { jsdoc },
     languageOptions: {
       ecmaVersion: 'latest',
       parserOptions: {
@@ -28,8 +24,6 @@ export default defineConfig([
     },
     rules: {
       'object-shorthand': 'error',
-      'react/jsx-uses-react': 'error',
-      'react/jsx-uses-vars': 'error',
       'import-x/namespace': 'off',
       'import-x/no-named-as-default': 'off',
       'import-x/no-named-as-default-member': 'off',

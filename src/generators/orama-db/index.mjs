@@ -1,7 +1,8 @@
 'use strict';
 
-import { create, insertMultiple } from '@orama/orama';
-import { persistToFile } from '@orama/plugin-data-persistence/server';
+import { writeFile } from 'node:fs/promises';
+
+import { create, save, insertMultiple } from '@orama/orama';
 
 import { SCHEMA } from './constants.mjs';
 import { groupNodesByModule } from '../../utils/generators.mjs';
@@ -82,8 +83,10 @@ export default {
       })
     );
 
-    // Insert all documents and persist database
+    // Insert all documents
     await insertMultiple(db, documents);
-    await persistToFile(db, 'json', `${output}/orama-db.json`);
+
+    // Persist
+    await writeFile(`${output}/orama-db.json`, JSON.stringify(save(db)));
   },
 };
