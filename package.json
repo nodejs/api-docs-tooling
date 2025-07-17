@@ -85,14 +85,5 @@
     "unist-util-visit": "^5.0.0",
     "vfile": "^6.0.3",
     "yaml": "^2.8.0"
-  },
-  "nano-staged": {
-    "*.{js,mjs,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,yml}": [
-      "prettier --write"
-    ]
   }
 }
