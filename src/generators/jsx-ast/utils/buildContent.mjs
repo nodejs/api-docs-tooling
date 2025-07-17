@@ -92,7 +92,7 @@ export const createSourceLink = sourceLink =>
  * @param {import('mdast').Node} content - The content node to extract text from
  */
 export const extractHeadingContent = content => {
-  const { text } = content.data;
+  const { text, type } = content.data;
 
   if (!text) {
     return content.children;
@@ -102,7 +102,7 @@ export const extractHeadingContent = content => {
   const fullName = getFullName(content.data, false);
 
   if (fullName) {
-    return fullName;
+    return type === 'ctor' ? `${fullName} Constructor` : fullName;
   }
 
   // Find the index of the first colon, i.e. `Class:`.
@@ -125,10 +125,6 @@ export const createHeadingElement = (content, changeElement) => {
   const { type, depth, slug } = content.data;
 
   let headingContent = extractHeadingContent(content);
-
-  if (type === 'ctor') {
-    headingContent += ' Constructor';
-  }
 
   // Build heading with anchor link
   const headingWrapper = createElement('div', [
