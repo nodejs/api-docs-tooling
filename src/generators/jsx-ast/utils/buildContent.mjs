@@ -95,7 +95,7 @@ export const extractHeadingContent = content => {
   const { text } = content.data;
 
   if (!text) {
-    return text;
+    return content.children;
   }
 
   // Try to get full name; fallback slices text after first colon
@@ -108,8 +108,8 @@ export const extractHeadingContent = content => {
   // Find the index of the first colon, i.e. `Class:`.
   const colonPos = findText(content, ':')[0];
 
-  if (colonPos === -1) {
-    return text;
+  if (!colonPos) {
+    return content.children;
   }
 
   // Slice out the prefix from the index gotten above.

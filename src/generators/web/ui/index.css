@@ -7,7 +7,7 @@
 }
 
 main {
-  overflow: hidden;
+  overflow-x: scroll;
 
   /* Code should inherit its font size */
   code {
