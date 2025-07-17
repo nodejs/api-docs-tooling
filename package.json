@@ -1,5 +1,5 @@
 {
-  "name": "@node-core/api-docs-tooling",
+  "name": "@nodejs/doc-kit",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nodejs/api-docs-tooling.git"
@@ -21,7 +21,7 @@
   },
   "main": "./src/index.mjs",
   "bin": {
-    "api-docs-tooling": "./bin/cli.mjs"
+    "doc-kit": "./bin/cli.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

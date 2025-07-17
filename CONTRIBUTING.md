@@ -1,6 +1,6 @@
-# Node.js `api-docs-tooling` Contributing Guide
+# `@nodejs/doc-kit` Contributing Guide
 
-Thank you for your interest in contributing to the Node.js `api-docs-tooling` project! We welcome contributions from everyone, and we appreciate your help in making this project better.
+Thank you for your interest in contributing to the `@nodejs/doc-kit` project! We welcome contributions from everyone, and we appreciate your help in making this project better.
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ Thank you for your interest in contributing to the Node.js `api-docs-tooling` pr
 
 ## Getting Started
 
-The steps below will give you a general idea of how to prepare your local environment for the Node.js `api-docs-tooling` project and general steps for getting things done and landing your contribution.
+The steps below will give you a general idea of how to prepare your local environment for the `@nodejs/doc-kit` project and general steps for getting things done and landing your contribution.
 
 ### Prerequisites
 
