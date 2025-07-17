@@ -98,6 +98,12 @@ export default ({ children }, { data }, idx) => {
   // Create a parsed signature object from the heading text and list
   const signature = parseSignature(data.text, params);
 
+  if (data.type === 'class' && !signature.extends) {
+    // We don't need to add a signature block, since
+    // this class has nothing to extend.
+    return;
+  }
+
   // Determine the displayed name (e.g., handles cases like `new Foo`)
   const displayName = getFullName(data);
 
