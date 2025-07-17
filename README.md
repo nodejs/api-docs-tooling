@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <code>api-docs-tooling</code> is a tool to generate API documentation of Node.js. <a href="https://github.com/nodejs/node/issues/52343">See this issue</a> for more information.
+  <code>@nodejs/doc-kit</code> is a tool to generate API documentation of Node.js. <a href="https://github.com/nodejs/node/issues/52343">See this issue</a> for more information.
 </p>
 
 <p align="center">
@@ -32,11 +32,11 @@
 Local invocation:
 
 ```sh
-$ npx api-docs-tooling --help
+$ npx doc-kit --help
 ```
 
 ```
-Usage: api-docs-tooling [options] [command]
+Usage: @nodejs/doc-kit [options] [command]
 
 CLI tool to generate and lint Node.js API documentation
 
@@ -54,7 +54,7 @@ Commands:
 ### `generate`
 
 ```
-Usage: api-docs-tooling generate [options]
+Usage: @nodejs/doc-kit generate [options]
 
 Generate API docs
 
@@ -74,7 +74,7 @@ Options:
 ### `lint`
 
 ```
-Usage: api-docs-tooling lint [options]
+Usage: @nodejs/doc-kit lint [options]
 
 Run linter independently
 
@@ -90,7 +90,7 @@ Options:
 ### `interactive`
 
 ```
-Usage: api-docs-tooling interactive [options]
+Usage: @nodejs/doc-kit interactive [options]
 
 Launch guided CLI wizard
 
@@ -101,7 +101,7 @@ Options:
 ### `list`
 
 ```
-Usage: api-docs-tooling list [options] <types>
+Usage: @nodejs/doc-kit list [options] <types>
 
 List the given type
 

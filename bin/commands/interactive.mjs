@@ -134,7 +134,7 @@ export default async function interactive() {
   }
 
   // Step 4: Build the final command by escaping values
-  const cmdParts = ['npx', 'api-docs-tooling', name];
+  const cmdParts = ['npx', 'doc-kit', name];
   const executionArgs = [name];
 
   for (const [key, { flags }] of Object.entries(options)) {

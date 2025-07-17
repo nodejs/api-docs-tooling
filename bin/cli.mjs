@@ -10,7 +10,7 @@ import list, { types } from './commands/list.mjs';
 import { errorWrap } from './utils.mjs';
 
 const program = new Command()
-  .name('api-docs-tooling')
+  .name('@nodejs/doc-kit')
   .description('CLI tool to generate and lint Node.js API documentation');
 
 // Registering generate and lint commands
