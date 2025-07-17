@@ -2,11 +2,13 @@ import pluginJs from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import importX from 'eslint-plugin-import-x';
 import jsdoc from 'eslint-plugin-jsdoc';
+import react from 'eslint-plugin-react-x';
 import globals from 'globals';
 
 export default defineConfig([
   pluginJs.configs.recommended,
   importX.flatConfigs.recommended,
+  react.configs.recommended,
   {
     ignores: ['out/', 'src/generators/api-links/__tests__/fixtures/'],
   },
@@ -46,6 +48,8 @@ export default defineConfig([
           },
         },
       ],
+      // We use [] as default props.
+      'react-x/no-unstable-default-props': 'off',
     },
   },
   {
