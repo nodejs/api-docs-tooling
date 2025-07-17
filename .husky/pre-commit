@@ -1,1 +1,1 @@
-npx nano-staged
+npx lint-staged
