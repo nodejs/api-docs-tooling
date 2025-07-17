@@ -1,0 +1,58 @@
+@import '@node-core/ui-components/styles/index.css';
+
+/* Fonts */
+:root {
+  --font-open-sans: 'Open Sans', sans-serif;
+  --font-ibm-plex-mono: 'IBM Plex Mono', monospace;
+}
+
+main {
+  overflow-x: scroll;
+
+  /* Code should inherit its font size */
+  code {
+    font-size: inherit;
+  }
+
+  /* Don't overflow the parent */
+  .overflow-container {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  table {
+    /* In tables, don't pad `a` elements */
+    a {
+      padding-right: unset;
+    }
+  }
+
+  /* Change history positioning */
+  div:has(> h1, > h2, > h3, > h4) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .change-history {
+      margin-left: auto;
+    }
+  }
+
+  .arrow {
+    /* Arrow icon styling */
+    width: calc(var(--spacing, 0.25rem) * 3);
+    display: inline;
+    margin-left: var(--spacing, 0.25rem);
+  }
+
+  .signature {
+    /* Signature styling - remove line numbers and padding */
+    .line {
+      padding-left: unset !important;
+
+      &::after {
+        all: unset !important;
+      }
+    }
+  }
+}

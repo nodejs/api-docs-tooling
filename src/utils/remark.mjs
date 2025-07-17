@@ -1,7 +1,9 @@
 'use strict';
 
-import rehypeShikiji from '@node-core/rehype-shiki';
+import rehypeShikiji from '@node-core/rehype-shiki/plugin';
 import recmaJsx from 'recma-jsx';
+import recmaStringify from 'recma-stringify';
+import rehypeRaw from 'rehype-raw';
 import rehypeRecma from 'rehype-recma';
 import rehypeStringify from 'rehype-stringify';
 import remarkGfm from 'remark-gfm';
@@ -13,6 +15,8 @@ import { unified } from 'unified';
 import syntaxHighlighter from './highlighter.mjs';
 import { AST_NODE_TYPES } from '../generators/jsx-ast/constants.mjs';
 import transformElements from '../generators/jsx-ast/utils/transformer.mjs';
+
+const passThrough = ['element', ...Object.values(AST_NODE_TYPES.MDX)];
 
 /**
  * Retrieves an instance of Remark configured to parse GFM (GitHub Flavored Markdown)
@@ -31,7 +35,7 @@ export const getRemarkRehype = () =>
     // as these are nodes we manually created during the rehype process
     // We also allow dangerous HTML to be passed through, since we have HTML within our Markdown
     // and we trust the sources of the Markdown files
-    .use(remarkRehype, { allowDangerousHtml: true, passThrough: ['element'] })
+    .use(remarkRehype, { allowDangerousHtml: true, passThrough })
     // This is a custom ad-hoc within the Shiki Rehype plugin, used to highlight code
     // and transform them into HAST nodes
     // @TODO: Get rid of @shikijis/rehype and use our own Rehype plugin for Shiki
@@ -54,9 +58,12 @@ export const getRemarkRecma = () =>
     // and we trust the sources of the Markdown files
     .use(remarkRehype, {
       allowDangerousHtml: true,
-      passThrough: ['element', ...Object.values(AST_NODE_TYPES.MDX)],
+      passThrough,
     })
+    // Any `raw` HTML in the markdown must be converted to AST in order for Recma to understand it
+    .use(rehypeRaw, { passThrough })
     .use(rehypeShikiji)
     .use(transformElements)
     .use(rehypeRecma)
-    .use(recmaJsx);
+    .use(recmaJsx)
+    .use(recmaStringify);

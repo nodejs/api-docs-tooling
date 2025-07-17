@@ -175,10 +175,10 @@ export default (textRaw, markdownParameters) => {
    */
   const signature = { params: [] };
 
-  // Find the return value & filter it out
+  // Find the return/extends value & filter it out
   markdownParameters = markdownParameters.filter(value => {
-    if (value.name === 'return') {
-      signature.return = value;
+    if (value.name === 'return' || value.name === 'extends') {
+      signature[value.name] = value;
       return false;
     }
 

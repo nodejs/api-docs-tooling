@@ -1,53 +1,36 @@
 'use strict';
 
-import { create, insert } from '@orama/orama';
+import { create, insertMultiple } from '@orama/orama';
 import { persistToFile } from '@orama/plugin-data-persistence/server';
 
-import { enforceArray } from '../../utils/array.mjs';
+import { SCHEMA } from './constants.mjs';
 import { groupNodesByModule } from '../../utils/generators.mjs';
-import { createSectionBuilder } from '../legacy-json/utils/buildSection.mjs';
+import { transformNodeToString } from '../../utils/unist.mjs';
 
 /**
- * Schema definition for the Orama database
+ * Builds a hierarchical title chain based on heading depths
+ *
+ * @param {ApiDocMetadataEntry[]} headings - All headings sorted by order
+ * @param {number} currentIndex - Index of current heading
+ * @returns {string} Hierarchical title
  */
-const ORAMA_SCHEMA = {
-  name: 'string',
-  type: 'string',
-  desc: 'string',
-  stability: 'number',
-  stabilityText: 'string',
-  meta: {
-    changes: 'string[]',
-    added: 'string[]',
-    napiVersion: 'string[]',
-    deprecated: 'string[]',
-    removed: 'string[]',
-  },
-};
+export function buildHierarchicalTitle(headings, currentIndex) {
+  const currentNode = headings[currentIndex];
+  const titleChain = [currentNode.heading.data.name];
+  let targetDepth = currentNode.heading.depth - 1;
 
-/**
- * Transforms a section into the format expected by Orama
- * @param {import('../legacy-json/types.d.ts').ModuleSection} node - The section to transform
- */
-function transformSectionForOrama(node) {
-  return {
-    name: node.name,
-    type: node.type,
-    desc: node.desc,
-    // Account for duplicate stability nodes
-    stability: enforceArray(node.stability)[0],
-    stabilityText: enforceArray(node.stabilityText)[0],
-    meta: {
-      changes:
-        node.meta?.changes?.map(
-          c => `${enforceArray(c.version).join(', ')}: ${c.description}`
-        ) ?? [],
-      added: node.meta?.added ?? [],
-      napiVersion: node.meta?.napiVersion ?? [],
-      deprecated: node.meta?.deprecated ?? [],
-      removed: node.meta?.removed ?? [],
-    },
-  };
+  // Walk backwards through preceding headings to build hierarchy
+  for (let i = currentIndex - 1; i >= 0 && targetDepth > 0; i--) {
+    const heading = headings[i];
+    const headingDepth = heading.heading.depth;
+
+    if (headingDepth <= targetDepth) {
+      titleChain.unshift(heading.heading.data.name);
+      targetDepth = headingDepth - 1;
+    }
+  }
+
+  return titleChain.join(' > ');
 }
 
 /**
@@ -71,36 +54,36 @@ export default {
    * @param {Input} input
    * @param {Partial<GeneratorOptions>} options
    */
-  async generate(input, { output, version }) {
+  async generate(input, { output }) {
     if (!input?.length) {
       throw new Error('Input data is required and must not be empty');
     }
 
-    if (!output || !version) {
-      throw new Error('Output path and version are required');
+    if (!output) {
+      throw new Error('Output path is required');
     }
 
-    const db = create({ schema: ORAMA_SCHEMA });
-    const buildSection = createSectionBuilder();
-    const groupedModules = groupNodesByModule(input);
-    const headNodes = input.filter(node => node.heading?.depth === 1);
+    const db = create({ schema: SCHEMA });
+    const apiGroups = groupNodesByModule(input);
 
-    // Process each head node and insert into database
-    headNodes.forEach(headNode => {
-      const nodes = groupedModules.get(headNode.api);
+    // Process all API groups and flatten into a single document array
+    const documents = Array.from(apiGroups.values()).flatMap(headings =>
+      headings.map((entry, index) => {
+        const hierarchicalTitle = buildHierarchicalTitle(headings, index);
+        const paragraph = entry.content.children.find(
+          child => child.type === 'paragraph'
+        );
 
-      const section = buildSection(headNode, nodes);
-      const node = (section.modules || section.globals || section.miscs)[0];
-      if (!node) return;
+        return {
+          title: hierarchicalTitle,
+          description: paragraph ? transformNodeToString(paragraph) : undefined,
+          path: `${entry.api}.html#${entry.slug}`,
+        };
+      })
+    );
 
-      const oramaData = transformSectionForOrama(node);
-      insert(db, oramaData);
-    });
-
-    // Generate output filename and persist database
-    const sanitizedVersion = version.raw.replaceAll('.', '-');
-    const outputFilename = `${output}/${sanitizedVersion}-orama-db.json`;
-
-    await persistToFile(db, 'json', outputFilename);
+    // Insert all documents and persist database
+    await insertMultiple(db, documents);
+    await persistToFile(db, 'json', `${output}/orama-db.json`);
   },
 };

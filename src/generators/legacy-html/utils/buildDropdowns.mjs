@@ -1,12 +1,10 @@
 'use strict';
 
-import {
-  DOC_API_BASE_URL_VERSION,
-  DOC_API_BLOB_EDIT_BASE_URL,
-} from '../../../constants.mjs';
+import { DOC_API_BLOB_EDIT_BASE_URL } from '../../../constants.mjs';
 import {
   getCompatibleVersions,
   getVersionFromSemVer,
+  getVersionURL,
 } from '../../../utils/generators.mjs';
 
 /**
@@ -63,9 +61,8 @@ const buildVersions = (api, added, versions) => {
     const parsedVersion = getVersionFromSemVer(version);
 
     const ltsLabel = isLts ? '<b>LTS</b>' : '';
-    const linkToApi = `${DOC_API_BASE_URL_VERSION}${parsedVersion}/api/${api}.html`;
 
-    return `<li><a href="${linkToApi}">${parsedVersion} ${ltsLabel}</a></li>`;
+    return `<li><a href="${getVersionURL(parsedVersion, api)}">${parsedVersion} ${ltsLabel}</a></li>`;
   });
 
   return (

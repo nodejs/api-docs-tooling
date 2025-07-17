@@ -18,7 +18,7 @@ declare global {
   }
 
   export interface StabilityIndexMetadataEntry {
-    index: number;
+    index: string;
     description: string;
   }
 
@@ -114,5 +114,6 @@ declare global {
   export interface ApiDocReleaseEntry {
     version: SemVer;
     isLts: boolean;
+    isCurrent: boolean;
   }
 }

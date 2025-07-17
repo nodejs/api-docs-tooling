@@ -26,7 +26,7 @@ const buildStabilityOverview = headMetadata => {
           createElement('a', { href: `${api}.html` }, heading.data.name)
         ),
         createElement(
-          `td.api_stability.api_stability_${data.index}`,
+          `td.api_stability.api_stability_${parseInt(data.index)}`,
           // Grabs the first sentence of the description
           // to be used as a summary of the Stability Index
           `(${data.index}) ${data.description.split('. ')[0]}`
