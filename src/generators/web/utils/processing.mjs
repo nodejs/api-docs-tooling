@@ -73,16 +73,11 @@ export async function processJSXEntry(
 
   const title = `${entry.data.heading.data.name} | Node.js v${version} Documentation`;
 
-  const scriptTag = `<script>${clientBundle.js}</script>`;
-
   // Replace template placeholders with actual content
-  const filledTemplate = template
+  const renderedHtml = template
     .replace('{{title}}', title)
-    .replace('{{dehydrated}}', dehydrated ?? '');
-
-  const renderedHtml = `${filledTemplate}
-${scriptTag}
-</body></html>`;
+    .replace('{{dehydrated}}', dehydrated ?? '')
+    .replace('{{clientBundleJs}}', () => clientBundle.js);
 
   // The input to `minify` must be a Buffer.
   const finalHTMLBuffer = HTMLMinifier.minify(Buffer.from(renderedHtml), {});
