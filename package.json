@@ -16,7 +16,7 @@
     "test:update-snapshots": "node --test --experimental-test-module-mocks --test-update-snapshots",
     "test:watch": "node --test --experimental-test-module-mocks --watch",
     "prepare": "husky",
-    "run": "node --inspect bin/cli.mjs ",
+    "run": "node bin/cli.mjs ",
     "watch": "node --watch bin/cli.mjs"
   },
   "main": "./src/index.mjs",
