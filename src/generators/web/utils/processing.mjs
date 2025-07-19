@@ -4,6 +4,10 @@ import Mustache from 'mustache';
 
 import bundleCode from './bundle.mjs';
 
+// Generate a unique variable name to capture the result of the server-side code.
+// This prevents naming conflicts.
+const SSRvariable = `_${Math.random().toString(36).slice(2)}`;
+
 /**
  * Executes server-side JavaScript code in a safe, isolated context.
  * This function takes a string of JavaScript code, bundles it, and then runs it
@@ -20,10 +24,6 @@ export async function executeServerCode(serverCode, requireFn) {
   // for execution, ensuring all necessary dependencies are self-contained.
   const { js: bundledServer } = await bundleCode(serverCode, { server: true });
 
-  // Generate a unique variable name to capture the result of the server-side code.
-  // This prevents naming conflicts.
-  const variable = `_${Math.random().toString(36).slice(2)}`;
-
   // Create a new Function from the bundled server code.
   // The `require` argument is passed into the function's scope, allowing the
   // `bundledServer` code to use it for dynamic imports.
@@ -31,7 +31,7 @@ export async function executeServerCode(serverCode, requireFn) {
   // the dynamic variable within the `bundledServer` code is returned by this function.
   const executedFunction = new Function(
     'require',
-    `let ${variable};${bundledServer}return ${variable};`
+    `${bundledServer}\nreturn ${SSRvariable};`
   );
 
   // Execute the dynamically created function with the provided `requireFn`.
@@ -63,7 +63,7 @@ export async function processJSXEntry(
   // `buildServerProgram` takes the JSX-derived code and prepares it for server execution.
   // `executeServerCode` then runs this code in a Node.js environment to produce
   // the initial HTML content (dehydrated state) that will be sent to the client.
-  const serverCode = buildServerProgram(code);
+  const serverCode = buildServerProgram(code, SSRvariable);
   const dehydrated = await executeServerCode(serverCode, requireFn);
 
   // `buildClientProgram` prepares the JSX-derived code for client-side execution.
