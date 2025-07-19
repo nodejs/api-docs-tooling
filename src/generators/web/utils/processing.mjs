@@ -1,6 +1,5 @@
 import HTMLMinifier from '@minify-html/node';
 import { toJs, jsx } from 'estree-util-to-js';
-import Mustache from 'mustache';
 
 import bundleCode from './bundle.mjs';
 
@@ -72,12 +71,13 @@ export async function processJSXEntry(
   const clientCode = buildClientProgram(code);
   const clientBundle = await bundleCode(clientCode);
 
-  // TODO(@avivkeller): Don't depend on Mustache
-  const renderedHtml = Mustache.render(template, {
-    title: `${entry.data.heading.data.name} | Node.js v${version} Documentation`,
-    dehydrated,
-    javascript: clientBundle.js,
-  });
+  const title = `${entry.data.heading.data.name} | Node.js v${version} Documentation`;
+
+  // Replace template placeholders with actual content
+  const renderedHtml = template
+    .replace('{{title}}', title)
+    .replace('{{dehydrated}}', dehydrated ?? '')
+    .replace('{{clientBundleJs}}', () => clientBundle.js);
 
   // The input to `minify` must be a Buffer.
   const finalHTMLBuffer = HTMLMinifier.minify(Buffer.from(renderedHtml), {});
