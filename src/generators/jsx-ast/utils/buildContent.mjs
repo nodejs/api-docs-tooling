@@ -1,5 +1,5 @@
 import { h as createElement } from 'hastscript';
-import { slice, findText } from 'mdast-util-slice-markdown';
+import { slice } from 'mdast-util-slice-markdown';
 import { u as createTree } from 'unist-builder';
 import { SKIP, visit } from 'unist-util-visit';
 
@@ -17,6 +17,7 @@ import {
   INTERNATIONALIZABLE,
   STABILITY_PREFIX_LENGTH,
   TYPES_WITH_METHOD_SIGNATURES,
+  TYPE_PREFIX_LENGTH,
 } from '../constants.mjs';
 import insertSignature, { getFullName } from './buildSignature.mjs';
 
@@ -105,15 +106,7 @@ export const extractHeadingContent = content => {
     return type === 'ctor' ? `${fullName} Constructor` : fullName;
   }
 
-  // Find the index of the first colon, i.e. `Class:`.
-  const colonPos = findText(content, ':')[0];
-
-  if (!colonPos) {
-    return content.children;
-  }
-
-  // Slice out the prefix from the index gotten above.
-  return slice(content, colonPos + 1).node.children;
+  return content.children;
 };
 
 /**
@@ -184,6 +177,20 @@ export const transformHeadingNode = (entry, remark, node, index, parent) => {
     node,
     createChangeElement(entry, remark)
   );
+
+  if (entry.api === 'deprecations') {
+    // On the 'deprecations.md' page, "Type: <XYZ>" turns into an AlertBox
+    const typeNode = parent.children[index + 1];
+    if (typeNode) {
+      parent.children[index + 1] = createJSXElement(JSX_IMPORTS.AlertBox.name, {
+        children: slice(typeNode, TYPE_PREFIX_LENGTH, undefined, {
+          textHandling: { boundaries: 'preserve' },
+        }).node.children,
+        level: 'danger',
+        title: 'Type',
+      });
+    }
+  }
 
   // Add source link element if available, right after heading
   const sourceLink = createSourceLink(entry.source_link);

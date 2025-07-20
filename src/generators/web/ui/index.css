@@ -12,6 +12,7 @@ main {
   /* Code should inherit its font size */
   code {
     font-size: inherit;
+    font-weight: inherit;
   }
 
   /* Don't overflow the parent */
