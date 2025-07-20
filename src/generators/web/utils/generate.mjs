@@ -1,6 +1,6 @@
-import { resolve } from 'node:path/posix';
+import { resolve } from 'node:path';
 
-import { JSX_IMPORTS, ROOT } from '../constants.mjs';
+import { JSX_IMPORTS, ROOT, toPosixPath } from '../constants.mjs';
 
 /**
  * Creates an ES Module `import` statement as a string, based on parameters.
@@ -56,7 +56,10 @@ export default () => {
       // Import client-side CSS styles.
       // This ensures that styles used in the rendered app are loaded on the client.
       // The use of `new URL(...).pathname` resolves the absolute path for `entrypoint.jsx`.
-      createImportDeclaration(null, resolve(ROOT, './ui/index.css')),
+      createImportDeclaration(
+        null,
+        toPosixPath(resolve(ROOT, './ui/index.css'))
+      ),
 
       // Import `hydrate()` from Preact — needed to attach to server-rendered HTML.
       // This is a named import (not default), hence `false` as the third argument.
