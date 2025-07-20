@@ -178,18 +178,20 @@ export const transformHeadingNode = (entry, remark, node, index, parent) => {
     createChangeElement(entry, remark)
   );
 
-  if (entry.api === 'deprecations') {
+  if (entry.api === 'deprecations' && node.depth === 3) {
     // On the 'deprecations.md' page, "Type: <XYZ>" turns into an AlertBox
-    const typeNode = parent.children[index + 1];
-    if (typeNode) {
-      parent.children[index + 1] = createJSXElement(JSX_IMPORTS.AlertBox.name, {
-        children: slice(typeNode, TYPE_PREFIX_LENGTH, undefined, {
+    parent.children[index + 1] = createJSXElement(JSX_IMPORTS.AlertBox.name, {
+      children: slice(
+        parent.children[index + 1],
+        TYPE_PREFIX_LENGTH,
+        undefined,
+        {
           textHandling: { boundaries: 'preserve' },
-        }).node.children,
-        level: 'danger',
-        title: 'Type',
-      });
-    }
+        }
+      ).node.children,
+      level: 'danger',
+      title: 'Type',
+    });
   }
 
   // Add source link element if available, right after heading
