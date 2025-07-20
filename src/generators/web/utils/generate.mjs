@@ -14,6 +14,10 @@ export const createImportDeclaration = (
   source,
   useDefault = true
 ) => {
+  // '\' characters shouldn't escape the next character,
+  // but rather be treated as slashes.
+  source = source.replaceAll('\\', '\\\\');
+
   // Side-effect-only import (CSS)
   if (!importName) {
     return `import "${source}";`;
@@ -56,10 +60,7 @@ export default () => {
       // Import client-side CSS styles.
       // This ensures that styles used in the rendered app are loaded on the client.
       // The use of `new URL(...).pathname` resolves the absolute path for `entrypoint.jsx`.
-      createImportDeclaration(
-        null,
-        resolve(ROOT, './ui/index.css').replaceAll('\\', '\\\\')
-      ),
+      createImportDeclaration(null, resolve(ROOT, './ui/index.css')),
 
       // Import `hydrate()` from Preact — needed to attach to server-rendered HTML.
       // This is a named import (not default), hence `false` as the third argument.

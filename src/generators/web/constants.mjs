@@ -17,19 +17,19 @@ export const ROOT = dirname(fileURLToPath(import.meta.url));
 export const JSX_IMPORTS = {
   NavBar: {
     name: 'NavBar',
-    source: resolve(ROOT, './ui/components/NavBar').replaceAll('\\', '\\\\'),
+    source: resolve(ROOT, './ui/components/NavBar'),
   },
   SideBar: {
     name: 'SideBar',
-    source: resolve(ROOT, './ui/components/SideBar').replaceAll('\\', '\\\\'),
+    source: resolve(ROOT, './ui/components/SideBar'),
   },
   MetaBar: {
     name: 'MetaBar',
-    source: resolve(ROOT, './ui/components/MetaBar').replaceAll('\\', '\\\\'),
+    source: resolve(ROOT, './ui/components/MetaBar'),
   },
   CodeBox: {
     name: 'CodeBox',
-    source: resolve(ROOT, './ui/components/CodeBox').replaceAll('\\', '\\\\'),
+    source: resolve(ROOT, './ui/components/CodeBox'),
   },
   CodeTabs: {
     name: 'CodeTabs',
