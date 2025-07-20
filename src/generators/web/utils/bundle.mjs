@@ -37,7 +37,9 @@ export default async function bundleCode(code, { server = false } = {}) {
     // External dependencies to exclude from bundling.
     // These are expected to be available at runtime in the server environment.
     // This reduces bundle size and avoids bundling shared server libs.
-    external: server ? ['preact', '@node-core/ui-components'] : [],
+    external: server
+      ? ['preact', 'preact-render-to-string', '@node-core/ui-components']
+      : [],
 
     // Inject global compile-time constants that will be replaced in code.
     // These are useful for tree-shaking and conditional branching.

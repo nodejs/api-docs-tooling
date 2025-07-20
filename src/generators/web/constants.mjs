@@ -1,3 +1,17 @@
+import { parse, relative, sep, dirname } from 'node:path';
+import { resolve } from 'node:path/posix';
+import { fileURLToPath } from 'node:url';
+
+// Convert the current module's URL to a filesystem path,
+// then calculate the relative path from the system root directory
+// to this file. This relative path uses platform-specific separators,
+// so replace them with forward slashes ("/") for consistency and web compatibility.
+// Finally, prepend a leading slash to form an absolute root-relative path string.
+//
+// This produces a POSIX-style absolute path, even on Windows systems.
+const dir = dirname(fileURLToPath(import.meta.url));
+export const ROOT = '/' + relative(parse(dir).root, dir).replaceAll(sep, '/');
+
 /**
  * @typedef {Object} JSXImportConfig
  * @property {string} name - The name of the component to be imported.
@@ -12,19 +26,19 @@
 export const JSX_IMPORTS = {
   NavBar: {
     name: 'NavBar',
-    source: new URL('./ui/components/NavBar', import.meta.url).pathname,
+    source: resolve(ROOT, './ui/components/NavBar'),
   },
   SideBar: {
     name: 'SideBar',
-    source: new URL('./ui/components/SideBar', import.meta.url).pathname,
+    source: resolve(ROOT, './ui/components/SideBar'),
   },
   MetaBar: {
     name: 'MetaBar',
-    source: new URL('./ui/components/MetaBar', import.meta.url).pathname,
+    source: resolve(ROOT, './ui/components/MetaBar'),
   },
   CodeBox: {
     name: 'CodeBox',
-    source: new URL('./ui/components/CodeBox', import.meta.url).pathname,
+    source: resolve(ROOT, './ui/components/CodeBox'),
   },
   CodeTabs: {
     name: 'CodeTabs',
