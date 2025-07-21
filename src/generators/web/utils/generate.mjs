@@ -1,4 +1,4 @@
-import { resolve } from 'node:path/posix';
+import { resolve } from 'node:path';
 
 import { JSX_IMPORTS, ROOT } from '../constants.mjs';
 
@@ -14,6 +14,10 @@ export const createImportDeclaration = (
   source,
   useDefault = true
 ) => {
+  // '\' characters shouldn't escape the next character,
+  // but rather be treated as slashes.
+  source = source.replaceAll('\\', '\\\\');
+
   // Side-effect-only import (CSS)
   if (!importName) {
     return `import "${source}";`;
