@@ -9,6 +9,15 @@ import { SKIP, visit } from 'unist-util-visit';
 import createMetadata from '../../../metadata.mjs';
 import createNodeSlugger from '../../../utils/parser/slugger.mjs';
 import createQueries from '../../../utils/queries/index.mjs';
+import {
+  isLinkReference,
+  isMarkdownUrl,
+  isHeading,
+  isStabilityNode,
+  isYamlNode,
+  isTextWithType,
+  isTextWithUnixManual,
+} from '../../../utils/queries/unist.mjs';
 import { getRemark } from '../../../utils/remark.mjs';
 
 /**
@@ -16,6 +25,12 @@ import { getRemark } from '../../../utils/remark.mjs';
  *
  * @param {ParserOutput<import('mdast').Root>} input
  * @returns {Promise<Array<ApiDocMetadataEntry>>}
+ */
+/**
+ *
+ * @param root0
+ * @param root0.file
+ * @param root0.tree
  */
 export const parseApiDoc = ({ file, tree }) => {
   /**
@@ -54,7 +69,7 @@ export const parseApiDoc = ({ file, tree }) => {
   const headingNodes = selectAll('heading', tree);
 
   // Handles Markdown link references and updates them to be plain links
-  visit(tree, createQueries.UNIST.isLinkReference, node =>
+  visit(tree, isLinkReference, node =>
     updateLinkReference(node, markdownDefinitions)
   );
 
@@ -64,9 +79,7 @@ export const parseApiDoc = ({ file, tree }) => {
 
   // Handles the normalisation URLs that reference to API doc files with .md extension
   // to replace the .md into .html, since the API doc files get eventually compiled as HTML
-  visit(tree, createQueries.UNIST.isMarkdownUrl, node =>
-    updateMarkdownLink(node)
-  );
+  visit(tree, isMarkdownUrl, node => updateMarkdownLink(node));
 
   // If the document has no headings but it has content, we add a fake heading to the top
   // so that our parsing logic can work correctly, and generate content for the whole file
@@ -79,7 +92,7 @@ export const parseApiDoc = ({ file, tree }) => {
   // (so all elements after a Heading until the next Heading)
   // and then it creates and updates a Metadata entry for each API doc entry
   // and then generates the final content for each API doc entry and pushes it to the collection
-  visit(tree, createQueries.UNIST.isHeading, (headingNode, index) => {
+  visit(tree, isHeading, (headingNode, index) => {
     // Creates a new Metadata entry for the current API doc file
     const apiEntryMetadata = createMetadata(nodeSlugger);
 
@@ -90,8 +103,7 @@ export const parseApiDoc = ({ file, tree }) => {
     // This is used for ensuring that we don't include items that would
     // belong only to the next heading to the current Heading metadata
     // Note that if there is no next heading, we use the current node as the next one
-    const nextHeadingNode =
-      findAfter(tree, index, createQueries.UNIST.isHeading) ?? headingNode;
+    const nextHeadingNode = findAfter(tree, index, isHeading) ?? headingNode;
 
     // This is the cutover index of the subtree that we should get
     // of all the Nodes within the AST tree that belong to this section
@@ -109,14 +121,14 @@ export const parseApiDoc = ({ file, tree }) => {
 
     // Visits all Stability Index nodes from the current subtree if there's any
     // and then apply the Stability Index metadata to the current metadata entry
-    visit(subTree, createQueries.UNIST.isStabilityNode, node =>
+    visit(subTree, isStabilityNode, node =>
       addStabilityMetadata(node, apiEntryMetadata)
     );
 
     // Visits all HTML nodes from the current subtree and if there's any that matches
     // our YAML metadata structure, it transforms into YAML metadata
     // and then apply the YAML Metadata to the current Metadata entry
-    visit(subTree, createQueries.UNIST.isYamlNode, node => {
+    visit(subTree, isYamlNode, node => {
       // TODO: Is there always only one YAML node?
       apiEntryMetadata.setYamlPosition(node.position);
       addYAMLMetadata(node, apiEntryMetadata);
@@ -124,19 +136,17 @@ export const parseApiDoc = ({ file, tree }) => {
 
     // Visits all Text nodes from the current subtree and if there's any that matches
     // any API doc type reference and then updates the type reference to be a Markdown link
-    visit(subTree, createQueries.UNIST.isTextWithType, (node, _, parent) =>
+    visit(subTree, isTextWithType, (node, _, parent) =>
       updateTypeReference(node, parent)
     );
 
     // Visits all Unix manual references, and replaces them with links
-    visit(
-      subTree,
-      createQueries.UNIST.isTextWithUnixManual,
-      (node, _, parent) => updateUnixManualReference(node, parent)
+    visit(subTree, isTextWithUnixManual, (node, _, parent) =>
+      updateUnixManualReference(node, parent)
     );
 
     // Removes already parsed items from the subtree so that they aren't included in the final content
-    remove(subTree, [createQueries.UNIST.isYamlNode]);
+    remove(subTree, [isYamlNode]);
 
     // Applies the AST transformations to the subtree based on the API doc entry Metadata
     // Note that running the transformation on the subtree isn't costly as it is a reduced tree

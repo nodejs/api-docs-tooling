@@ -23,10 +23,10 @@ describe('parseChangelog', () => {
 
     const results = await parseChangelog('...');
 
-    assert.partialDeepStrictEqual(results, [
-      { version: { raw: '24.0.0' }, isLts: false },
-      { version: { raw: '22.0.0' }, isLts: true },
-    ]);
+    assert.equal(results[0].version.version, '24.0.0');
+    assert.equal(results[0].isLts, false);
+    assert.equal(results[1].version.version, '22.0.0');
+    assert.equal(results[1].isLts, true);
   });
 });
 

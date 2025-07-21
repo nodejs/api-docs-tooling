@@ -1,11 +1,12 @@
+import parseSignature from './parseSignature.mjs';
 import {
+  TYPED_LIST_STARTERS,
   DEFAULT_EXPRESSION,
   LEADING_HYPHEN,
   NAME_EXPRESSION,
   TYPE_EXPRESSION,
-} from '../constants.mjs';
-import parseSignature from './parseSignature.mjs';
-import createQueries from '../../../utils/queries/index.mjs';
+} from '../../../utils/queries/regex.mjs';
+import { isTypedList } from '../../../utils/queries/unist.mjs';
 import { transformNodesToString } from '../../../utils/unist.mjs';
 
 /**
@@ -46,7 +47,7 @@ export const extractPattern = (text, pattern, key, current) => {
 export function parseListItem(child) {
   const current = {};
 
-  const subList = child.children.find(createQueries.UNIST.isTypedList);
+  const subList = child.children.find(isTypedList);
 
   // Extract and clean raw text from the node, excluding nested lists
   current.textRaw = transformTypeReferences(
@@ -58,7 +59,7 @@ export function parseListItem(child) {
   let text = current.textRaw;
 
   // Identify return items or extract key properties (name, type, default) from the text
-  const starter = text.match(createQueries.QUERIES.typedListStarters);
+  const starter = text.match(TYPED_LIST_STARTERS);
   if (starter) {
     current.name =
       starter[1] === 'Returns' ? 'return' : starter[1].toLowerCase();

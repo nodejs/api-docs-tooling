@@ -2,8 +2,6 @@
 
 import { visit } from 'estree-util-visit';
 
-import { CONSTRUCTOR_EXPRESSION } from '../constants.mjs';
-
 /**
  * @see https://github.com/estree/estree/blob/master/es5.md#assignmentexpression
  *
@@ -99,7 +97,7 @@ function handleExpression(node, basename, nameToLineNumberMap) {
             case 'Identifier': {
               exports.identifiers.push(value.name);
 
-              if (CONSTRUCTOR_EXPRESSION.test(value.name[0])) {
+              if (/^[A-Z]/.test(value.name)) {
                 exports.ctors.push(value.name);
               }
 

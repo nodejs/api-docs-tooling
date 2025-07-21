@@ -1,7 +1,7 @@
 import { highlightToHast } from '@node-core/rehype-shiki';
 import { h as createElement } from 'hastscript';
 
-import createQueries from '../../../utils/queries/index.mjs';
+import { isTypedList } from '../../../utils/queries/unist.mjs';
 import { parseListItem } from '../../legacy-json/utils/parseList.mjs';
 import parseSignature from '../../legacy-json/utils/parseSignature.mjs';
 
@@ -89,7 +89,7 @@ export const getFullName = ({ name, text }, fallback = name) => {
  */
 export default ({ children }, { data }, idx) => {
   // Try to locate the parameter list immediately following the heading
-  const listIdx = children.findIndex(createQueries.UNIST.isTypedList);
+  const listIdx = children.findIndex(isTypedList);
 
   // Parse parameters from the list, if found
   const params =

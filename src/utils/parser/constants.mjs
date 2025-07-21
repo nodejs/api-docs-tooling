@@ -1,5 +1,14 @@
 'use strict';
 
+import {
+  CLASS_HEADING,
+  CLASS_METHOD_HEADING,
+  CTOR_HEADING,
+  EVENT_HEADING,
+  METHOD_HEADING,
+  PROPERTY_HEADING,
+} from '../queries/regex.mjs';
+
 // These are string replacements specific to Node.js API docs for anchor IDs
 export const DOC_API_SLUGS_REPLACEMENTS = [
   { from: /node.js/i, to: 'nodejs' }, // Replace Node.js
@@ -28,45 +37,13 @@ export const DOC_MDN_BASE_URL_JS_GLOBALS = `${DOC_MDN_BASE_URL_JS}Reference/Glob
 // These are regular expressions used to determine if a given Markdown heading
 // is a specific type of API Doc entry (e.g., Event, Class, Method, etc)
 // and to extract the inner content of said Heading to be used as the API doc entry name
-const CAMEL_CASE = '\\w+(?:\\.\\w+)*';
-const FUNCTION_CALL = '\\([^)]*\\)';
-
-// Matches "bar":
-// Group 1: foo[bar]
-// Group 2: foo.bar
-const PROPERTY = `${CAMEL_CASE}(?:(\\[${CAMEL_CASE}\\])|\\.(\\w+))`;
-
 export const DOC_API_HEADING_TYPES = [
-  {
-    type: 'method',
-    regex: new RegExp(`^\`?${PROPERTY}${FUNCTION_CALL}\`?$`, 'i'),
-  },
-  { type: 'event', regex: /^Event: +`?['"]?([^'"]+)['"]?`?$/i },
-  {
-    type: 'class',
-    regex: new RegExp(
-      `Class: +\`?(${CAMEL_CASE}(?: extends +${CAMEL_CASE})?)\`?$`,
-      'i'
-    ),
-  },
-  {
-    type: 'ctor',
-    regex: new RegExp(
-      `^(?:Constructor: +)?\`?new +(${CAMEL_CASE})${FUNCTION_CALL}\`?$`,
-      'i'
-    ),
-  },
-  {
-    type: 'classMethod',
-    regex: new RegExp(
-      `^Static method: +\`?${PROPERTY}${FUNCTION_CALL}\`?$`,
-      'i'
-    ),
-  },
-  {
-    type: 'property',
-    regex: new RegExp(`^(?:Class property: +)?\`?${PROPERTY}\`?$`, 'i'),
-  },
+  { type: 'method', regex: METHOD_HEADING },
+  { type: 'event', regex: EVENT_HEADING },
+  { type: 'class', regex: CLASS_HEADING },
+  { type: 'ctor', regex: CTOR_HEADING },
+  { type: 'classMethod', regex: CLASS_METHOD_HEADING },
+  { type: 'property', regex: PROPERTY_HEADING },
 ];
 
 // This is a mapping for types within the Markdown content and their respective

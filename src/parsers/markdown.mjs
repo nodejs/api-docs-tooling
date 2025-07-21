@@ -4,16 +4,12 @@ import { coerce } from 'semver';
 
 import { loadFromURL } from '../utils/parser.mjs';
 import createQueries from '../utils/queries/index.mjs';
+import {
+  LIST_ITEM,
+  NODE_LTS_VERSION,
+  NODE_VERSIONS,
+} from '../utils/queries/regex.mjs';
 import { getRemark } from '../utils/remark.mjs';
-
-// A ReGeX for retrieving Node.js version headers from the CHANGELOG.md
-const NODE_VERSIONS_REGEX = /\* \[Node\.js ([0-9.]+)\]\S+ (.*)\r?\n/g;
-
-// A ReGeX for retrieving the list items in the index document
-const LIST_ITEM_REGEX = /\* \[(.*?)\]\((.*?)\.md\)/g;
-
-// A ReGeX for checking if a Node.js version is an LTS release
-const NODE_LTS_VERSION_REGEX = /Long Term Support/i;
 
 /**
  * Creates an API doc parser for a given Markdown API doc file
@@ -79,11 +75,11 @@ const createParser = linter => {
 export const parseChangelog = async path => {
   const changelog = await loadFromURL(path);
 
-  const nodeMajors = Array.from(changelog.matchAll(NODE_VERSIONS_REGEX));
+  const nodeMajors = Array.from(changelog.matchAll(NODE_VERSIONS));
 
   return nodeMajors.map(match => ({
     version: coerce(match[1]),
-    isLts: NODE_LTS_VERSION_REGEX.test(match[2]),
+    isLts: NODE_LTS_VERSION.test(match[2]),
   }));
 };
 
@@ -96,7 +92,7 @@ export const parseChangelog = async path => {
 export const parseIndex = async path => {
   const index = await loadFromURL(path);
 
-  const items = Array.from(index.matchAll(LIST_ITEM_REGEX));
+  const items = Array.from(index.matchAll(LIST_ITEM));
 
   return items.map(([, section, api]) => ({ section, api }));
 };

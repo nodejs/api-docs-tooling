@@ -3,11 +3,8 @@
 import { find } from 'unist-util-find';
 import { findBefore } from 'unist-util-find-before';
 
-import {
-  INTRODUCED_IN_REGEX,
-  LINT_MESSAGES,
-  LLM_DESCRIPTION_REGEX,
-} from '../constants.mjs';
+import { INTRODUCED_IN, LLM_DESCRIPTION } from '../../utils/queries/regex.mjs';
+import { LINT_MESSAGES } from '../constants.mjs';
 
 /**
  * Finds the first node that matches the condition before the first h2 heading,
@@ -25,13 +22,13 @@ const findTopLevelEntry = (node, condition) => {
 const METADATA_CHECKS = Object.freeze([
   {
     name: 'introducedIn',
-    regex: INTRODUCED_IN_REGEX,
+    regex: INTRODUCED_IN,
     level: 'info',
     message: LINT_MESSAGES.missingIntroducedIn,
   },
   {
     name: 'llmDescription',
-    regex: LLM_DESCRIPTION_REGEX,
+    regex: LLM_DESCRIPTION,
     level: 'warn',
     message: LINT_MESSAGES.missingLlmDescription,
   },

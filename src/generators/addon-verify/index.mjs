@@ -5,13 +5,13 @@ import { join } from 'node:path';
 
 import { visit } from 'unist-util-visit';
 
-import { EXTRACT_CODE_FILENAME_COMMENT } from './constants.mjs';
 import { generateFileList } from './utils/generateFileList.mjs';
 import {
   generateSectionFolderName,
   isBuildableSection,
   normalizeSectionName,
 } from './utils/section.mjs';
+import { EXTRACT_CODE_FILENAME_COMMENT } from '../../utils/queries/regex.mjs';
 
 /**
  * This generator generates a file list from code blocks extracted from
