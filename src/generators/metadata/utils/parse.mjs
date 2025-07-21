@@ -20,7 +20,7 @@ import {
 } from '../../../utils/queries/unist.mjs';
 import { getRemark } from '../../../utils/remark.mjs';
 
-/**x
+/**
  * This generator generates a flattened list of metadata entries from a API doc
  *
  * @param {ParserOutput<import('mdast').Root>} input

@@ -1,6 +1,6 @@
 const CAMEL_CASE = '\\w+(?:\\.\\w+)*';
 const FUNCTION_CALL = '\\([^)]*\\)';
-const PROPERTY = `?${CAMEL_CASE}(?:(\\[\\w+\\.\\w+\\])|\\.(\\w+))`;
+const PROPERTY = `${CAMEL_CASE}(?:(\\[\\w+\\.\\w+\\])|\\.(\\w+))`;
 
 /**
  * Matches class headings like `Class: SomeClass` or `Class: SomeClass extends BaseClass`
@@ -30,7 +30,7 @@ export const CTOR_HEADING = new RegExp(
  * Matches class property headings like `Class property: SomeClass.prop` or `SomeClass[foo.bar]`
  */
 export const PROPERTY_HEADING = new RegExp(
-  `^(?:Class property: +)?\`${PROPERTY}\`?$`,
+  `^(?:Class property: +)?\`?${PROPERTY}\`?$`,
   'i'
 );
 
