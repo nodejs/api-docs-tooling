@@ -18,6 +18,9 @@ export const TOC_MAX_HEADING_DEPTH = 3;
 // 'Stability: '.length + ' - '.length
 export const STABILITY_PREFIX_LENGTH = 14;
 
+// 'Type: '.length
+export const TYPE_PREFIX_LENGTH = 6;
+
 /**
  * HTML tag to UI component mappings
  */
