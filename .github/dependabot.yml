@@ -23,7 +23,7 @@ updates:
     cooldown:
       default-days: 3
     groups:
-      fromat:
+      format:
         patterns:
           - 'prettier'
       lint:
