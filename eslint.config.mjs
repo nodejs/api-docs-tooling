@@ -2,21 +2,19 @@ import pluginJs from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import importX from 'eslint-plugin-import-x';
 import jsdoc from 'eslint-plugin-jsdoc';
-import react from 'eslint-plugin-react';
+import react from 'eslint-plugin-react-x';
 import globals from 'globals';
 
 export default defineConfig([
   pluginJs.configs.recommended,
   importX.flatConfigs.recommended,
+  react.configs.recommended,
   {
     ignores: ['out/', 'src/generators/api-links/__tests__/fixtures/'],
   },
   {
     files: ['**/*.{mjs,jsx}'],
-    plugins: {
-      jsdoc,
-      react,
-    },
+    plugins: { jsdoc },
     languageOptions: {
       ecmaVersion: 'latest',
       parserOptions: {
@@ -28,8 +26,6 @@ export default defineConfig([
     },
     rules: {
       'object-shorthand': 'error',
-      'react/jsx-uses-react': 'error',
-      'react/jsx-uses-vars': 'error',
       'import-x/namespace': 'off',
       'import-x/no-named-as-default': 'off',
       'import-x/no-named-as-default-member': 'off',
@@ -52,6 +48,8 @@ export default defineConfig([
           },
         },
       ],
+      // We use [] as default props.
+      'react-x/no-unstable-default-props': 'off',
     },
   },
   {
