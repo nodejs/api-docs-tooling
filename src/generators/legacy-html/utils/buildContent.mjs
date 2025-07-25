@@ -6,7 +6,12 @@ import { SKIP, visit } from 'unist-util-visit';
 
 import buildExtraContent from './buildExtraContent.mjs';
 import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
-import createQueries from '../../../utils/queries/index.mjs';
+import { LINKS_WITH_TYPES } from '../../../utils/queries/regex.mjs';
+import {
+  isHeading,
+  isHtmlWithType,
+  isStabilityNode,
+} from '../../../utils/queries/unist.mjs';
 
 /**
  * Builds a Markdown heading for a given node
@@ -71,7 +76,7 @@ const buildStability = ({ children, data }, index, parent) => {
  */
 const buildHtmlTypeLink = node => {
   node.value = node.value.replace(
-    createQueries.QUERIES.linksWithTypes,
+    LINKS_WITH_TYPES,
     (_, type, link) => `<a href="${link}" class="type">&lt;${type}&gt;</a>`
   );
 };
@@ -223,16 +228,16 @@ export default (headNodes, metadataEntries, remark) => {
       const content = structuredClone(entry.content);
 
       // Parses the Heading nodes into Heading elements
-      visit(content, createQueries.UNIST.isHeading, buildHeading);
+      visit(content, isHeading, buildHeading);
 
       // Parses the Blockquotes into Stability elements
       // This is treated differently as we want to preserve the position of a Stability Index
       // within the content, so we can't just remove it and append it to the metadata
-      visit(content, createQueries.UNIST.isStabilityNode, buildStability);
+      visit(content, isStabilityNode, buildStability);
 
       // Parses the type references that got replaced into Markdown links (raw)
       // into actual HTML links, these then get parsed into HAST nodes on `runSync`
-      visit(content, createQueries.UNIST.isHtmlWithType, buildHtmlTypeLink);
+      visit(content, isHtmlWithType, buildHtmlTypeLink);
 
       // Splits the content into the Heading node and the rest of the content
       const [headingNode, ...restNodes] = content.children;

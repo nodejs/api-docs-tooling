@@ -8,7 +8,7 @@ import {
   extractYamlContent,
   normalizeYamlSyntax,
 } from '../../utils/parser/index.mjs';
-import createQueries from '../../utils/queries/index.mjs';
+import { isYamlNode } from '../../utils/queries/unist.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
 import {
   createYamlIssueReporter,
@@ -94,7 +94,7 @@ export const extractVersions = ({ context, node, createYamlIssue }) => {
  * @returns {void}
  */
 export const invalidChangeVersion = context => {
-  visit(context.tree, createQueries.UNIST.isYamlNode, node => {
+  visit(context.tree, isYamlNode, node => {
     const yamlContent = extractYamlContent(node);
 
     const normalizedYaml = normalizeYamlSyntax(yamlContent);

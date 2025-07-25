@@ -1,6 +1,7 @@
 import { h as createElement } from 'hastscript';
 
-import createQueries from '../../../utils/queries/index.mjs';
+import { TYPED_LIST_STARTERS } from '../../../utils/queries/regex.mjs';
+import { isTypedList } from '../../../utils/queries/unist.mjs';
 
 /**
  * Determines if a node looks like part of a type annotation.
@@ -51,9 +52,7 @@ export const extractPropertyName = children => {
 
   // Text with a prefix like "Type:", "Param:", etc.
   if (first.type === 'text') {
-    const starterMatch = first.value.match(
-      createQueries.QUERIES.typedListStarters
-    );
+    const starterMatch = first.value.match(TYPED_LIST_STARTERS);
     if (starterMatch) {
       // If the starter is 'Type', we don't have a property.
       const label = starterMatch[1] !== 'Type' && starterMatch[1];
@@ -133,7 +132,7 @@ export const parseListIntoProperties = node => {
       // The remaining children are the description
       desc: children,
       // Is there a list within this list?
-      sublist: sublists.find(createQueries.UNIST.isTypedList),
+      sublist: sublists.find(isTypedList),
     });
   }
 

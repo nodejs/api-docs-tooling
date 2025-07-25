@@ -12,7 +12,7 @@ import {
   DOC_TYPES_MAPPING_PRIMITIVES,
   DOC_MAN_BASE_URL,
 } from './constants.mjs';
-import createQueries from '../queries/index.mjs';
+import { YAML_INNER_CONTENT } from '../queries/regex.mjs';
 
 /**
  * Extracts raw YAML content from a node
@@ -22,7 +22,7 @@ import createQueries from '../queries/index.mjs';
  */
 export const extractYamlContent = node => {
   return node.value.replace(
-    createQueries.QUERIES.yamlInnerContent,
+    YAML_INNER_CONTENT,
     // Either capture a YAML multinline block, or a simple single-line YAML block
     (_, simple, yaml) => simple || yaml
   );

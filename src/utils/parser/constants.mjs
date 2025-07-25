@@ -1,5 +1,14 @@
 'use strict';
 
+import {
+  CLASS_HEADING,
+  CLASS_METHOD_HEADING,
+  CTOR_HEADING,
+  EVENT_HEADING,
+  METHOD_HEADING,
+  PROPERTY_HEADING,
+} from '../queries/regex.mjs';
+
 // This is the base URL of the MDN Web documentation
 export const DOC_MDN_BASE_URL = 'https://developer.mozilla.org/en-US/docs/Web/';
 
@@ -19,34 +28,12 @@ export const DOC_MDN_BASE_URL_JS_GLOBALS = `${DOC_MDN_BASE_URL_JS}Reference/Glob
 // is a specific type of API Doc entry (e.g., Event, Class, Method, etc)
 // and to extract the inner content of said Heading to be used as the API doc entry name
 export const DOC_API_HEADING_TYPES = [
-  {
-    type: 'method',
-    regex:
-      // Group 1: foo[bar]()
-      // Group 2: foo.bar()
-      // Group 3: foobar()
-      /^`?(?:\w*(?:(\[[^\]]+\])|(?:\.(\w+)))|(\w+))\([^)]*\)`?$/i,
-  },
-  { type: 'event', regex: /^Event: +`?['"]?([^'"]+)['"]?`?$/i },
-  {
-    type: 'class',
-    regex:
-      /^Class: +`?([A-Z]\w+(?:\.[A-Z]\w+)*(?: +extends +[A-Z]\w+(?:\.[A-Z]\w+)*)?)`?$/i,
-  },
-  {
-    type: 'ctor',
-    regex: /^(?:Constructor: +)?`?new +([A-Z]\w+(?:\.[A-Z]\w+)*)\([^)]*\)`?$/i,
-  },
-  {
-    type: 'classMethod',
-    regex:
-      /^Static method: +`?[A-Z]\w+(?:\.[A-Z]\w+)*(?:(\[\w+\.\w+\])|\.(\w+))\([^)]*\)`?$/i,
-  },
-  {
-    type: 'property',
-    regex:
-      /^(?:Class property: +)?`?[A-Z]\w+(?:\.[A-Z]\w+)*(?:(\[\w+\.\w+\])|\.(\w+))`?$/i,
-  },
+  { type: 'method', regex: METHOD_HEADING },
+  { type: 'event', regex: EVENT_HEADING },
+  { type: 'class', regex: CLASS_HEADING },
+  { type: 'ctor', regex: CTOR_HEADING },
+  { type: 'classMethod', regex: CLASS_METHOD_HEADING },
+  { type: 'property', regex: PROPERTY_HEADING },
 ];
 
 // This is a mapping for types within the Markdown content and their respective
