@@ -29,7 +29,7 @@ const PROPERTY = `${CAMEL_CASE}(?:(\\[${CAMEL_CASE}\\])|\\.(\\w+))`;
 export const DOC_API_HEADING_TYPES = [
   {
     type: 'method',
-    regex: new RegExp(`^\`${PROPERTY}${FUNCTION_CALL}\`?$`, 'i'),
+    regex: new RegExp(`^\`?${PROPERTY}${FUNCTION_CALL}\`?$`, 'i'),
   },
   { type: 'event', regex: /^Event: +`?['"]?([^'"]+)['"]?`?$/i },
   {
