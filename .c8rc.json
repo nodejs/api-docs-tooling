@@ -4,6 +4,7 @@
     "eslint.config.mjs",
     "**/fixtures",
     "src/generators/legacy-html/assets",
-    "src/generators/web/ui"
+    "src/generators/web/ui",
+    "**/*.d.ts"
   ]
 }
