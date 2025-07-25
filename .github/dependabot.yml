@@ -10,6 +10,8 @@ updates:
       interval: monthly
     commit-message:
       prefix: meta
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
   - package-ecosystem: npm
     directory: '/'
@@ -18,8 +20,10 @@ updates:
       interval: monthly
     commit-message:
       prefix: meta
+    cooldown:
+      default-days: 3
     groups:
-      fromat:
+      format:
         patterns:
           - 'prettier'
       lint:
