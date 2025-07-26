@@ -22,6 +22,13 @@ describe('transformTypeToReferenceLink', () => {
       '[`<Array>`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)'
     );
   });
+
+  it('should transform a prefixed type into a Markdown link', () => {
+    strictEqual(
+      transformTypeToReferenceLink('prefix.Type'),
+      '[`<prefix.Type>`](prefix.html#class-prefixtype)'
+    );
+  });
 });
 
 describe('normalizeYamlSyntax', () => {
