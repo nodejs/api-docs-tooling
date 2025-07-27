@@ -197,7 +197,6 @@ createQueries.QUERIES = {
   // Fixes the references to Markdown pages into the API documentation
   markdownUrl: /^(?![+a-zA-Z]+:)([^#?]+)\.md(#.+)?$/,
   // ReGeX to match the {Type}<Type> (API type references)
-
   normalizeTypes: /(\{|<)(?! )[^<({})>]+(?! )(\}|>)/g,
   // ReGex to match the type API type references that got already parsed
   // so that they can be transformed into HTML links
