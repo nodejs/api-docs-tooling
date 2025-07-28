@@ -26,12 +26,6 @@ import { getRemark } from '../../../utils/remark.mjs';
  * @param {ParserOutput<import('mdast').Root>} input
  * @returns {Promise<Array<ApiDocMetadataEntry>>}
  */
-/**
- *
- * @param root0
- * @param root0.file
- * @param root0.tree
- */
 export const parseApiDoc = ({ file, tree }) => {
   /**
    * This holds references to all the Metadata entries for a given file
