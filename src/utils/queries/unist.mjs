@@ -1,8 +1,8 @@
 import {
   LINKS_WITH_TYPES,
   MARKDOWN_URL,
-  NAME_EXPRESSION,
   STABILITY_INDEX,
+  TYPE_EXPRESSION,
   TYPED_LIST_STARTERS,
   UNIX_MANUAL_PAGE,
   YAML_INNER_CONTENT,
@@ -29,7 +29,7 @@ export const isYamlNode = ({ type, value }) =>
  * @returns {boolean}
  */
 export const isTextWithType = ({ type, value }) =>
-  type === 'text' && NAME_EXPRESSION.test(value);
+  type === 'text' && TYPE_EXPRESSION.test(value);
 
 /**
  * @param {import('@types/mdast').Text} text
