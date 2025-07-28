@@ -1,7 +1,7 @@
 import {
   LINKS_WITH_TYPES,
   MARKDOWN_URL,
-  NORMALIZE_TYPES,
+  NAME_EXPRESSION,
   STABILITY_INDEX,
   TYPED_LIST_STARTERS,
   UNIX_MANUAL_PAGE,
@@ -29,7 +29,7 @@ export const isYamlNode = ({ type, value }) =>
  * @returns {boolean}
  */
 export const isTextWithType = ({ type, value }) =>
-  type === 'text' && NORMALIZE_TYPES.test(value);
+  type === 'text' && NAME_EXPRESSION.test(value);
 
 /**
  * @param {import('@types/mdast').Text} text

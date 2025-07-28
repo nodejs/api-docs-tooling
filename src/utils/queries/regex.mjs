@@ -119,6 +119,8 @@ export const EVENT_HEADING = /^Event: +`?['"]?([^'"]+)['"]?`?$/i;
 // TYPE AND REFERENCE PATTERNS
 // ============================================================================
 
+const TYPE_SAFE = '[^<({})>]+';
+
 /**
  * Matches API type references enclosed in curly braces or angle brackets.
  * Used to normalize type references across documentation.
@@ -127,7 +129,10 @@ export const EVENT_HEADING = /^Event: +`?['"]?([^'"]+)['"]?`?$/i;
  * - '{Buffer|string}'
  * - '<Object>'
  */
-export const NORMALIZE_TYPES = /(\{|<)(?! )[^<({})>]+(?! )(\}|>)/g;
+export const TYPE_EXPRESSION = new RegExp(
+  `(?:\\{|<)(${TYPE_SAFE})(?:\\}|>)`,
+  'g'
+);
 
 /**
  * Matches already-parsed API type references in Markdown link format.
@@ -136,7 +141,10 @@ export const NORMALIZE_TYPES = /(\{|<)(?! )[^<({})>]+(?! )(\}|>)/g;
  * - '[`<string>`](/api/string)'
  * - '[`<Buffer>`](/api/buffer)'
  */
-export const LINKS_WITH_TYPES = /\[`<[^<({})>]+>`\]\((\S+)\)/g;
+export const LINKS_WITH_TYPES = new RegExp(
+  `\\[\`<${TYPE_SAFE}>\`\\]\\((\\S+)\\)`,
+  'g'
+);
 
 /**
  * Matches headings that start typed lists in documentation.
@@ -148,15 +156,6 @@ export const LINKS_WITH_TYPES = /\[`<[^<({})>]+>`\]\((\S+)\)/g;
  * - 'Returns:'
  */
 export const TYPED_LIST_STARTERS = /^(Returns|Extends|Type):?\s*/;
-
-/**
- * Matches type expressions in curly braces.
- * Examples:
- * - '{string}'
- * - '{Buffer|null}'
- * - '{Object}'
- */
-export const TYPE_EXPRESSION = /^\{([^}]+)\}\s*/;
 
 // ============================================================================
 // PARAMETER AND EXPRESSION PATTERNS
@@ -187,14 +186,6 @@ export const PARAM_EXPRESSION = /\((.+)\);?$/;
  * - '**Default:** 0'
  */
 export const DEFAULT_EXPRESSION = /\s*\*\*Default:\*\*\s*([^]+)$/i;
-
-/**
- * Matches leading hyphens in list items.
- * Examples:
- * - '- item'
- * - '-  spaced item'
- */
-export const LEADING_HYPHEN = /^-\s*/;
 
 // ============================================================================
 // URL AND REFERENCE PATTERNS
@@ -259,8 +250,7 @@ export const STABILITY_INDEX = new RegExp(
  * - '<!-- YAML foo bar -->'
  * - '<!-- description -->'
  */
-export const YAML_INNER_CONTENT =
-  /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/;
+export const YAML_INNER_CONTENT = /^<!-- *(?:YAML([\s\S]*?)|([ \S]*?))? *-->/;
 
 /**
  * Matches code filename comments at the beginning of files.
@@ -276,14 +266,14 @@ export const EXTRACT_CODE_FILENAME_COMMENT = /^\/\/\s+(.*\.(?:cc|h|js))[\r\n]/;
  * Examples:
  * - '<!-- introduced_in=v10.0.0 -->'
  */
-export const INTRODUCED_IN = /<!--\s?introduced_in=.*-->/;
+export const INTRODUCED_IN = /<!-- *introduced_in=.*-->/;
 
 /**
  * Matches HTML comments with LLM description metadata.
  * Examples:
  * - '<!-- llm_description=... -->'
  */
-export const LLM_DESCRIPTION = /<!--\s?llm_description=.*-->/;
+export const LLM_DESCRIPTION = /<!-- *llm_description=.*-->/;
 
 // ============================================================================
 // NODE.JS VERSION AND LIST PATTERNS
@@ -303,12 +293,4 @@ export const NODE_VERSIONS = /\* \[Node\.js ([0-9.]+)\]\S+ (.*)\r?\n/g;
  * - '* [Buffer](buffer.md)'
  * - '* [File System](fs.md)'
  */
-export const LIST_ITEM = /\* \[(.*?)\]\((.*?)\.md\)/g;
-
-/**
- * Matches Long Term Support indicators in version descriptions.
- * Examples:
- * - 'Long Term Support'
- * - 'long term support'
- */
-export const NODE_LTS_VERSION = /Long Term Support/i;
+export const MD_LINKED_LIST_ITEM = /\* \[(.*?)\]\((.*?)\.md\)/g;

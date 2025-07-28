@@ -4,12 +4,10 @@ import { coerce } from 'semver';
 
 import { loadFromURL } from '../utils/parser.mjs';
 import createQueries from '../utils/queries/index.mjs';
-import {
-  LIST_ITEM,
-  NODE_LTS_VERSION,
-  NODE_VERSIONS,
-} from '../utils/queries/regex.mjs';
+import { MD_LINKED_LIST_ITEM, NODE_VERSIONS } from '../utils/queries/regex.mjs';
 import { getRemark } from '../utils/remark.mjs';
+
+const LTS = 'long term support';
 
 /**
  * Creates an API doc parser for a given Markdown API doc file
@@ -79,7 +77,7 @@ export const parseChangelog = async path => {
 
   return nodeMajors.map(match => ({
     version: coerce(match[1]),
-    isLts: NODE_LTS_VERSION.test(match[2]),
+    isLts: match[2].toLowerCase().includes(LTS),
   }));
 };
 
@@ -92,7 +90,7 @@ export const parseChangelog = async path => {
 export const parseIndex = async path => {
   const index = await loadFromURL(path);
 
-  const items = Array.from(index.matchAll(LIST_ITEM));
+  const items = Array.from(index.matchAll(MD_LINKED_LIST_ITEM));
 
   return items.map(([, section, api]) => ({ section, api }));
 };

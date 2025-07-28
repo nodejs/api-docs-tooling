@@ -15,9 +15,9 @@ import { getRemark } from '../remark.mjs';
 import { transformNodesToString } from '../unist.mjs';
 import {
   MARKDOWN_URL,
-  NORMALIZE_TYPES,
   STABILITY_INDEX,
   STABILITY_INDEX_PREFIX,
+  TYPE_EXPRESSION,
   UNIX_MANUAL_PAGE,
 } from './regex.mjs';
 
@@ -181,7 +181,7 @@ const createQueries = () => {
     updateMarkdownLink,
     /** @param {Array<import('@types/mdast').Node>} args */
     updateTypeReference: (...args) =>
-      updateReferences(NORMALIZE_TYPES, transformTypeToReferenceLink, ...args),
+      updateReferences(TYPE_EXPRESSION, transformTypeToReferenceLink, ...args),
     /** @param {Array<import('@types/mdast').Node>} args */
     updateUnixManualReference: (...args) =>
       updateReferences(UNIX_MANUAL_PAGE, transformUnixManualToLink, ...args),

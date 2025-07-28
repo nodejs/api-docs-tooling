@@ -2,7 +2,6 @@ import parseSignature from './parseSignature.mjs';
 import {
   TYPED_LIST_STARTERS,
   DEFAULT_EXPRESSION,
-  LEADING_HYPHEN,
   NAME_EXPRESSION,
   TYPE_EXPRESSION,
 } from '../../../utils/queries/regex.mjs';
@@ -72,7 +71,7 @@ export function parseListItem(child) {
   text = extractPattern(text, DEFAULT_EXPRESSION, 'default', current);
 
   // Set the remaining text as the description, removing any leading hyphen
-  current.desc = text.replace(LEADING_HYPHEN, '').trim() || undefined;
+  current.desc = text.replace(/^-\s*/, '').trim() || undefined;
 
   // Parse nested lists (options) recursively if present
   if (subList) {

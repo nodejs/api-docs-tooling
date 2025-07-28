@@ -187,21 +187,6 @@ const testCases = {
     },
   ],
 
-  NORMALIZE_TYPES: [
-    {
-      input: '{string}',
-      matches: '{string}',
-    },
-    {
-      input: 'Takes a {string} and returns an <Object>',
-      matches: ['{string}', '<Object>'],
-    },
-    {
-      input: '{Buffer|string}',
-      matches: '{Buffer|string}',
-    },
-  ],
-
   LINKS_WITH_TYPES: [
     {
       input: 'Returns [`<Buffer>`](/api/buffer) or [`<string>`](/api/string)',
@@ -431,25 +416,6 @@ const testCases = {
     },
   ],
 
-  LEADING_HYPHEN: [
-    {
-      input: '- item',
-      matches: '- ',
-    },
-    {
-      input: '-  spaced item',
-      matches: '-  ',
-    },
-    {
-      input: '* bullet point',
-      matches: false,
-    },
-    {
-      input: '- ',
-      matches: '- ',
-    },
-  ],
-
   DEFAULT_EXPRESSION: [
     {
       input: '**Default:** `true`',
@@ -520,7 +486,7 @@ const testCases = {
     },
   ],
 
-  LIST_ITEM: [
+  MD_LINKED_LIST_ITEM: [
     {
       input: '* [Buffer](buffer.md)',
       matches: ['* [Buffer](buffer.md)'],
@@ -537,25 +503,6 @@ const testCases = {
     {
       input: '- [Not a match](file.txt)',
       matches: [],
-    },
-  ],
-
-  NODE_LTS_VERSION: [
-    {
-      input: 'This is a Long Term Support version',
-      matches: 'Long Term Support',
-    },
-    {
-      input: 'long term support release',
-      matches: 'long term support',
-    },
-    {
-      input: 'LTS',
-      matches: false,
-    },
-    {
-      input: 'Long-term support',
-      matches: false,
     },
   ],
 
