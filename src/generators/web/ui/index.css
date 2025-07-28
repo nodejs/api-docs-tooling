@@ -29,7 +29,7 @@ main {
   }
 
   /* Change history positioning */
-  div:has(> h1, > h2, > h3, > h4) {
+  div:has(> h1, > h2, > h3, > h4, > h5, > h6) {
     display: flex;
     align-items: center;
     gap: 8px;

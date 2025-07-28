@@ -12,6 +12,7 @@ import {
   DOC_TYPES_MAPPING_PRIMITIVES,
   DOC_MAN_BASE_URL,
 } from './constants.mjs';
+import { slug } from './slugger.mjs';
 import createQueries from '../queries/index.mjs';
 
 /**
@@ -101,6 +102,14 @@ export const transformTypeToReferenceLink = type => {
     // that refer to other API docs pages within the Node.js API docs
     if (lookupPiece in DOC_TYPES_MAPPING_NODE_MODULES) {
       return DOC_TYPES_MAPPING_NODE_MODULES[lookupPiece];
+    }
+
+    // Transform Node.js types like 'vm.Something'.
+    if (lookupPiece.indexOf('.') >= 0) {
+      const [mod, ...pieces] = lookupPiece.split('.');
+      const isClass = pieces.at(-1).match(/^[A-Z][a-z]/);
+
+      return `${mod}.html#${isClass ? 'class-' : ''}${slug(lookupPiece)}`;
     }
 
     return '';

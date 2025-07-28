@@ -1,5 +1,15 @@
 'use strict';
 
+// These are string replacements specific to Node.js API docs for anchor IDs
+export const DOC_API_SLUGS_REPLACEMENTS = [
+  { from: /node.js/i, to: 'nodejs' }, // Replace Node.js
+  { from: /&/, to: '-and-' }, // Replace &
+  { from: /[/_,:;\\ ]/g, to: '-' }, // Replace /_,:;\. and whitespace
+  { from: /--+/g, to: '-' }, // Replace multiple hyphens with single
+  { from: /^-/, to: '' }, // Remove any leading hyphen
+  { from: /-$/, to: '' }, // Remove any trailing hyphen
+];
+
 // This is the base URL of the MDN Web documentation
 export const DOC_MDN_BASE_URL = 'https://developer.mozilla.org/en-US/docs/Web/';
 
@@ -104,6 +114,7 @@ export const DOC_TYPES_MAPPING_GLOBALS = {
       'WeakSet',
 
       'TypedArray',
+      'Float16Array',
       'Float32Array',
       'Float64Array',
       'Int8Array',
@@ -137,6 +148,7 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   AesGcmParams: 'webcrypto.html#class-aesgcmparams',
   AesKeyAlgorithm: 'webcrypto.html#class-aeskeyalgorithm',
   AesKeyGenParams: 'webcrypto.html#class-aeskeygenparams',
+  AesDerivedKeyParams: 'webcrypto.html#class-aesderivedkeyparams',
 
   Blob: 'buffer.html#class-blob',
   BroadcastChannel:
@@ -148,6 +160,8 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   Channel: 'diagnostics_channel.html#class-channel',
   ChildProcess: 'child_process.html#class-childprocess',
   Cipher: 'crypto.html#class-cipher',
+  Cipheriv: 'crypto.html#class-cipheriv',
+  Decipheriv: 'crypto.html#class-decipheriv',
   ClientHttp2Session: 'http2.html#class-clienthttp2session',
   ClientHttp2Stream: 'http2.html#class-clienthttp2stream',
 
@@ -201,6 +215,8 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   IntervalHistogram:
     'perf_hooks.html#class-intervalhistogram-extends-histogram',
 
+  LockManager: 'worker_threads.html#class-lockmanager',
+
   KeyAlgorithm: 'webcrypto.html#class-keyalgorithm',
   KeyObject: 'crypto.html#class-keyobject',
 
@@ -229,6 +245,10 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
   ReadableStreamDefaultReader:
     'webstreams.html#class-readablestreamdefaultreader',
 
+  ModuleRequest: 'vm.html#type-modulerequest',
+
+  DatabaseSync: 'sqlite.html#class-databasesync',
+
   RecordableHistogram:
     'perf_hooks.html#class-recordablehistogram-extends-histogram',
 
@@ -243,6 +263,10 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
 
   Sign: 'crypto.html#class-sign',
 
+  Disposable:
+    'https://tc39.es/proposal-explicit-resource-management/#sec-disposable-interface',
+
+  Session: 'sqlite.html#class-session',
   StatementSync: 'sqlite.html#class-statementsync',
 
   Stream: 'stream.html#stream',
@@ -283,71 +307,20 @@ export const DOC_TYPES_MAPPING_NODE_MODULES = {
 
   'brotli options': 'zlib.html#class-brotlioptions',
 
-  'cluster.Worker': 'cluster.html#class-worker',
-
-  'crypto.constants': 'crypto.html#cryptoconstants',
-
-  'dgram.Socket': 'dgram.html#class-dgramsocket',
-
-  'errors.Error': 'errors.html#class-error',
-
-  'fs.Dir': 'fs.html#class-fsdir',
-  'fs.Dirent': 'fs.html#class-fsdirent',
-  'fs.FSWatcher': 'fs.html#class-fsfswatcher',
-  'fs.ReadStream': 'fs.html#class-fsreadstream',
-  'fs.StatFs': 'fs.html#class-fsstatfs',
-  'fs.Stats': 'fs.html#class-fsstats',
-  'fs.StatWatcher': 'fs.html#class-fsstatwatcher',
-  'fs.WriteStream': 'fs.html#class-fswritestream',
-
-  'http.Agent': 'http.html#class-httpagent',
-  'http.ClientRequest': 'http.html#class-httpclientrequest',
-  'http.IncomingMessage': 'http.html#class-httpincomingmessage',
-  'http.OutgoingMessage': 'http.html#class-httpoutgoingmessage',
-  'http.Server': 'http.html#class-httpserver',
-  'http.ServerResponse': 'http.html#class-httpserverresponse',
-
-  'http2.Http2ServerRequest': 'http2.html#class-http2http2serverrequest',
-  'http2.Http2ServerResponse': 'http2.html#class-http2http2serverresponse',
-
   'import.meta': 'esm.html#importmeta',
-
-  'module.SourceMap': 'module.html#class-modulesourcemap',
-
-  'net.BlockList': 'net.html#class-netblocklist',
-  'net.Server': 'net.html#class-netserver',
-  'net.Socket': 'net.html#class-netsocket',
-  'net.SocketAddress': 'net.html#class-netsocketaddress',
 
   'os.constants.dlopen': 'os.html#dlopen-constants',
 
-  'readline.Interface': 'readline.html#class-readlineinterface',
-  'readline.InterfaceConstructor': 'readline.html#class-interfaceconstructor',
   'readlinePromises.Interface': 'readline.html#class-readlinepromisesinterface',
 
-  'repl.REPLServer': 'repl.html#class-replserver',
-
   require: 'modules.html#requireid',
-
-  'stream.Duplex': 'stream.html#class-streamduplex',
-  'stream.Readable': 'stream.html#class-streamreadable',
-  'stream.Transform': 'stream.html#class-streamtransform',
-  'stream.Writable': 'stream.html#class-streamwritable',
-
-  'tls.SecureContext': 'tls.html#tlscreatesecurecontextoptions',
-  'tls.Server': 'tls.html#class-tlsserver',
-  'tls.TLSSocket': 'tls.html#class-tlstlssocket',
-
-  'tty.ReadStream': 'tty.html#class-ttyreadstream',
-  'tty.WriteStream': 'tty.html#class-ttywritestream',
-
-  'vm.Module': 'vm.html#class-vmmodule',
-  'vm.Script': 'vm.html#class-vmscript',
-  'vm.SourceTextModule': 'vm.html#class-vmsourcetextmodule',
-  'vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER':
-    'vm.html#vmconstantsuse_main_context_default_loader',
+  module: 'modules.html#the-module-object',
 
   'zlib options': 'zlib.html#class-options',
+  'zstd options': 'zlib.html#class-zstdoptions',
+
+  'HTTP/2 Headers Object': 'http2.html#headers-object',
+  'HTTP/2 Settings Object': 'http2.html#settings-object',
 };
 
 // This is a mapping for miscellaneous types within the Markdown content and their respective
