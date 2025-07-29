@@ -41,15 +41,23 @@ const shouldIncludeEntryInToC = ({ heading }) =>
 const extractHeading = entry => {
   const data = entry.heading.data;
 
-  const rawName = data.name
-    // Remove any containing code blocks
-    .replace(/`/g, '')
-    // Remove any prefixes (i.e. 'Class:')
-    .replace(/^[^:]+:/, '')
-    // Trim the remaining whitespace
-    .trim();
+  const cliFlagOrEnv = [...data.text.matchAll(/`(-[\w-]+|[A-Z0-9_]+=)/g)];
 
-  let heading = getFullName(data, rawName);
+  let heading;
+
+  if (cliFlagOrEnv.length > 0) {
+    heading = cliFlagOrEnv.at(-1)[1];
+  } else {
+    const rawName = data.name
+      // Remove any containing code blocks
+      .replace(/`/g, '')
+      // Remove any prefixes (i.e. 'Class:')
+      .replace(/^[^:]+:/, '')
+      // Trim the remaining whitespace
+      .trim();
+
+    heading = getFullName(data, rawName);
+  }
 
   if (data.type === 'ctor') {
     heading += ' Constructor';
@@ -58,6 +66,7 @@ const extractHeading = entry => {
   return {
     depth: entry.heading.depth,
     value: heading,
+    stability: parseInt(entry.stability?.children[0]?.data.index ?? 2),
     slug: data.slug,
   };
 };
