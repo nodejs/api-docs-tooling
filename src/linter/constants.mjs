@@ -2,7 +2,7 @@
 
 export const INTRODUCED_IN_REGEX = /<!--\s?introduced_in=.*-->/;
 
-export const llmDescription_REGEX = /<!--\s?llmDescription:.*-->/;
+export const LLM_DESCRIPTION_REGEX = /<!--\s?llmDescription:.*-->/;
 
 export const LINT_MESSAGES = {
   missingIntroducedIn: "Missing 'introduced_in' field in the API doc entry",

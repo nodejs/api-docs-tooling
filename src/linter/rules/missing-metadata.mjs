@@ -6,7 +6,7 @@ import { findBefore } from 'unist-util-find-before';
 import {
   INTRODUCED_IN_REGEX,
   LINT_MESSAGES,
-  llmDescription_REGEX,
+  LLM_DESCRIPTION_REGEX,
 } from '../constants.mjs';
 
 /**
@@ -31,7 +31,7 @@ const METADATA_CHECKS = Object.freeze([
   },
   {
     name: 'llmDescription',
-    regex: llmDescription_REGEX,
+    regex: LLM_DESCRIPTION_REGEX,
     level: 'warn',
     message: LINT_MESSAGES.missingLlmDescription,
   },
