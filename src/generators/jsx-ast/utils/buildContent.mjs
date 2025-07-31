@@ -9,7 +9,11 @@ import createPropertyTable from './buildPropertyTable.mjs';
 import { DOC_NODE_BLOB_BASE_URL } from '../../../constants.mjs';
 import { enforceArray } from '../../../utils/array.mjs';
 import { sortChanges } from '../../../utils/generators.mjs';
-import createQueries from '../../../utils/queries/index.mjs';
+import {
+  isStabilityNode,
+  isHeading,
+  isTypedList,
+} from '../../../utils/queries/unist.mjs';
 import { JSX_IMPORTS } from '../../web/constants.mjs';
 import {
   STABILITY_LEVELS,
@@ -219,17 +223,17 @@ export const processEntry = (entry, remark) => {
   const content = structuredClone(entry.content);
 
   // Visit and transform stability nodes
-  visit(content, createQueries.UNIST.isStabilityNode, transformStabilityNode);
+  visit(content, isStabilityNode, transformStabilityNode);
 
   // Visit and transform headings with metadata and links
-  visit(content, createQueries.UNIST.isHeading, (...args) =>
+  visit(content, isHeading, (...args) =>
     transformHeadingNode(entry, remark, ...args)
   );
 
   // Transform typed lists into property tables
   visit(
     content,
-    createQueries.UNIST.isTypedList,
+    isTypedList,
     (node, idx, parent) => (parent.children[idx] = createPropertyTable(node))
   );
 

@@ -2,7 +2,7 @@
 
 import { visit } from 'unist-util-visit';
 
-import createQueries from '../../utils/queries/index.mjs';
+import { STABILITY_INDEX } from '../../utils/queries/regex.mjs';
 import { LINT_MESSAGES } from '../constants.mjs';
 
 /**
@@ -33,9 +33,7 @@ export const duplicateStabilityNodes = context => {
         ) {
           const text = paragraph.children[0];
           if (text.type === 'text') {
-            const match = text.value.match(
-              createQueries.QUERIES.stabilityIndex
-            );
+            const match = text.value.match(STABILITY_INDEX);
             if (match) {
               const stability = parseFloat(match[1]);
 

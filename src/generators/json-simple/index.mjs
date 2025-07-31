@@ -5,7 +5,7 @@ import { join } from 'node:path';
 
 import { remove } from 'unist-util-remove';
 
-import createQueries from '../../utils/queries/index.mjs';
+import { isHeading, isStabilityNode } from '../../utils/queries/unist.mjs';
 
 /**
  * This generator generates a simplified JSON version of the API docs and returns it as a string
@@ -41,10 +41,7 @@ export default {
 
       // Removes numerous nodes from the content that should not be on the "body"
       // of the JSON version of the API docs as they are already represented in the metadata
-      remove(content, [
-        createQueries.UNIST.isStabilityNode,
-        createQueries.UNIST.isHeading,
-      ]);
+      remove(content, [isStabilityNode, isHeading]);
 
       return { ...node, content };
     });

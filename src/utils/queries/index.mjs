@@ -13,6 +13,13 @@ import {
 } from '../parser/index.mjs';
 import { getRemark } from '../remark.mjs';
 import { transformNodesToString } from '../unist.mjs';
+import {
+  MARKDOWN_URL,
+  STABILITY_INDEX,
+  STABILITY_INDEX_PREFIX,
+  TYPE_EXPRESSION,
+  UNIX_MANUAL_PAGE,
+} from './regex.mjs';
 
 /**
  * Creates an instance of the Query Manager, which allows to do multiple sort
@@ -57,7 +64,7 @@ const createQueries = () => {
    */
   const updateMarkdownLink = node => {
     node.url = node.url.replace(
-      createQueries.QUERIES.markdownUrl,
+      MARKDOWN_URL,
       (_, filename, hash = '') => `${filename}.html${hash}`
     );
 
@@ -126,7 +133,7 @@ const createQueries = () => {
     const stabilityPrefix = transformNodesToString(node.children[0].children);
 
     // Attempts to grab the Stability index and description from the prefix
-    const matches = createQueries.QUERIES.stabilityIndex.exec(stabilityPrefix);
+    const matches = STABILITY_INDEX.exec(stabilityPrefix);
 
     // Ensures that the matches are valid and that we have at least 3 entries
     if (matches && matches.length === 3) {
@@ -163,7 +170,7 @@ const createQueries = () => {
   const updateStabilityPrefixToLink = vfile => {
     // The `vfile` value is a String (check `loaders.mjs`)
     vfile.value = String(vfile.value).replace(
-      createQueries.QUERIES.stabilityIndexPrefix,
+      STABILITY_INDEX_PREFIX,
       match => `[${match}](${DOC_API_STABILITY_SECTION_REF_URL})`
     );
   };
@@ -174,140 +181,14 @@ const createQueries = () => {
     updateMarkdownLink,
     /** @param {Array<import('@types/mdast').Node>} args */
     updateTypeReference: (...args) =>
-      updateReferences(
-        createQueries.QUERIES.normalizeTypes,
-        transformTypeToReferenceLink,
-        ...args
-      ),
+      updateReferences(TYPE_EXPRESSION, transformTypeToReferenceLink, ...args),
     /** @param {Array<import('@types/mdast').Node>} args */
     updateUnixManualReference: (...args) =>
-      updateReferences(
-        createQueries.QUERIES.unixManualPage,
-        transformUnixManualToLink,
-        ...args
-      ),
+      updateReferences(UNIX_MANUAL_PAGE, transformUnixManualToLink, ...args),
     updateLinkReference,
     addStabilityMetadata,
     updateStabilityPrefixToLink,
   };
-};
-
-// This defines the actual REGEX Queries
-createQueries.QUERIES = {
-  // Fixes the references to Markdown pages into the API documentation
-  markdownUrl: /^(?![+a-zA-Z]+:)([^#?]+)\.md(#.+)?$/,
-  // ReGeX to match the {Type}<Type> (API type references)
-  normalizeTypes: /(\{|<)(?! )[^<({})>]+(?! )(\}|>)/g,
-  // ReGex to match the type API type references that got already parsed
-  // so that they can be transformed into HTML links
-  linksWithTypes: /\[`<[^<({})>]+>`\]\((\S+)\)/g,
-  // ReGeX for handling Stability Indexes Metadata
-  stabilityIndex: /^Stability: ([0-5](?:\.[0-3])?)(?:\s*-\s*)?(.*)$/s,
-  // ReGeX for handling the Stability Index Prefix
-  stabilityIndexPrefix: /Stability: ([0-5](?:\.[0-3])?)/,
-  // ReGeX for retrieving the inner content from a YAML block
-  yamlInnerContent: /^<!--[ ]?(?:YAML([\s\S]*?)|([ \S]*?))?[ ]?-->/,
-  // ReGeX for finding references to Unix manuals
-  unixManualPage: /\b([a-z.]+)\((\d)([a-z]?)\)/g,
-  // ReGeX for determing a typed list's non-property names
-  typedListStarters: /^(Returns|Extends|Type):?\s*/,
-};
-
-createQueries.UNIST = {
-  /**
-   * @param {import('@types/mdast').Blockquote} blockquote
-   * @returns {boolean}
-   */
-  isStabilityNode: ({ type, children }) =>
-    type === 'blockquote' &&
-    createQueries.QUERIES.stabilityIndex.test(transformNodesToString(children)),
-  /**
-   * @param {import('@types/mdast').Html} html
-   * @returns {boolean}
-   */
-  isYamlNode: ({ type, value }) =>
-    type === 'html' && createQueries.QUERIES.yamlInnerContent.test(value),
-  /**
-   * @param {import('@types/mdast').Text} text
-   * @returns {boolean}
-   */
-  isTextWithType: ({ type, value }) =>
-    type === 'text' && createQueries.QUERIES.normalizeTypes.test(value),
-  /**
-   * @param {import('@types/mdast').Text} text
-   * @returns {boolean}
-   */
-  isTextWithUnixManual: ({ type, value }) =>
-    type === 'text' && createQueries.QUERIES.unixManualPage.test(value),
-  /**
-   * @param {import('@types/mdast').Html} html
-   * @returns {boolean}
-   */
-  isHtmlWithType: ({ type, value }) =>
-    type === 'html' && createQueries.QUERIES.linksWithTypes.test(value),
-  /**
-   * @param {import('@types/mdast').Link} link
-   * @returns {boolean}
-   */
-  isMarkdownUrl: ({ type, url }) =>
-    type === 'link' && createQueries.QUERIES.markdownUrl.test(url),
-  /**
-   * @param {import('@types/mdast').Heading} heading
-   * @returns {boolean}
-   */
-  isHeading: ({ type, depth }) =>
-    type === 'heading' && depth >= 1 && depth <= 5,
-  /**
-   * @param {import('@types/mdast').LinkReference} linkReference
-   * @returns {boolean}
-   */
-  isLinkReference: ({ type, identifier }) =>
-    type === 'linkReference' && !!identifier,
-
-  /**
-   * @param {import('@types/mdast').List} list
-   * @returns {boolean}
-   */
-  isTypedList: list => {
-    // Exit early if not a list node
-    if (list.type !== 'list') {
-      return false;
-    }
-
-    // Get the content nodes of the first list item's paragraph
-    const [node, ...contentNodes] =
-      list?.children?.[0]?.children?.[0]?.children ?? [];
-
-    // Exit if no content nodes
-    if (!node) {
-      return false;
-    }
-
-    // Check for other starters
-    if (
-      node.value?.trimStart().match(createQueries.QUERIES.typedListStarters)
-    ) {
-      return true;
-    }
-
-    // Check for direct type link pattern (starts with '<')
-    if (node.type === 'link' && node.children?.[0]?.value?.[0] === '<') {
-      return true;
-    }
-
-    // Check for inline code + space + type link pattern
-    if (
-      node.type === 'inlineCode' &&
-      contentNodes[0]?.value.trim() === '' &&
-      contentNodes[1]?.type === 'link' &&
-      contentNodes[1]?.children?.[0]?.value?.[0] === '<'
-    ) {
-      return true;
-    }
-
-    // Not a typed list
-    return false;
-  },
 };
 
 export default createQueries;

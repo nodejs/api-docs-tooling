@@ -1,6 +1,6 @@
 'use strict';
 
-import { PARAM_EXPRESSION } from '../constants.mjs';
+import { PARAM_EXPRESSION } from '../../../utils/queries/regex.mjs';
 
 const OPTIONAL_LEVEL_CHANGES = { '[': 1, ']': -1 };
 
