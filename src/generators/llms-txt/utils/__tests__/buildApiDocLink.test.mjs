@@ -4,9 +4,9 @@ import { describe, it } from 'node:test';
 import { getEntryDescription, buildApiDocLink } from '../buildApiDocLink.mjs';
 
 describe('getEntryDescription', () => {
-  it('returns llm_description when available', () => {
+  it('returns llmDescription when available', () => {
     const entry = {
-      llm_description: 'LLM generated description',
+      llmDescription: 'LLM generated description',
       content: { children: [] },
     };
 
@@ -14,7 +14,7 @@ describe('getEntryDescription', () => {
     assert.equal(result, 'LLM generated description');
   });
 
-  it('extracts first paragraph when no llm_description', () => {
+  it('extracts first paragraph when no llmDescription', () => {
     const entry = {
       content: {
         children: [
@@ -66,7 +66,7 @@ describe('buildApiDocLink', () => {
     const entry = {
       heading: { data: { name: 'Test API' } },
       api_doc_source: 'doc/api/test.md',
-      llm_description: 'Test description',
+      llmDescription: 'Test description',
     };
 
     const result = buildApiDocLink(entry);

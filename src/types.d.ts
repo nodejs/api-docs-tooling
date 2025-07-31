@@ -65,7 +65,7 @@ declare global {
     introduced_in?: string;
     napiVersion?: number;
     tags?: Array<string>;
-    llm_description?: string;
+    llmDescription?: string;
   }
 
   export interface ApiDocMetadataEntry {
@@ -101,7 +101,7 @@ declare global {
     // to provide additional metadata about the API doc entry
     tags: Array<string>;
     // The llms.txt specific description
-    llm_description: string | undefined;
+    llmDescription: string | undefined;
     // The postion of the YAML of the API doc entry
     yaml_position: Position;
   }
