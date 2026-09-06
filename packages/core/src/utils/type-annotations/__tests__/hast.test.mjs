@@ -4,10 +4,8 @@ import { describe, it } from 'node:test';
 import { toHtml } from 'hast-util-to-html';
 import { toString } from 'hast-util-to-string';
 
-import {
-  typeAnnotationToHast,
-  typeAnnotationToHighlightedHast,
-} from '../hast.mjs';
+import { typeAnnotationToHast } from '../hast.mjs';
+import { typeAnnotationToHighlightedHast } from '../highlighted.mjs';
 
 // A minimal mdast-util-to-hast state — the handlers only use patch/applyData
 const state = { patch: () => {}, applyData: (_, result) => result };

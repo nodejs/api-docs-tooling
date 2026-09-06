@@ -2,7 +2,7 @@
 
 import { highlighter } from '@doc-kit/core/utils/highlighter.mjs';
 import { lazy } from '@doc-kit/core/utils/misc.mjs';
-import { typeAnnotationToHighlightedHast } from '@doc-kit/core/utils/type-annotations/hast.mjs';
+import { typeAnnotationToHighlightedHast } from '@doc-kit/core/utils/type-annotations/highlighted.mjs';
 import rehypeShikiji from '@node-core/rehype-shiki/plugin';
 import recmaJsx from 'recma-jsx';
 import recmaStringify from 'recma-stringify';

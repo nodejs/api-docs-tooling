@@ -8,8 +8,10 @@ import {
 
 import { FONTS } from '../../constants.mjs';
 import {
+  buildAssetTags,
   buildPreloads,
   buildHead,
+  pageFileName,
   populateWithEvaluation,
   resolvePageRoot,
 } from '../processing.mjs';
@@ -194,5 +196,48 @@ describe('buildHead', () => {
 
   it('returns an empty string when nothing is configured', () => {
     assert.strictEqual(buildHead({ meta: [], links: [], html: [] }), '');
+  });
+});
+
+describe('buildAssetTags', () => {
+  const assets = {
+    scripts: ['assets/client-abc.js'],
+    preloads: ['assets/shared-def.js'],
+    stylesheets: ['assets/style-ghi.css'],
+  };
+
+  it('resolves every asset against the page root, scripts first', () => {
+    const tags = buildAssetTags(assets, '../').split('\n');
+
+    assert.deepStrictEqual(
+      tags.map(tag => tag.trim()),
+      [
+        '<script type="module" crossorigin src="../assets/client-abc.js"></script>',
+        '<link rel="modulepreload" crossorigin href="../assets/shared-def.js" />',
+        '<link rel="stylesheet" crossorigin href="../assets/style-ghi.css" />',
+      ]
+    );
+  });
+
+  it('keeps an absolute root absolute', () => {
+    const tags = buildAssetTags(assets, 'https://example.com/docs/');
+
+    assert.ok(
+      tags.includes('src="https://example.com/docs/assets/client-abc.js"')
+    );
+  });
+
+  it('renders nothing for an empty asset list', () => {
+    assert.strictEqual(
+      buildAssetTags({ scripts: [], preloads: [], stylesheets: [] }, './'),
+      ''
+    );
+  });
+});
+
+describe('pageFileName', () => {
+  it('derives the output file from the page path', () => {
+    assert.strictEqual(pageFileName({ path: '/api/fs' }), 'api/fs.html');
+    assert.strictEqual(pageFileName({ path: '/404' }), '404.html');
   });
 });

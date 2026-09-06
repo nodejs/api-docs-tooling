@@ -20,6 +20,9 @@ import { deepMerge } from '#utils/misc.mjs';
 
 const configExplorer = cosmiconfig('doc-kit');
 
+// The default `threads` ceiling; `--threads` raises it explicitly.
+const MAX_THREADS = 4;
+
 /**
  * The name of the project being documented, from the manifest in the working
  * directory. Generators use it for titles, logos, and templated text.
@@ -68,7 +71,12 @@ export const getDefaultConfig = (generators, config) =>
       // riscv64 with sv39. Running multiple generators that use wasm in
       // parallel could cause failures to allocate new wasm instance.
       // See also https://github.com/nodejs/node/pull/60591
-      threads: process.arch === 'riscv64' ? 1 : cpus().length,
+      //
+      // Elsewhere the count is capped: each worker that highlights code holds
+      // Shiki's grammars and regex engine (~300MB) on top of the pages it is
+      // building, so past a few threads memory, not CPU, is what runs out.
+      threads:
+        process.arch === 'riscv64' ? 1 : Math.min(cpus().length, MAX_THREADS),
       chunkSize: 10,
     })
   );

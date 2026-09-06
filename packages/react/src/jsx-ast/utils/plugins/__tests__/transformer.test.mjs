@@ -4,10 +4,10 @@ import { describe, it } from 'node:test';
 import transformer from '../transformer.mjs';
 
 describe('jsx-ast transformer', () => {
-  it('moves generated footnotes into the Layout children', () => {
-    const layout = {
-      type: 'mdxJsxTextElement',
-      name: 'Layout',
+  it('moves generated footnotes into the page content fragment', () => {
+    const content = {
+      type: 'mdxJsxFlowElement',
+      name: null,
       children: [{ type: 'element', tagName: 'p', children: [] }],
     };
     const footnotes = {
@@ -31,12 +31,12 @@ describe('jsx-ast transformer', () => {
     };
     const tree = {
       type: 'root',
-      children: [layout, { type: 'text', value: '\n' }, footnotes],
+      children: [content, { type: 'text', value: '\n' }, footnotes],
     };
 
     transformer()(tree);
 
     assert.equal(tree.children.includes(footnotes), false);
-    assert.equal(layout.children.at(-1), footnotes);
+    assert.equal(content.children.at(-1), footnotes);
   });
 });

@@ -76,6 +76,14 @@ export const JSX_IMPORTS = {
 };
 
 /**
+ * The bindings a page program imports from the component library for its JSX,
+ * and which the bundler's `compile` must target (classic runtime): every
+ * `<tag>` becomes a `_jsx(...)` call, every `<>` a `_Fragment`.
+ */
+export const JSX_PRAGMA = '_jsx';
+export const JSX_PRAGMA_FRAG = '_Fragment';
+
+/**
  * Where the bundler emits fonts
  */
 export const FONT_DIRECTORY = 'assets/fonts';

@@ -8,13 +8,13 @@ import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
-import syntaxHighlighter from './highlighter.mjs';
 import { lazy } from './misc.mjs';
 import { typeAnnotationToHast } from './type-annotations/hast.mjs';
 import remarkTypeAnnotations from './type-annotations/remark.mjs';
 
-// Nodes the rehype pipelines pass through untouched.
-const passThrough = ['element'];
+// Nothing in this module loads Shiki: the `ast` and `metadata` stages (and
+// every worker that runs them) import it, and none of them highlight code.
+// The highlighting pipeline lives in `./remark-shiki.mjs`.
 
 /**
  * Renders an MDX JSX element as just its children, so the surrounding prose
@@ -30,15 +30,28 @@ const mdxElementToChildren = (state, node) => state.all(node);
  */
 const dropNode = () => undefined;
 
-// The HTML-string pipelines cannot render MDX nodes (rendering those is the
-// React generators' job): JSX elements degrade to their children so the
-// surrounding prose still renders, and expressions/ESM are dropped.
-const mdxToHastHandlers = {
-  mdxJsxTextElement: mdxElementToChildren,
-  mdxJsxFlowElement: mdxElementToChildren,
-  mdxFlowExpression: dropNode,
-  mdxTextExpression: dropNode,
-  mdxjsEsm: dropNode,
+/**
+ * The `remark-rehype` options shared by the HTML-string pipelines.
+ *
+ * Existing HTML nodes pass through untouched (they were created during the
+ * rehype process), and dangerous HTML is allowed since the Markdown sources
+ * are trusted. The MDX node types cannot be rendered to an HTML string (that
+ * is the React generators' job): JSX elements degrade to their children so the
+ * surrounding prose still renders, and expressions/ESM are dropped.
+ *
+ * @type {import('remark-rehype').Options}
+ */
+export const rehypeOptions = {
+  allowDangerousHtml: true,
+  passThrough: ['element'],
+  handlers: {
+    typeAnnotation: typeAnnotationToHast,
+    mdxJsxTextElement: mdxElementToChildren,
+    mdxJsxFlowElement: mdxElementToChildren,
+    mdxFlowExpression: dropNode,
+    mdxTextExpression: dropNode,
+    mdxjsEsm: dropNode,
+  },
 };
 
 /**
@@ -72,41 +85,6 @@ export const getRemarkMdx = lazy(() =>
 export const getRemarkRehype = lazy(() =>
   unified()
     .use(remarkParse)
-    // We make Rehype ignore existing HTML nodes (just the node itself, not its children)
-    // as these are nodes we manually created during the rehype process
-    // We also allow dangerous HTML to be passed through, since we have HTML within our Markdown
-    // and we trust the sources of the Markdown files
-    .use(remarkRehype, {
-      allowDangerousHtml: true,
-      passThrough,
-      handlers: { typeAnnotation: typeAnnotationToHast, ...mdxToHastHandlers },
-    })
-    // We allow dangerous HTML to be passed through, since we have HTML within our Markdown
-    // and we trust the sources of the Markdown files
-    .use(rehypeStringify, { allowDangerousHtml: true })
-);
-
-/**
- * Retrieves an instance of Remark configured to output stringified HTML code
- * including parsing Code Boxes with syntax highlighting
- */
-export const getRemarkRehypeWithShiki = lazy(() =>
-  unified()
-    .use(remarkParse)
-    // We make Rehype ignore existing HTML nodes (just the node itself, not its children)
-    // as these are nodes we manually created during the rehype process
-    // We also allow dangerous HTML to be passed through, since we have HTML within our Markdown
-    // and we trust the sources of the Markdown files
-    .use(remarkRehype, {
-      allowDangerousHtml: true,
-      passThrough,
-      // legacy-html gets the minimal (unhighlighted) type rendering
-      handlers: { typeAnnotation: typeAnnotationToHast, ...mdxToHastHandlers },
-    })
-    // This is a custom ad-hoc within the Shiki Rehype plugin, used to highlight code
-    // and transform them into HAST nodes
-    .use(syntaxHighlighter)
-    // We allow dangerous HTML to be passed through, since we have HTML within our Markdown
-    // and we trust the sources of the Markdown files
+    .use(remarkRehype, rehypeOptions)
     .use(rehypeStringify, { allowDangerousHtml: true })
 );

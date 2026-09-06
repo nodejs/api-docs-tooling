@@ -1,11 +1,17 @@
 # `html` Generator
 
-The `html` generator transforms JSX AST entries into complete web bundles. Its
-bundler adapter builds server-rendered HTML and client-side JavaScript, CSS, and
-imported assets, then writes the complete static site to `output`. Vite is the
-default adapter, but projects can supply an adapter for webpack or another
-bundler. The generator is output-only and does not return an in-memory copy of
-its HTML or CSS.
+The `html` generator turns the pages' JSX into a complete static site: the
+server-rendered HTML pages, the client-side JavaScript, CSS, and imported
+assets, written to `output`. Vite is the default bundler adapter, but projects
+can supply an adapter for webpack or another bundler. The generator is
+output-only and does not return an in-memory copy of its HTML or CSS.
+
+The site is built in pieces that are each as small as they can be. The bundler
+builds the component library once and the client assets once. Each page's
+program is then compiled — JSX to a plain module — and the worker pool imports,
+renders, templates, minifies and writes the pages one at a time, so memory
+scales with the largest page rather than with the site. `all.html` is assembled
+from the module pages' compiled content rather than built again from scratch.
 
 ## Configuring
 
@@ -38,9 +44,13 @@ its HTML or CSS.
   JSX-in-MDX. See [`components`](#components). **Default:** `{}`.
 - `navigation` {Object} Sidebar groups and navigation bar items. See
   [`navigation`](#navigation). **Default:** `{}`.
-- `bundler` {WebBundler} Adapter that renders server entries and writes the
-  client and HTML output. See [Bundler adapters](#bundler-adapters).
-  **Default:** `createViteBundler()`.
+- `generateAllPage` {boolean} When `true`, writes `all.html`: every module
+  page's content on one page, in sidebar order, assembled from the module pages
+  rather than built again. Chunk pages and the index are left out.
+  **Default:** `true`.
+- `bundler` {WebBundler} Adapter that bundles the component library and the
+  client assets, and compiles page programs. See
+  [Bundler adapters](#bundler-adapters). **Default:** `createViteBundler()`.
 
 ### `head`
 
@@ -175,29 +185,42 @@ omitted rather than rendered empty.
 
 ### Bundler adapters
 
-- `getEntryId` {Function} Return the module identifier placed in every
-  populated HTML page's client script tag.
-- `render` {Function} Bundle and execute the server `entries`, returning a `Map`
-  of API name to rendered HTML.
-- `build` {Function} Bundle the client `entry`, process the populated `pages`,
-  and write the complete output.
+- `buildServer` {Function} Bundle the component library for Node and return
+  the `file:` URL of the built module.
+- `compile` {Function} Turn one page program, a module using JSX, into plain
+  JavaScript Node can import.
+- `buildClient` {Function} Bundle the client `entry` into `config.output` and
+  return the assets every page loads.
 
 The `bundler` option accepts a small Doc Kit adapter rather than configuration
 for a particular build system.
 
-`render` receives `{ entries, virtualImports, config }`; `build` receives
-`{ entry, virtualImports, pages, minifyPages, config }`. The server entry map
-uses `${api}.jsx` keys and rendered server results use `api` keys. The client
-`entry` is a single program shared by every page, served at the identifier
-`getEntryId` returns. Page maps use output-relative HTML file names;
-`minifyPages` takes such a map and returns its minified counterpart, spreading
-the work across Doc Kit's worker pool — call it on the final HTML when
-`config.minify` is set. `config` is the resolved `html` configuration.
+`buildServer` receives `{ entry, virtualImports, outDir, config }`. The `entry`
+is the component library's source: re-exports of every component a page may
+render, Preact's `h` and `Fragment`, and `renderToStringAsync`. It must be
+bundled into one self-contained module written under `outDir` (a temporary
+directory the generator removes afterwards), since the page programs import it
+from wherever they are compiled to.
 
-The adapter must compile the generated Preact JSX and CSS imports and resolve
-the supplied theme aliases and virtual modules. The generated `#theme/config`
-module exports `server` as `true` for the server build and `false` for the
-client build.
+`compile(code, fileName)` receives one page program: a module that imports the
+library and exports the page's `content` and a default render function, written
+in JSX. It must return plain JavaScript. The JSX must compile with the classic
+runtime to calls of the `_jsx` and `_Fragment` bindings the program imports
+(these names are exported as `JSX_PRAGMA` and `JSX_PRAGMA_FRAG` from the
+generator's `constants.mjs`), so that the page and the library share one Preact.
+
+`buildClient` receives `{ entry, virtualImports, config }`. The client `entry`
+is a single program shared by every page. It must be bundled into
+`config.output` and the call must return
+`{ scripts, preloads, stylesheets }`: paths relative to the output root of the
+module scripts to load, the chunks they statically import (rendered as
+`modulepreload` hints), and the stylesheets. The generator renders those into
+every page, resolved against the page's location.
+
+`config` is the resolved `html` configuration. The adapter must compile the
+generated Preact JSX and CSS imports and resolve the supplied theme aliases and
+virtual modules. The generated `#theme/config` module exports `server` as
+`true` for the server build and `false` for the client build.
 
 A webpack integration can live entirely in project configuration without
 adding webpack to Doc Kit:
@@ -205,17 +228,20 @@ adding webpack to Doc Kit:
 ```js
 // webpack-bundler.mjs
 export const createWebpackBundler = webpackOptions => ({
-  getEntryId: () => 'virtual:doc-kit/client/index.jsx',
-
-  async render({ entries, virtualImports, config }) {
-    // Materialize or load the in-memory modules, run webpack's server target,
-    // execute each emitted entry, and return Map<api, renderedHtml>.
+  async buildServer({ entry, virtualImports, outDir, config }) {
+    // Materialize or load the in-memory modules, run webpack's Node target
+    // with the entry, write one self-contained module under `outDir`, and
+    // return its `file:` URL.
   },
 
-  async build({ entry, virtualImports, pages, minifyPages, config }) {
-    // Run webpack's browser target, inject its emitted assets into `pages`,
-    // minify them with `minifyPages` when `config.minify` is set, and write
-    // the HTML and assets to config.output.
+  async compile(code, fileName) {
+    // Transform the page's JSX (classic runtime, pragma `_jsx`, fragment
+    // pragma `_Fragment`) and return the resulting module source.
+  },
+
+  async buildClient({ entry, virtualImports, config }) {
+    // Run webpack's browser target into config.output and return
+    // { scripts, preloads, stylesheets } as output-relative paths.
   },
 });
 ```
@@ -271,18 +297,22 @@ export default {
 The generator owns the fields required to coordinate its builds: config-file
 loading, app type and base, virtual inputs, Preact compatibility aliases and
 automatic JSX runtime, the Lightning CSS transformer, output/write mode, SSR
-format and temporary output, and SSR dependency bundling. Values supplied for
-those fields are replaced after configuration is merged. User plugins are
-registered after the generator's virtual-module plugin; other Vite options are
-preserved.
+format and output, and SSR dependency bundling. Values supplied for those
+fields are replaced after configuration is merged. User plugins are registered
+after the generator's virtual-module plugin; other Vite options are preserved.
 
-Vite manifests are optional. Pass `build: { manifest: true }` or a manifest file
-name to `createViteBundler` when another tool needs one. The generated HTML
-already references the correct hashed scripts, stylesheets, imported assets,
-and module preloads.
+Vite builds the client entry as a module, not the pages as HTML entries, so
+plugins see and can transform every module of the client and server builds but
+never the HTML pages. Customize the pages through the
+[HTML template](#html-template) instead.
 
-Function-valued plugins and hooks are supported because the `html` generator
-runs on the main thread and does not serialize the bundler to a worker.
+The adapter reads the client asset names from Vite's manifest. A manifest is
+written either way; pass `build: { manifest: true }` (or a file name) to
+`createViteBundler` to keep it in the output for another tool.
+
+The adapter is only ever used on the main thread, so function-valued plugins
+and hooks are supported. Worker threads receive the `html` configuration with
+its function values removed.
 
 ### Default `imports`
 
@@ -438,7 +468,7 @@ export default ({ metadata }) => (
 - `headings` {Array} Pre-computed table of contents heading entries.
 - `readingTime` {string|undefined} Estimated reading time (e.g. `'5 min read'`).
   Only present when the `jsx-ast` generator's `showReadingTime` option is
-  enabled.
+  enabled. On `all.html` it is the sum of the module pages' reading times.
 - `children` {ComponentChildren} Processed page content.
 
 The `Layout` component receives the props above. Custom Layout components can use
@@ -453,8 +483,8 @@ The HTML template file (set via `templatePath`) uses JavaScript template literal
 - `title` {string} Fully resolved page title (e.g.
   `'File system | Node.js v22.x'`).
 - `dehydrated` {string} Server-rendered HTML for the page content.
-- `entrypoint` {string} Adapter-provided module identifier for this page's
-  hydration.
+- `assets` {string} The `<script>` and `<link>` tags loading the client
+  assets, resolved against this page's location.
 - `speculationRules` {string} Speculation rules JSON for prefetching.
 - `themeScript` {string} Inline script that applies the saved theme before paint.
 - `root` {string} Relative or absolute path to the site root.
@@ -466,10 +496,9 @@ The HTML template file (set via `templatePath`) uses JavaScript template literal
 Since the template supports arbitrary JS expressions, you can use conditionals and method calls:
 
 ```html
-<title>${title}</title>
-<script type="module" src="${entrypoint}"></script>
+<title>${title}</title> ${assets}
 ```
 
-The configured adapter processes each populated page. It must replace or
-resolve `entrypoint`, include that page's scripts and stylesheets, and write the
-final HTML.
+The populated page is the final HTML: it is minified when `minify` is set and
+written as is. Put `${assets}` in the `<head>`, or the page loads no script and
+no stylesheet.

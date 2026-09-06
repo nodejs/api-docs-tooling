@@ -1,6 +1,5 @@
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { basename, isAbsolute, join, resolve } from 'node:path';
+import { readFile, rm, rmdir } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
@@ -8,10 +7,10 @@ import {
   defaultClientConditions,
   defaultServerConditions,
   mergeConfig,
+  transformWithOxc,
 } from 'vite';
 
-import { FONT_DIRECTORY } from '../constants.mjs';
-import { createPageMinifier } from '../utils/minify.mjs';
+import { FONT_DIRECTORY, JSX_PRAGMA, JSX_PRAGMA_FRAG } from '../constants.mjs';
 
 const VIRTUAL_PREFIX = 'virtual:doc-kit/';
 const RESOLVED_VIRTUAL_PREFIX = '\0doc-kit:';
@@ -21,6 +20,18 @@ const PACKAGE_ANCHOR = fileURLToPath(import.meta.url);
 // entry chunk (plus its shared dependencies) for the whole site, rather than
 // a copy per page.
 const CLIENT_ENTRY_ID = `${VIRTUAL_PREFIX}client/index.jsx`;
+const CLIENT_NAME = 'client';
+
+// The server-side component library every page program imports from.
+const SERVER_ENTRY_ID = `${VIRTUAL_PREFIX}server/library.jsx`;
+const LIBRARY_NAME = 'library';
+
+// Where Vite writes the client manifest the asset tags are read from, unless
+// the project asked for a manifest of its own.
+const MANIFEST_NAME = '.vite/manifest.json';
+
+// Vite injects this into HTML entries; a module entry has to import it.
+const MODULE_PRELOAD_POLYFILL = 'vite/modulepreload-polyfill';
 
 /**
  * Resolves a package specifier
@@ -44,9 +55,7 @@ const resolveThemeAliases = (aliases, root) =>
   );
 
 /**
- * Creates a Vite plugin that serves an exact map of in-memory modules and HTML
- * entries. HTML keeps its absolute identifier so Vite emits it at the matching
- * path relative to the configured root.
+ * Creates a Vite plugin that serves an exact map of in-memory modules.
  *
  * @param {Map<string, string>} sources
  * @returns {import('vite').Plugin}
@@ -54,7 +63,7 @@ const resolveThemeAliases = (aliases, root) =>
 export const createVirtualModulesPlugin = sources => {
   // Package imports are anchored to the same importer whichever virtual
   // module they come from, so each specifier resolves the same way every
-  // time: resolve it once, not once per page that imports it.
+  // time: resolve it once, not once per module that imports it.
   const anchored = new Map();
 
   return {
@@ -70,9 +79,7 @@ export const createVirtualModulesPlugin = sources => {
      */
     resolveId(id, importer) {
       if (sources.has(id)) {
-        return isAbsolute(id) && id.endsWith('.html')
-          ? id
-          : `${RESOLVED_VIRTUAL_PREFIX}${id}`;
+        return `${RESOLVED_VIRTUAL_PREFIX}${id}`;
       }
 
       if (
@@ -97,75 +104,11 @@ export const createVirtualModulesPlugin = sources => {
      * @returns {string|undefined}
      */
     load(id) {
-      return sources.get(
-        id.startsWith(RESOLVED_VIRTUAL_PREFIX)
-          ? id.slice(RESOLVED_VIRTUAL_PREFIX.length)
-          : id
-      );
-    },
-  };
-};
-
-/**
- * Finalizes Vite's generated HTML before its normal write phase.
- *
- * @param {import('../types').ClientBundleOptions['minifyPages']} minifyPages
- * @returns {import('vite').Plugin}
- */
-const createHTMLFinalizerPlugin = minifyPages => ({
-  name: 'doc-kit:finalize-html',
-  /**
-   * Minifies every generated HTML entry after Vite has injected its scripts,
-   * stylesheets, and module preloads. The pages are handed over as one batch
-   * so the minifier can spread them across the worker pool.
-   */
-  generateBundle: {
-    order: 'post',
-    /**
-     * @param {object} _
-     * @param {Record<string, object>} bundle
-     */
-    async handler(_, bundle) {
-      const assets = Object.values(bundle).filter(
-        item => item.type === 'asset' && item.fileName.endsWith('.html')
-      );
-
-      const minified = await minifyPages(
-        new Map(
-          assets.map(asset => [
-            asset.fileName,
-            typeof asset.source === 'string'
-              ? asset.source
-              : Buffer.from(asset.source).toString('utf8'),
-          ])
-        )
-      );
-
-      for (const asset of assets) {
-        asset.source = minified.get(asset.fileName);
+      if (id.startsWith(RESOLVED_VIRTUAL_PREFIX)) {
+        return sources.get(id.slice(RESOLVED_VIRTUAL_PREFIX.length));
       }
     },
-  },
-});
-
-/**
- * Converts generated page programs into named Vite inputs and virtual modules
- * for the SSR build: each page needs a distinct virtual JSX path of its own.
- *
- * @param {Map<string, string>} codeMap
- */
-const createServerEntries = codeMap => {
-  const input = {};
-  const sources = new Map();
-
-  for (const [fileName, code] of codeMap) {
-    const id = `${VIRTUAL_PREFIX}server/${fileName}`;
-
-    input[basename(fileName, '.jsx')] = id;
-    sources.set(id, code);
-  }
-
-  return { input, sources };
+  };
 };
 
 /**
@@ -174,10 +117,9 @@ const createServerEntries = codeMap => {
  *
  * @param {object} options
  * @param {Map<string, string>} options.sources
- * @param {Record<string, string>|Array<string>} options.input
+ * @param {Record<string, string>} options.input
  * @param {boolean} options.server
- * @param {string} [options.serverOutDir]
- * @param {import('../types').ClientBundleOptions['minifyPages']} [options.minifyPages]
+ * @param {string} options.outDir
  * @param {import('../types').ResolvedWebConfiguration} options.config
  * @param {import('vite').UserConfig} options.vite
  * @returns {import('vite').InlineConfig}
@@ -186,8 +128,7 @@ export const createViteConfig = ({
   sources,
   input,
   server,
-  serverOutDir,
-  minifyPages = createPageMinifier(),
+  outDir,
   config: webConfig,
   vite = {},
 }) => {
@@ -209,14 +150,8 @@ export const createViteConfig = ({
     logLevel: vite.logLevel ?? 'warn',
 
     // Virtual entries must resolve before user plugins, while user plugins can
-    // still transform every module and generated HTML page.
-    plugins: [
-      createVirtualModulesPlugin(sources),
-      ...(vite.plugins ?? []),
-      ...(!server && webConfig.minify
-        ? [createHTMLFinalizerPlugin(minifyPages)]
-        : []),
-    ],
+    // still transform every module.
+    plugins: [createVirtualModulesPlugin(sources), ...(vite.plugins ?? [])],
 
     resolve: mergeConfig(
       { resolve: vite.resolve },
@@ -265,16 +200,18 @@ export const createViteConfig = ({
     build: {
       ...vite.build,
 
-      // Both builds are complete Vite outputs. SSR uses a private directory
-      // because its entries can share chunks; the client writes the final site.
-      outDir: server ? serverOutDir : resolve(webConfig.output),
+      // Both builds are complete Vite outputs. The server library goes to a
+      // private directory; the client writes into the final site.
+      outDir,
       write: true,
       emptyOutDir: false,
       copyPublicDir: false,
       watch: null,
       lib: false,
 
-      ...(server ? { manifest: false } : {}),
+      // The client manifest is how the asset tags are found; a manifest the
+      // project asked for doubles as that.
+      manifest: server ? false : vite.build?.manifest || MANIFEST_NAME,
       ssr: server,
 
       // Islands make split CSS wrong: a component's stylesheet would arrive
@@ -283,8 +220,8 @@ export const createViteConfig = ({
       // first paint, whenever — or whether — its islands load.
       ...(server ? {} : { cssCodeSplit: false }),
 
-      // Browser output follows the generator's minification setting. Temporary
-      // server output stays readable and disappears immediately after render.
+      // Browser output follows the generator's minification setting. The
+      // server library is only ever executed, never shipped.
       minify: server ? false : (vite.build?.minify ?? webConfig.minify),
 
       rolldownOptions: {
@@ -337,109 +274,141 @@ export const createViteConfig = ({
 };
 
 /**
- * Builds and executes the server entries through Vite's SSR pipeline.
+ * Bundles the component library through Vite's SSR pipeline, into one
+ * self-contained module Node can import from anywhere.
  *
- * @param {object} options
- * @param {Map<string, string>} options.entries
- * @param {Record<string, string>} options.virtualImports
- * @param {import('../types').ResolvedWebConfiguration} options.config
- * @param {import('vite').UserConfig} options.vite
- * @param {() => Promise<string>} [options.createTemporaryDirectory]
- * @returns {Promise<Map<string, string>>}
+ * @param {import('../types').ServerBundleOptions & { vite?: import('vite').UserConfig }} options
+ * @returns {Promise<string>} The `file:` URL of the built library
  */
-export const render = async ({
-  entries,
-  virtualImports,
-  createTemporaryDirectory = () => mkdtemp(join(tmpdir(), 'doc-kit-vite-ssr-')),
-  config,
-  vite = {},
-}) => {
-  const { input, sources } = createServerEntries(entries);
-
-  for (const [id, code] of Object.entries(virtualImports)) {
-    sources.set(id, code);
-  }
-
-  // Vite writes the compiled SSR renderers here so Node can import and execute
-  // them without mixing intermediate modules into the final site. The directory
-  // is removed after rendering
-  const temporaryDirectory = await createTemporaryDirectory();
-
-  try {
-    await viteBuild(
-      createViteConfig({
-        sources,
-        input,
-        server: true,
-        serverOutDir: temporaryDirectory,
-        config,
-        vite,
-      })
-    );
-
-    const pages = new Map();
-
-    await Promise.all(
-      Object.keys(input).map(async name => {
-        const module = await import(
-          pathToFileURL(join(temporaryDirectory, `${name}.mjs`)).href
-        );
-
-        pages.set(name, await module.default());
-      })
-    );
-
-    return pages;
-  } finally {
-    await rm(temporaryDirectory, { recursive: true, force: true });
-  }
-};
-
-/**
- * Lets Vite transform the rendered pages as HTML entries. Vite injects their
- * hashed scripts, stylesheets, and module preloads, then writes the site.
- *
- * @param {object} options
- * @param {string} options.entry
- * @param {Record<string, string>} options.virtualImports
- * @param {Map<string, string>} options.pages
- * @param {import('../types').ClientBundleOptions['minifyPages']} [options.minifyPages]
- * @param {import('../types').ResolvedWebConfiguration} options.config
- * @param {import('vite').UserConfig} options.vite
- * @returns {Promise<void>}
- */
-export const build = async ({
+export const buildServer = async ({
   entry,
   virtualImports,
-  pages,
-  minifyPages,
+  outDir,
   config,
   vite = {},
 }) => {
-  const sources = new Map([[CLIENT_ENTRY_ID, entry]]);
-  const root = resolve(vite.root ?? process.cwd());
-  const input = [];
-
-  for (const [fileName, html] of pages) {
-    const id = resolve(root, fileName);
-    input.push(id);
-    sources.set(id, html);
-  }
-
-  for (const [id, code] of Object.entries(virtualImports)) {
-    sources.set(id, code);
-  }
+  const sources = new Map([
+    [SERVER_ENTRY_ID, entry],
+    ...Object.entries(virtualImports),
+  ]);
 
   await viteBuild(
     createViteConfig({
       sources,
-      input,
-      server: false,
-      minifyPages,
+      input: { [LIBRARY_NAME]: SERVER_ENTRY_ID },
+      server: true,
+      outDir,
       config,
       vite,
     })
   );
+
+  return pathToFileURL(join(outDir, `${LIBRARY_NAME}.mjs`)).href;
+};
+
+/**
+ * Compiles one page program's JSX to the calls it imports from the library.
+ * A single native transform, no module graph: this runs once per page.
+ *
+ * @param {string} code
+ * @param {string} fileName
+ * @returns {Promise<string>}
+ */
+export const compile = async (code, fileName) => {
+  const result = await transformWithOxc(code, fileName, {
+    jsx: {
+      runtime: 'classic',
+      pragma: JSX_PRAGMA,
+      pragmaFrag: JSX_PRAGMA_FRAG,
+    },
+  });
+
+  return result.code;
+};
+
+/**
+ * Collects the chunks an entry statically imports, transitively, in the order
+ * Vite would preload them.
+ *
+ * @param {Record<string, { file: string, imports?: Array<string> }>} manifest
+ * @param {{ imports?: Array<string> }} chunk
+ * @param {Set<string>} [seen]
+ * @returns {Array<string>}
+ */
+const collectImports = (manifest, chunk, seen = new Set()) => {
+  for (const key of chunk.imports ?? []) {
+    if (!seen.has(key)) {
+      seen.add(key);
+      collectImports(manifest, manifest[key], seen);
+    }
+  }
+
+  return [...seen].map(key => manifest[key].file);
+};
+
+/**
+ * Bundles the client entry into the site and reads back, from Vite's
+ * manifest, the assets every page has to load.
+ *
+ * @param {import('../types').ClientBundleOptions & { vite?: import('vite').UserConfig }} options
+ * @returns {Promise<import('../types').ClientAssets>}
+ */
+export const buildClient = async ({
+  entry,
+  virtualImports,
+  config,
+  vite = {},
+}) => {
+  const sources = new Map([
+    [
+      CLIENT_ENTRY_ID,
+      `import ${JSON.stringify(MODULE_PRELOAD_POLYFILL)};\n${entry}`,
+    ],
+    ...Object.entries(virtualImports),
+  ]);
+
+  const outDir = resolve(config.output);
+
+  await viteBuild(
+    createViteConfig({
+      sources,
+      input: { [CLIENT_NAME]: CLIENT_ENTRY_ID },
+      server: false,
+      outDir,
+      config,
+      vite,
+    })
+  );
+
+  const requested = vite.build?.manifest;
+  const manifestPath = join(
+    outDir,
+    typeof requested === 'string' ? requested : MANIFEST_NAME
+  );
+
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+
+  // The manifest was only for us, so it does not ship with the site
+  if (!requested) {
+    await rm(manifestPath);
+    await rmdir(dirname(manifestPath)).catch(() => {});
+  }
+
+  const chunk = Object.values(manifest).find(item => item.isEntry);
+
+  return {
+    scripts: [chunk.file],
+    preloads: collectImports(manifest, chunk),
+    // With CSS code splitting off, the one stylesheet is its own manifest
+    // entry rather than being listed under the chunk that imports it.
+    stylesheets: [
+      ...new Set(
+        Object.values(manifest)
+          .map(({ file }) => file)
+          .filter(file => file.endsWith('.css'))
+      ),
+    ],
+  };
 };
 
 /**
@@ -450,19 +419,16 @@ export const build = async ({
  */
 export const createViteBundler = (options = {}) => ({
   /**
-   * The client entry every page loads.
-   */
-  getEntryId: () => CLIENT_ENTRY_ID,
-  /**
-   * Runs the Vite server build.
+   * Bundles the server-side component library.
    *
    * @param {import('../types').ServerBundleOptions} context
    */
-  render: context => render({ ...context, vite: options }),
+  buildServer: context => buildServer({ ...context, vite: options }),
+  compile,
   /**
-   * Runs the Vite client build.
+   * Bundles the client assets.
    *
    * @param {import('../types').ClientBundleOptions} context
    */
-  build: context => build({ ...context, vite: options }),
+  buildClient: context => buildClient({ ...context, vite: options }),
 });
