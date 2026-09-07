@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { after, before, describe, it } from 'node:test';
 
 import { STABILITY_INDEX_URL } from '../constants.mjs';
@@ -9,12 +9,14 @@ import { processChunk } from '../generate.mjs';
 
 let dir;
 
+const toPosixPath = value => value.split(sep).join('/');
+
 // Writes `content` to `<name>` in the temp dir and returns the
 // `[path, parent]` tuple `processChunk` expects.
 const file = async (name, content) => {
   const path = join(dir, name);
   await writeFile(path, content);
-  return [path, dir];
+  return [toPosixPath(path), toPosixPath(dir)];
 };
 
 // Runs a single file through `processChunk` and returns its result entry.

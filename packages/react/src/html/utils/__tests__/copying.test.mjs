@@ -118,9 +118,9 @@ describe('copyStaticAssets', () => {
     assert.strictEqual(mockLogError.mock.callCount(), 1);
 
     const logMessage = mockLogError.mock.calls[0].arguments[0];
-    assert.match(
+    assert.equal(
       logMessage,
-      /\[html-generator\] Failed to copy asset from protected-file to \/out\/protected-file: Permission denied/
+      `[html-generator] Failed to copy asset from protected-file to ${join('/out', 'protected-file')}: Permission denied`
     );
   });
 });
