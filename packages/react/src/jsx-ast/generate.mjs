@@ -7,18 +7,6 @@ import { getSortedHeadNodes } from './utils/getSortedHeadNodes.mjs';
 import { buildNotFoundPage } from './utils/synthetic/404.mjs';
 
 /**
- * Builds the `{ head, entries }` page descriptors for the configured synthetic
- * pages. `all.html` is not one of them: it is the module pages concatenated,
- * so the `html` generator assembles it from their content instead of building
- * every module a second time here.
- */
-const buildSyntheticDescriptors = () => {
-  const config = getConfig('jsx-ast');
-
-  return config.generateNotFoundPage ? [buildNotFoundPage()] : [];
-};
-
-/**
  * Process a chunk of items in a worker thread.
  *
  * Each item is a `{ head, entries }` descriptor (one module, one chunk page, or
@@ -57,7 +45,12 @@ export async function* generate(input, worker) {
     entries: groupedModules.get(head.api),
   }));
 
-  descriptors.push(...buildSyntheticDescriptors());
+  // `all.html` is not built here: it is the module pages concatenated, so the
+  // `html` generator assembles it from their content instead of building
+  // every module a second time.
+  if (getConfig('jsx-ast').generateNotFoundPage) {
+    descriptors.push(buildNotFoundPage());
+  }
 
   for await (const chunkResult of worker.stream(descriptors)) {
     yield chunkResult;

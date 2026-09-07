@@ -1,7 +1,6 @@
 import { resolve } from 'node:path';
 
 import getConfig from '@doc-kit/core/utils/configuration/index.mjs';
-import { omitKeys } from '@doc-kit/core/utils/misc.mjs';
 
 import {
   JSX_IMPORTS,
@@ -23,12 +22,13 @@ const normalizeComponent = ([tag, value]) =>
     : { name: tag, isDefaultExport: true, ...value };
 
 /**
- * Quotes a module source for an import/export statement, escaping backslashes
- * so Windows paths are not treated as escape sequences.
+ * Quotes a module source for an import/export statement: a JavaScript string
+ * literal, with the backslashes of Windows paths and any quotes escaped.
  *
  * @param {string} source
  */
-const quote = source => `"${source.replaceAll('\\', '\\\\')}"`;
+const quote = source =>
+  `"${source.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`;
 
 /**
  * Creates an ES Module `import` statement as a string, based on parameters.
@@ -109,7 +109,10 @@ export default () => {
   /**
    * Builds a page's server program: a module exporting the page's `content`
    * (a function returning the JSX fragment, so each render gets fresh
-   * elements), its `headings`, and a default export rendering the page.
+   * elements) and a default export rendering the page inside the layout with
+   * the props it is given. The program carries no data of its own — the
+   * metadata, table of contents and reading time reach it as those props at
+   * render time — only code.
    *
    * A composed page (`all.html`) has no content of its own: it imports the
    * `content` of the pages it is made of, so their JSX is never rebuilt.
@@ -119,8 +122,6 @@ export default () => {
    * @returns {string} The program, as JSX.
    */
   const buildPageProgram = (page, libraryURL) => {
-    const { data, headings, readingTime } = page;
-
     const { imports, content } =
       'parts' in page
         ? {
@@ -138,20 +139,11 @@ export default () => {
       .map(({ name }) => name)
       .filter(name => name !== JSX_IMPORTS.Layout.name);
 
-    // The metadata is the head without the node children
-    const metadata = omitKeys(data, [
-      'content',
-      'heading',
-      'stability',
-      'changes',
-    ]);
-
     return [
       `import { ${[...RUNTIME_IMPORTS, ...used].join(', ')} } from ${quote(libraryURL)};`,
       ...imports,
-      `export const headings = ${JSON.stringify(headings)};`,
       `export const content = () => ${content};`,
-      `export default () => renderToStringAsync(<${JSX_IMPORTS.Layout.name} metadata={${JSON.stringify(metadata)}} headings={headings} readingTime={${JSON.stringify(readingTime?.text)}}>{content()}</${JSX_IMPORTS.Layout.name}>);`,
+      `export default props => renderToStringAsync(<${JSX_IMPORTS.Layout.name} {...props}>{content()}</${JSX_IMPORTS.Layout.name}>);`,
     ].join('\n');
   };
 

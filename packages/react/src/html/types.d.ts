@@ -32,17 +32,18 @@ export type ResolvedWebConfiguration = Configuration & GlobalConfiguration;
 
 // A page assembled from other pages' content (`all.html`): `parts` lists the
 // `api`s whose compiled programs it imports, in order.
-export type ComposedPage = Omit<PageCode, 'content'> & { parts: Array<string> };
+export type ComposedPage = Omit<PageCode, 'content' | 'readingTime'> & {
+  parts: Array<string>;
+};
 
 // What the generator turns into a page program.
 export type Page = PageCode | ComposedPage;
 
-// A compiled page program, ready for a worker to import and render.
-export type PageTask = {
+// A compiled page program, ready for a worker to import and render, with the
+// data the layout is rendered with.
+export type PageTask = Pick<PageCode, 'data' | 'headings' | 'readingTime'> & {
   // `file:` URL of the compiled module.
   moduleURL: string;
-  // The page's metadata.
-  data: PageCode['data'];
 };
 
 // The client assets every page loads, as paths relative to the output root.

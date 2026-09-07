@@ -3,4 +3,4 @@
 '@doc-kit/core': minor
 ---
 
-perf: improve (yay!)
+perf: build the site one page at a time, and `all.html` from the module pages

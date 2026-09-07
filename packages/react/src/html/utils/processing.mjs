@@ -114,9 +114,10 @@ export const buildHead = ({ meta = [], links = [], html = [] }) =>
   ].join('\n  ');
 
 /**
- * Renders the tags that load a page's client assets, resolved against the
- * page's root: the entry script, the chunks it statically imports (preloaded,
- * as the bundler would), and the stylesheets.
+ * Renders the tags that load a page's client assets, each resolved against
+ * the page's root: the entry scripts as module scripts, the chunks they
+ * statically import as preload hints (as the bundler would inject them), and
+ * the stylesheets as links.
  *
  * @param {import('../types').ClientAssets} assets - Output-relative asset paths
  * @param {string} root - The page's root (see {@link resolvePageRoot})
@@ -124,24 +125,26 @@ export const buildHead = ({ meta = [], links = [], html = [] }) =>
  */
 export const buildAssetTags = ({ scripts, preloads, stylesheets }, root) =>
   [
-    ...scripts.map(
+    scripts.map(
       file => `<script type="module" crossorigin src="${root}${file}"></script>`
     ),
-    ...preloads.map(file =>
+    preloads.map(file =>
       renderTag('link', {
         rel: 'modulepreload',
         crossorigin: true,
         href: `${root}${file}`,
       })
     ),
-    ...stylesheets.map(file =>
+    stylesheets.map(file =>
       renderTag('link', {
         rel: 'stylesheet',
         crossorigin: true,
         href: `${root}${file}`,
       })
     ),
-  ].join('\n    ');
+  ]
+    .flat()
+    .join('\n    ');
 
 /**
  * The output file of a page, relative to the output directory.

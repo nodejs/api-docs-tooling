@@ -30,7 +30,9 @@ const LIBRARY_NAME = 'library';
 // the project asked for a manifest of its own.
 const MANIFEST_NAME = '.vite/manifest.json';
 
-// Vite injects this into HTML entries; a module entry has to import it.
+// Vite's polyfill for `<link rel="modulepreload">`, for browsers without it.
+// Vite adds it by itself to HTML entries; the client is built from a module
+// entry instead, so it is imported explicitly to keep the output the same.
 const MODULE_PRELOAD_POLYFILL = 'vite/modulepreload-polyfill';
 
 /**
@@ -275,7 +277,10 @@ export const createViteConfig = ({
 
 /**
  * Bundles the component library through Vite's SSR pipeline, into one
- * self-contained module Node can import from anywhere.
+ * self-contained module Node can import from anywhere. It is written under
+ * `outDir`, the temporary directory the `html` generator owns for the library
+ * and the compiled page programs, and which it removes once every page is
+ * written.
  *
  * @param {import('../types').ServerBundleOptions & { vite?: import('vite').UserConfig }} options
  * @returns {Promise<string>} The `file:` URL of the built library
@@ -380,34 +385,36 @@ export const buildClient = async ({
     })
   );
 
-  const requested = vite.build?.manifest;
+  // A manifest the project configured is read from where it asked for it and
+  // kept; otherwise the one written for the generator's own use is removed
+  // again, since it has no business shipping with the site.
+  const configuredManifest = vite.build?.manifest;
   const manifestPath = join(
     outDir,
-    typeof requested === 'string' ? requested : MANIFEST_NAME
+    typeof configuredManifest === 'string' ? configuredManifest : MANIFEST_NAME
   );
 
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 
-  // The manifest was only for us, so it does not ship with the site
-  if (!requested) {
+  if (!configuredManifest) {
     await rm(manifestPath);
     await rmdir(dirname(manifestPath)).catch(() => {});
   }
 
-  const chunk = Object.values(manifest).find(item => item.isEntry);
+  const entries = Object.values(manifest);
+  const chunk = entries.find(item => item.isEntry);
+
+  // Vite lists a chunk's stylesheets under that chunk, except with CSS code
+  // splitting off (see `createViteConfig`): the site's CSS is then one file
+  // with a manifest entry of its own, so it is found by its extension.
+  const stylesheets = entries
+    .map(({ file }) => file)
+    .filter(file => file.endsWith('.css'));
 
   return {
     scripts: [chunk.file],
     preloads: collectImports(manifest, chunk),
-    // With CSS code splitting off, the one stylesheet is its own manifest
-    // entry rather than being listed under the chunk that imports it.
-    stylesheets: [
-      ...new Set(
-        Object.values(manifest)
-          .map(({ file }) => file)
-          .filter(file => file.endsWith('.css'))
-      ),
-    ],
+    stylesheets: [...new Set(stylesheets)],
   };
 };
 

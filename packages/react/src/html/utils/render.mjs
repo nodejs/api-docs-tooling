@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import logger from '@doc-kit/core/logger/index.mjs';
 import getConfig from '@doc-kit/core/utils/configuration/index.mjs';
 import { minifyHTML } from '@doc-kit/core/utils/html-minifier.mjs';
+import { omitKeys } from '@doc-kit/core/utils/misc.mjs';
 
 import { pageFileName, populatePage } from './processing.mjs';
 
@@ -16,11 +17,12 @@ const renderLogger = logger.child('html');
  * entry point.
  *
  * Each page is a compiled program on disk (see `buildPageProgram`): it is
- * imported, rendered to HTML, placed in the template, minified when configured,
- * and written to the output directory — one page at a time, and nothing comes
- * back but the file name. A worker therefore holds one page at once, plus the
- * component library it imported the first time, and the whole run's memory
- * scales with the largest page rather than with the site.
+ * imported, rendered to HTML with its layout props, placed in the template,
+ * minified when configured, and written to the output directory — one page at
+ * a time, and nothing comes back but the file name. A worker therefore holds
+ * one page at once, plus the component library it imported the first time, and
+ * the whole run's memory scales with the largest page rather than with the
+ * site.
  *
  * @param {Array<import('../types').PageTask>} tasks
  * @param {Array<number>} indices - The tasks to process
@@ -33,14 +35,22 @@ export const processChunk = async (tasks, indices, { template, assets }) => {
   const written = [];
 
   for (const index of indices) {
-    const { moduleURL, data } = tasks[index];
+    const { moduleURL, data, headings, readingTime } = tasks[index];
 
     const { default: render } = await import(moduleURL);
+
+    // The metadata is the head without the node children
+    const metadata = omitKeys(data, [
+      'content',
+      'heading',
+      'stability',
+      'changes',
+    ]);
 
     let html = populatePage({
       template,
       data,
-      dehydrated: await render(),
+      dehydrated: await render({ metadata, headings, readingTime }),
       assets,
     });
 

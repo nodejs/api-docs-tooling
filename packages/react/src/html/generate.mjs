@@ -93,7 +93,14 @@ export async function generate(input, worker) {
         )
       );
 
-      return { moduleURL: pathToFileURL(file).href, data: page.data };
+      const { data, headings, readingTime } = page;
+
+      return {
+        moduleURL: pathToFileURL(file).href,
+        data,
+        headings,
+        readingTime,
+      };
     };
 
     const tasks = [];

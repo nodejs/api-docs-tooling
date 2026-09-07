@@ -203,8 +203,8 @@ directory the generator removes afterwards), since the page programs import it
 from wherever they are compiled to.
 
 `compile(code, fileName)` receives one page program: a module that imports the
-library and exports the page's `content` and a default render function, written
-in JSX. It must return plain JavaScript. The JSX must compile with the classic
+library and exports the page's `content` and a default function rendering the
+page from its layout props, written in JSX. It must return plain JavaScript. The JSX must compile with the classic
 runtime to calls of the `_jsx` and `_Fragment` bindings the program imports
 (these names are exported as `JSX_PRAGMA` and `JSX_PRAGMA_FRAG` from the
 generator's `constants.mjs`), so that the page and the library share one Preact.
@@ -468,7 +468,7 @@ export default ({ metadata }) => (
 - `headings` {Array} Pre-computed table of contents heading entries.
 - `readingTime` {string|undefined} Estimated reading time (e.g. `'5 min read'`).
   Only present when the `jsx-ast` generator's `showReadingTime` option is
-  enabled. On `all.html` it is the sum of the module pages' reading times.
+  enabled. `all.html` has none.
 - `children` {ComponentChildren} Processed page content.
 
 The `Layout` component receives the props above. Custom Layout components can use

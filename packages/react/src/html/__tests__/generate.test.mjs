@@ -305,7 +305,7 @@ describe('web generate', () => {
             'export const Fragment = "Fragment";',
             'export const Layout = "Layout";',
             'export const renderToStringAsync = async ({ props }) =>',
-            '  `<article data-custom-ssr>${props.metadata.api}</article>`;',
+            '  `<article data-custom-ssr>${props.metadata.api}:${props.headings.length}</article>`;',
           ].join('\n')
         );
 
@@ -316,6 +316,9 @@ describe('web generate', () => {
         calls.push('compile');
         assert.match(fileName, /^fs\.jsx$/);
         assert.match(code, /export const content = \(\) => <>/);
+        // The program is code only: the layout props arrive at render time
+        assert.doesNotMatch(code, /"api":/);
+        assert.match(code, /export default props =>/);
 
         return compile(code, fileName);
       },
@@ -341,7 +344,7 @@ describe('web generate', () => {
     await generate([toPage(await buildContent([fs], fs))]);
     const html = await readFile(join(output, 'fs.html'), 'utf8');
 
-    assert.match(html, /<article data-custom-ssr>fs<\/article>/);
+    assert.match(html, /<article data-custom-ssr>fs:1<\/article>/);
     assert.match(
       html,
       /<script type=module crossorigin src=\.\/custom\/index\.js>/

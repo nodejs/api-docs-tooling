@@ -3,11 +3,7 @@ import { describe, it } from 'node:test';
 
 import { buildAllPage } from '../all.mjs';
 
-const createPage = (
-  api,
-  name,
-  { depth = 1, chunk, synthetic, minutes } = {}
-) => ({
+const createPage = (api, name, { depth = 1, chunk, synthetic } = {}) => ({
   data: {
     api,
     path: `/${api}`,
@@ -17,16 +13,13 @@ const createPage = (
     heading: { depth, data: { name, text: name, slug: api } },
   },
   headings: [{ depth, value: name, slug: api }],
-  readingTime:
-    minutes === undefined
-      ? undefined
-      : { text: `${minutes} min read`, minutes },
+  readingTime: '1 min read',
   content: `<><h1>${name}</h1></>`,
 });
 
 describe('buildAllPage', () => {
   it('returns a synthetic `all` page made of the module pages, in sidebar order', () => {
-    const { data, headings, parts } = buildAllPage([
+    const page = buildAllPage([
       createPage('zlib', 'Zlib'),
       createPage('index', 'Index'),
       createPage('fs', 'File system'),
@@ -34,31 +27,17 @@ describe('buildAllPage', () => {
       createPage('fs-readfile', 'readFile', { chunk: { api: 'fs' } }),
     ]);
 
-    assert.equal(data.api, 'all');
-    assert.equal(data.path, '/all');
-    assert.equal(data.heading.data.name, 'All');
-    assert.equal(data.synthetic, true);
+    assert.equal(page.data.api, 'all');
+    assert.equal(page.data.path, '/all');
+    assert.equal(page.data.heading.data.name, 'All');
+    assert.equal(page.data.synthetic, true);
     // The index, the other synthetic pages and the chunk pages are left out
-    assert.deepEqual(parts, ['fs', 'zlib']);
+    assert.deepEqual(page.parts, ['fs', 'zlib']);
     assert.deepEqual(
-      headings.map(({ value }) => value),
+      page.headings.map(({ value }) => value),
       ['File system', 'Zlib']
     );
-  });
-
-  it('sums the reading time of its parts when it is shown', () => {
-    const { readingTime } = buildAllPage([
-      createPage('fs', 'File system', { minutes: 2.4 }),
-      createPage('zlib', 'Zlib', { minutes: 1.2 }),
-    ]);
-
-    assert.equal(readingTime.text, '4 min read');
-    assert.ok(Math.abs(readingTime.minutes - 3.6) < 1e-9);
-  });
-
-  it('has no reading time when the pages have none', () => {
-    const { readingTime } = buildAllPage([createPage('fs', 'File system')]);
-
-    assert.equal(readingTime, undefined);
+    // A reading time makes no sense for the whole reference
+    assert.equal('readingTime' in page, false);
   });
 });

@@ -37,19 +37,13 @@ import {
 } from './signature.mjs';
 
 /**
- * Estimates the reading time of a page's text. Both the display text and the
- * raw minutes are kept: pages assembled from several others (`all.html`) sum
- * the minutes rather than re-reading the text.
+ * Estimates the reading time of a page's text, as display text.
  *
  * @param {string} text
- * @returns {Promise<{ text: string, minutes: number }>}
+ * @returns {Promise<string>}
  */
 const readingTime = text =>
-  import('reading-time').then(({ default: rt }) => {
-    const { text: display, minutes } = rt(text);
-
-    return { text: display, minutes };
-  });
+  import('reading-time').then(({ default: rt }) => rt(text).text);
 
 /**
  * Processes lifecycle and change history data into a sorted array of change entries.
@@ -364,7 +358,7 @@ export const createDocumentContent = async entries => {
  * @typedef {Object} PageContent
  * @property {import('@doc-kit/core/generators/metadata/types').MetadataEntry} data - The page's head entry
  * @property {Array<ReturnType<typeof extractHeadings>[number]>} headings - The table of contents
- * @property {{ text: string, minutes: number } | undefined} readingTime - Set when `showReadingTime` is on
+ * @property {string | undefined} readingTime - Set when `showReadingTime` is on
  * @property {import('estree-jsx').JSXFragment} content - The processed entries, as one JSX fragment
  *
  * Transforms API metadata entries into a page's JSX content

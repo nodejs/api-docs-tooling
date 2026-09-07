@@ -18,10 +18,9 @@ import { enforceArray } from '#utils/array.mjs';
 import { leftHandAssign } from '#utils/generators.mjs';
 import { deepMerge } from '#utils/misc.mjs';
 
-const configExplorer = cosmiconfig('doc-kit');
+import { DEFAULT_CHUNK_SIZE, DEFAULT_MAX_THREADS } from './constants.mjs';
 
-// The default `threads` ceiling; `--threads` raises it explicitly.
-const MAX_THREADS = 4;
+const configExplorer = cosmiconfig('doc-kit');
 
 /**
  * The name of the project being documented, from the manifest in the working
@@ -71,13 +70,11 @@ export const getDefaultConfig = (generators, config) =>
       // riscv64 with sv39. Running multiple generators that use wasm in
       // parallel could cause failures to allocate new wasm instance.
       // See also https://github.com/nodejs/node/pull/60591
-      //
-      // Elsewhere the count is capped: each worker that highlights code holds
-      // Shiki's grammars and regex engine (~300MB) on top of the pages it is
-      // building, so past a few threads memory, not CPU, is what runs out.
       threads:
-        process.arch === 'riscv64' ? 1 : Math.min(cpus().length, MAX_THREADS),
-      chunkSize: 10,
+        process.arch === 'riscv64'
+          ? 1
+          : Math.min(cpus().length, DEFAULT_MAX_THREADS),
+      chunkSize: DEFAULT_CHUNK_SIZE,
     })
   );
 
