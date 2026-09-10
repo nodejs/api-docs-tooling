@@ -1,5 +1,21 @@
 # @doc-kit/generator-react
 
+## 0.3.0
+
+### Minor Changes
+
+- [#1057](https://github.com/nodejs/doc-kit/pull/1057) [`da5d8e6`](https://github.com/nodejs/doc-kit/commit/da5d8e63d0d33fe7a95c46afb8d5140d576827b4) Thanks [@avivkeller](https://github.com/avivkeller)! - perf(html): one client entry chunk, HTML minification in the worker pool
+
+- [#1090](https://github.com/nodejs/doc-kit/pull/1090) [`0a9dc37`](https://github.com/nodejs/doc-kit/commit/0a9dc37dc96f8044c76c3ca9b35e97895a87d1fd) Thanks [@avivkeller](https://github.com/avivkeller)! - perf: build the site one page at a time, and `all.html` from the module pages
+
+- [#1057](https://github.com/nodejs/doc-kit/pull/1057) [`da5d8e6`](https://github.com/nodejs/doc-kit/commit/da5d8e63d0d33fe7a95c46afb8d5140d576827b4) Thanks [@avivkeller](https://github.com/avivkeller)! - feat: `dependent` generators and the `section-pages` generator
+
+### Patch Changes
+
+- [#1061](https://github.com/nodejs/doc-kit/pull/1061) [`aac7ef7`](https://github.com/nodejs/doc-kit/commit/aac7ef70439732f5a08c1273f47fc0796e937b1e) Thanks [@zeexzeex](https://github.com/zeexzeex)! - fix(html): list pages without a document-level stability index
+- Updated dependencies [[`0a9dc37`](https://github.com/nodejs/doc-kit/commit/0a9dc37dc96f8044c76c3ca9b35e97895a87d1fd), [`da5d8e6`](https://github.com/nodejs/doc-kit/commit/da5d8e63d0d33fe7a95c46afb8d5140d576827b4)]:
+  - @doc-kit/core@1.1.0
+
 ## 0.2.0
 
 ### Minor Changes

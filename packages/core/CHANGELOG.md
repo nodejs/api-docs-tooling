@@ -1,5 +1,13 @@
 # @doc-kit/core
 
+## 1.1.0
+
+### Minor Changes
+
+- [#1090](https://github.com/nodejs/doc-kit/pull/1090) [`0a9dc37`](https://github.com/nodejs/doc-kit/commit/0a9dc37dc96f8044c76c3ca9b35e97895a87d1fd) Thanks [@avivkeller](https://github.com/avivkeller)! - perf: build the site one page at a time, and `all.html` from the module pages
+
+- [#1057](https://github.com/nodejs/doc-kit/pull/1057) [`da5d8e6`](https://github.com/nodejs/doc-kit/commit/da5d8e63d0d33fe7a95c46afb8d5140d576827b4) Thanks [@avivkeller](https://github.com/avivkeller)! - feat: `dependent` generators and the `section-pages` generator
+
 ## 1.0.1
 
 ### Patch Changes
