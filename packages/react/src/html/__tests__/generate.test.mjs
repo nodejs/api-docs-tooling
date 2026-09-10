@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
+import { pathToFileURL } from 'node:url';
 
 import { setConfig } from '@doc-kit/core/utils/configuration/index.mjs';
 import { jsx, toJs } from 'estree-util-to-js';
@@ -10,16 +11,16 @@ import { jsx, toJs } from 'estree-util-to-js';
 import buildContent from '../../jsx-ast/utils/buildContent.mjs';
 import { buildNotFoundPage } from '../../jsx-ast/utils/synthetic/404.mjs';
 import { generate as chunk } from '../../section-pages/generate.mjs';
-import { createViteBundler } from '../bundlers/vite.mjs';
+import { compile, createViteBundler } from '../bundlers/vite.mjs';
 import { generate } from '../generate.mjs';
 
 /**
- * Converts a JSX AST entry into the `{ data, code }` shape `web` now consumes,
- * mirroring the conversion the jsx-ast worker performs before streaming.
+ * Converts a page's JSX AST into the `{ data, headings, readingTime, content }`
+ * shape `html` consumes, mirroring the conversion the jsx-ast worker performs.
  */
-const toCodeItem = content => ({
-  data: content.data,
-  code: toJs(content, { handlers: jsx }).value,
+const toPage = ({ content, ...page }) => ({
+  ...page,
+  content: toJs(content, { handlers: jsx }).value,
 });
 
 const createEntry = (
@@ -67,6 +68,9 @@ const createTestConfiguration = async (context, target = ['html']) => {
     },
   });
 
+  // The pages under test are the module pages themselves
+  config.html.generateAllPage = false;
+
   return { config, output };
 };
 
@@ -82,7 +86,7 @@ describe('web generate', () => {
       buildContent(notFoundPage.entries, notFoundPage.head),
     ]);
 
-    await generate(contents.map(toCodeItem));
+    await generate(contents.map(toPage));
 
     const [fsHTML, notFoundHTML] = await Promise.all([
       readFile(join(output, 'api/fs.html'), 'utf8'),
@@ -93,9 +97,41 @@ describe('web generate', () => {
     assert.match(fsHTML, /href=fs\.json/);
     assert.match(fsHTML, /href=fs\.md/);
     assert.doesNotMatch(notFoundHTML, /View As/);
-    assert.match(fsHTML, /src=\.\.\/assets\//);
-    assert.match(notFoundHTML, /src=\.\/assets\//);
+    // Assets resolve from the page: relative for real pages, from the root
+    // for synthetic ones, which are served at any path
+    assert.match(fsHTML, /src=\.\.\/assets\/client-[^ ]+\.js/);
+    assert.match(fsHTML, /href=\.\.\/assets\/[^ ]+\.css/);
+    assert.match(notFoundHTML, /src=\/assets\/client-[^ ]+\.js/);
     assert.match(fsHTML, /on:idle[^>]*data-island-name=SearchBox/);
+    // The manifest the asset tags were read from does not ship
+    assert.equal((await readdir(output)).includes('.vite'), false);
+  });
+
+  it('assembles all.html from the module pages, in sidebar order', async context => {
+    const { config, output } = await createTestConfiguration(context);
+    config.html.generateAllPage = true;
+
+    const entries = [
+      createEntry('zlib', 'Zlib'),
+      createEntry('fs', 'File system'),
+      createEntry('index', 'Index'),
+    ];
+
+    await generate(
+      await Promise.all(
+        entries.map(entry => buildContent([entry], entry))
+      ).then(contents => contents.map(toPage))
+    );
+
+    const html = await readFile(join(output, 'all.html'), 'utf8');
+
+    assert.match(html, /<title>All \|/);
+    // Both modules' content, file system first, the index left out
+    assert.match(html, /File system body[\s\S]*Zlib body/);
+    assert.doesNotMatch(html, /Index body/);
+    // Their tables of contents, concatenated
+    assert.match(html, /href=#fs[\s\S]*href=#zlib/);
+    assert.doesNotMatch(html, /View As/);
   });
 
   it('renders chunk pages with navigation back to their module', async context => {
@@ -145,7 +181,7 @@ describe('web generate', () => {
       [...pages.values()].map(group => buildContent(group, group[0]))
     );
 
-    await generate(contents.map(toCodeItem));
+    await generate(contents.map(toPage));
 
     const [fsHTML, readFileHTML] = await Promise.all([
       readFile(join(output, 'fs.html'), 'utf8'),
@@ -191,7 +227,7 @@ describe('web generate', () => {
     };
 
     const fs = createEntry('fs', 'File system');
-    await generate([toCodeItem(await buildContent([fs], fs))]);
+    await generate([toPage(await buildContent([fs], fs))]);
     const html = await readFile(join(output, 'fs.html'), 'utf8');
 
     assert.match(html, /Custom project docs/);
@@ -202,44 +238,43 @@ describe('web generate', () => {
     assert.match(html, /property=og:type content=website/);
   });
 
-  it('uses Vite base URLs for absolute client assets', async context => {
+  it('uses the base URL for absolute client assets', async context => {
     const { config, output } = await createTestConfiguration(context);
     config.html.useAbsoluteURLs = true;
     config.html.baseURL = 'https://example.com/docs';
 
     const notFoundPage = buildNotFoundPage();
     const content = await buildContent(notFoundPage.entries, notFoundPage.head);
-    await generate([toCodeItem(content)]);
+    await generate([toPage(content)]);
     const html = await readFile(join(output, '404.html'), 'utf8');
 
     assert.match(html, /src=https:\/\/example\.com\/docs\/assets\//);
     assert.match(html, /href=https:\/\/example\.com\/docs\/assets\//);
   });
 
-  it('applies configured Vite plugins', async context => {
+  it('applies configured Vite plugins to the client build', async context => {
     const { config, output } = await createTestConfiguration(context);
     config.html.bundler = createViteBundler({
       plugins: [
         {
-          name: 'test-html-transform',
-          transformIndexHtml() {
-            return [
-              {
-                tag: 'meta',
-                attrs: { name: 'vite-plugin', content: 'enabled' },
-                injectTo: 'head',
-              },
-            ];
+          name: 'test-transform',
+          transform(code, id) {
+            if (id.includes('client/index.jsx')) {
+              return `${code}\nglobalThis.__DOC_KIT_PLUGIN__ = "enabled";`;
+            }
           },
         },
       ],
     });
 
     const fs = createEntry('fs', 'File system');
-    await generate([toCodeItem(await buildContent([fs], fs))]);
-    const html = await readFile(join(output, 'fs.html'), 'utf8');
+    await generate([toPage(await buildContent([fs], fs))]);
 
-    assert.match(html, /name=vite-plugin/);
+    const assets = await readdir(join(output, 'assets'));
+    const client = assets.find(file => /^client-.*\.js$/.test(file));
+    const code = await readFile(join(output, 'assets', client), 'utf8');
+
+    assert.match(code, /__DOC_KIT_PLUGIN__/);
   });
 
   it('uses a custom bundler adapter for server and client output', async context => {
@@ -247,51 +282,81 @@ describe('web generate', () => {
     const calls = [];
 
     config.html.bundler = {
-      getEntryId() {
-        calls.push('entry');
-        return '/custom/index.js';
-      },
-
-      async render({ entries, virtualImports, config: receivedConfig }) {
+      async buildServer({ entry, virtualImports, outDir, config: received }) {
         calls.push('server');
-        assert.strictEqual(receivedConfig, config.html);
-        assert.ok(entries.has('fs.jsx'));
+        assert.strictEqual(received, config.html);
+        assert.match(
+          entry,
+          /export \{ default as Layout \} from "#theme\/Layout";/
+        );
+        assert.match(entry, /export \{ h, Fragment \} from "preact";/);
         assert.match(virtualImports['#theme/config'], /export const pages/);
         assert.match(
           virtualImports['#theme/config'],
           /export const server = true;/
         );
 
-        return new Map([
-          ['fs', '<article data-custom-ssr>Custom SSR</article>'],
-        ]);
+        // A stand-in library: the page renders to a fixed fragment
+        const library = join(outDir, 'library.mjs');
+        await writeFile(
+          library,
+          [
+            'export const h = (type, props, ...children) => ({ type, props, children });',
+            'export const Fragment = "Fragment";',
+            'export const Layout = "Layout";',
+            'export const renderToStringAsync = async ({ props }) =>',
+            '  `<article data-custom-ssr>${props.metadata.api}:${props.headings.length}</article>`;',
+          ].join('\n')
+        );
+
+        return pathToFileURL(library).href;
       },
 
-      async build({ entry, virtualImports, pages, config: receivedConfig }) {
+      compile(code, fileName) {
+        calls.push('compile');
+        assert.match(fileName, /^fs\.jsx$/);
+        assert.match(code, /export const content = \(\) => <>/);
+        // The program is code only: the layout props arrive at render time
+        assert.doesNotMatch(code, /"api":/);
+        assert.match(code, /export default props =>/);
+
+        return compile(code, fileName);
+      },
+
+      async buildClient({ entry, virtualImports, config: received }) {
         calls.push('client');
-        assert.strictEqual(receivedConfig, config.html);
+        assert.strictEqual(received, config.html);
         assert.match(entry, /registerIslands\(/);
         assert.match(
           virtualImports['#theme/config'],
           /export const server = false;/
         );
 
-        await Promise.all(
-          [...pages].map(async ([fileName, html]) => {
-            const path = join(output, fileName);
-            await mkdir(dirname(path), { recursive: true });
-            await writeFile(path, html);
-          })
-        );
+        return {
+          scripts: ['custom/index.js'],
+          preloads: ['custom/shared.js'],
+          stylesheets: ['custom/index.css'],
+        };
       },
     };
 
     const fs = createEntry('fs', 'File system');
-    await generate([toCodeItem(await buildContent([fs], fs))]);
+    await generate([toPage(await buildContent([fs], fs))]);
     const html = await readFile(join(output, 'fs.html'), 'utf8');
 
-    assert.match(html, /data-custom-ssr/);
-    assert.match(html, /src="\/custom\/index\.js"/);
-    assert.deepStrictEqual(calls, ['server', 'entry', 'client']);
+    assert.match(html, /<article data-custom-ssr>fs:1<\/article>/);
+    assert.match(
+      html,
+      /<script type=module crossorigin src=\.\/custom\/index\.js>/
+    );
+    assert.match(
+      html,
+      /<link rel=modulepreload crossorigin href=\.\/custom\/shared\.js>/
+    );
+    assert.match(
+      html,
+      /<link rel=stylesheet crossorigin href=\.\/custom\/index\.css>/
+    );
+    assert.deepStrictEqual(calls, ['server', 'client', 'compile']);
   });
 });

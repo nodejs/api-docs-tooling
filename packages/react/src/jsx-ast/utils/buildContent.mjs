@@ -7,7 +7,6 @@ import {
   populate,
 } from '@doc-kit/core/utils/configuration/templates.mjs';
 import { parseInline } from '@doc-kit/core/utils/inline.mjs';
-import { omitKeys } from '@doc-kit/core/utils/misc.mjs';
 import { UNIST } from '@doc-kit/core/utils/queries/index.mjs';
 import { transformNodesToString } from '@doc-kit/core/utils/unist.mjs';
 import { h as createElement } from 'hastscript';
@@ -38,7 +37,10 @@ import {
 } from './signature.mjs';
 
 /**
+ * Estimates the reading time of a page's text, as display text.
  *
+ * @param {string} text
+ * @returns {Promise<string>}
  */
 const readingTime = text =>
   import('reading-time').then(({ default: rt }) => rt(text).text);
@@ -321,54 +323,58 @@ export const processEntry = entry => {
 };
 
 /**
- * Builds the overall document layout tree
+ * Builds a page's content: every entry processed and wrapped in one JSX
+ * fragment, plus the table of contents and reading time the layout needs.
+ *
+ * The layout itself (`<Layout>`) is not part of the content. The `html`
+ * generator wraps each page in it, which lets a page be assembled from other
+ * pages' content — `all.html` is the module pages concatenated — without
+ * building those modules a second time.
+ *
  * @param {Array<import('@doc-kit/core/generators/metadata/types').MetadataEntry>} entries - API documentation metadata entries
- * @param {Object} metadata - Raw page metadata from the head entry
  */
-export const createDocumentLayout = async (entries, metadata) => {
+export const createDocumentContent = async entries => {
   // Collapse overloaded function headings into one stable ToC entry, tagging the
   // underlying headings with compact anchors / overload flags read just below.
   annotateOverloads(entries);
 
   const { showReadingTime } = getConfig('jsx-ast');
 
-  return createTree('root', [
-    createJSXElement(JSX_IMPORTS.Layout.name, {
-      metadata,
-      headings: extractHeadings(entries),
-      readingTime: showReadingTime
-        ? await readingTime(extractTextContent(entries))
-        : undefined,
-      children: entries.map(processEntry),
-    }),
-  ]);
+  return {
+    headings: extractHeadings(entries),
+    readingTime: showReadingTime
+      ? await readingTime(extractTextContent(entries))
+      : undefined,
+    root: createTree('root', [
+      createJSXElement(null, {
+        inline: false,
+        children: entries.map(processEntry),
+      }),
+    ]),
+  };
 };
 
 /**
- * @typedef {import('estree').Node & { data: import('@doc-kit/core/generators/metadata/types').MetadataEntry }} JSXContent
+ * @typedef {Object} PageContent
+ * @property {import('@doc-kit/core/generators/metadata/types').MetadataEntry} data - The page's head entry
+ * @property {Array<ReturnType<typeof extractHeadings>[number]>} headings - The table of contents
+ * @property {string | undefined} readingTime - Set when `showReadingTime` is on
+ * @property {import('estree-jsx').JSXFragment} content - The processed entries, as one JSX fragment
  *
- * Transforms API metadata entries into processed MDX content
+ * Transforms API metadata entries into a page's JSX content
  * @param {Array<import('@doc-kit/core/generators/metadata/types').MetadataEntry>} metadataEntries - API documentation metadata entries
  * @param {import('@doc-kit/core/generators/metadata/types').MetadataEntry} head - Main API metadata entry with version information
- * @returns {Promise<JSXContent>}
+ * @returns {Promise<PageContent>}
  */
 const buildContent = async (metadataEntries, head) => {
-  // The metadata is the heading without the node children
-  const metadata = omitKeys(head, [
-    'content',
-    'heading',
-    'stability',
-    'changes',
-  ]);
-
-  // Create root document AST with all layout components and processed content
-  const root = await createDocumentLayout(metadataEntries, metadata);
+  const { headings, readingTime, root } =
+    await createDocumentContent(metadataEntries);
 
   // Run remark processor to transform AST (parse markdown, plugins, etc.)
   const ast = await remark().run(root);
 
-  // The final MDX content is the expression in the Program's first body node
-  return { ...ast.body[0].expression, data: head };
+  // The fragment is the expression in the Program's first body node
+  return { data: head, headings, readingTime, content: ast.body[0].expression };
 };
 
 export default buildContent;

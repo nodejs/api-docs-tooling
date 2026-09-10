@@ -7,7 +7,7 @@ import getConfig from '@doc-kit/core/utils/configuration/index.mjs';
 import { writeFile } from '@doc-kit/core/utils/file.mjs';
 import { groupNodesByModule } from '@doc-kit/core/utils/generators.mjs';
 import { minifyHTML } from '@doc-kit/core/utils/html-minifier.mjs';
-import { getRemarkRehypeWithShiki as remark } from '@doc-kit/core/utils/remark.mjs';
+import { getRemarkRehypeWithShiki as remark } from '@doc-kit/core/utils/remark-shiki.mjs';
 
 import buildContent from './utils/buildContent.mjs';
 import { replaceTemplateValues } from './utils/replaceTemplateValues.mjs';

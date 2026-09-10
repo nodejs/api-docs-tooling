@@ -14,11 +14,17 @@ const isFootnotesSection = node =>
     node.properties?.className?.includes('footnotes'));
 
 /**
- * Finds the generated page Layout node.
+ * Finds the JSX fragment wrapping the page content (see `buildContent`).
  * @param {import('hast').Root} tree
  */
-const findLayout = tree =>
-  tree.children.find(node => node.name === 'Layout' && node.children);
+const findPageContent = tree =>
+  tree.children.find(
+    node =>
+      (node.type === 'mdxJsxFlowElement' ||
+        node.type === 'mdxJsxTextElement') &&
+      node.name === null &&
+      node.children
+  );
 
 /**
  * @template {import('unist').Node} T
@@ -64,10 +70,10 @@ const transformer = tree => {
 
   if (index !== -1) {
     const [section] = tree.children.splice(index, 1);
-    const layout = findLayout(tree);
+    const content = findPageContent(tree);
 
-    if (layout) {
-      layout.children.push(section);
+    if (content) {
+      content.children.push(section);
     } else {
       tree.children.push(section);
     }

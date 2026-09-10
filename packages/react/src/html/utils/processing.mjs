@@ -2,9 +2,7 @@ import getConfig from '@doc-kit/core/utils/configuration/index.mjs';
 import { populate } from '@doc-kit/core/utils/configuration/templates.mjs';
 
 import createConfigSource from './config.mjs';
-import createProgramBuilder from './generate.mjs';
 import { relativeOrAbsolute } from './relativeOrAbsolute.mjs';
-import { resolveBundler } from '../bundlers/index.mjs';
 import { FONT_DIRECTORY, FONTS, SPECULATION_RULES } from '../constants.mjs';
 import { THEME_SCRIPT } from '../ui/theme-script.mjs';
 
@@ -16,7 +14,7 @@ import { THEME_SCRIPT } from '../ui/theme-script.mjs';
  * @param {boolean} server
  * @returns {Record<string, string>}
  */
-const createVirtualImports = (datas, virtualImports, server) => ({
+export const createVirtualImports = (datas, virtualImports, server) => ({
   ...virtualImports,
   '#theme/config': createConfigSource(datas, server),
 });
@@ -116,113 +114,78 @@ export const buildHead = ({ meta = [], links = [], html = [] }) =>
   ].join('\n  ');
 
 /**
- * Creates an accumulator that wraps per-page JSX code into server and client
- * programs one at a time. The JSX AST has already been serialized to a code
- * string upstream (in the `jsx-ast` worker), so the heavy AST never reaches
- * the main thread — only the code string and page metadata stream in here.
+ * Renders the tags that load a page's client assets, each resolved against
+ * the page's root: the entry scripts as module scripts, the chunks they
+ * statically import as preload hints (as the bundler would inject them), and
+ * the stylesheets as links.
  *
- * @returns {{ add: (item: { data: import('@doc-kit/core/generators/metadata/types').MetadataEntry, code: string }) => void, serverCodeMap: Map<string, string>, clientProgram: string }}
+ * @param {import('../types').ClientAssets} assets - Output-relative asset paths
+ * @param {string} root - The page's root (see {@link resolvePageRoot})
+ * @returns {string}
  */
-export function createCodeConverter() {
-  const { buildServerProgram, clientProgram } = createProgramBuilder();
-
-  const serverCodeMap = new Map();
-
-  return {
-    /**
-     * Records the server program for a single page's JSX code.
-     *
-     * @param {{ data: import('@doc-kit/core/generators/metadata/types').MetadataEntry, code: string }} item
-     */
-    add: ({ data, code }) => {
-      // Prepare code for server-side execution (wrapped for SSR)
-      serverCodeMap.set(`${data.api}.jsx`, buildServerProgram(code));
-    },
-    serverCodeMap,
-    // The client entry is the same module for every page: the pages differ
-    // only in their server-rendered markup, which the entry hydrates.
-    clientProgram,
-  };
-}
+export const buildAssetTags = ({ scripts, preloads, stylesheets }, root) =>
+  [
+    scripts.map(
+      file => `<script type="module" crossorigin src="${root}${file}"></script>`
+    ),
+    preloads.map(file =>
+      renderTag('link', {
+        rel: 'modulepreload',
+        crossorigin: true,
+        href: `${root}${file}`,
+      })
+    ),
+    stylesheets.map(file =>
+      renderTag('link', {
+        rel: 'stylesheet',
+        crossorigin: true,
+        href: `${root}${file}`,
+      })
+    ),
+  ]
+    .flat()
+    .join('\n    ');
 
 /**
- * Bundles pre-converted JSX code into complete HTML pages and client assets.
- * Conversion (JSX AST → code) happens upstream via
- * {@link createCodeConverter} so the heavy ASTs are already discarded; this
- * step needs every entry together for code-splitting and the shared sidebar.
+ * The output file of a page, relative to the output directory.
+ *
+ * @param {import('@doc-kit/core/generators/metadata/types').MetadataEntry} data
+ */
+export const pageFileName = data => `${data.path.replace(/^\/+/, '')}.html`;
+
+/**
+ * Populates the HTML template for one rendered page.
  *
  * @param {object} params
- * @param {Map<string, string>} params.serverCodeMap - Server-side code per page.
- * @param {string} params.clientProgram - The client entry shared by every page.
- * @param {Array<import('@doc-kit/core/generators/metadata/types').MetadataEntry>} params.datas - Per-page metadata, in render order.
- * @param {string} params.template - The HTML template string for the output pages.
- * @param {import('../types').ClientBundleOptions['minifyPages']} params.minifyPages - Minifies the final pages, off the main thread.
+ * @param {string} params.template - The HTML template
+ * @param {import('@doc-kit/core/generators/metadata/types').MetadataEntry} params.data - The page's metadata
+ * @param {string} params.dehydrated - The server-rendered page
+ * @param {import('../types').ClientAssets} params.assets - The client assets every page loads
+ * @returns {string}
  */
-export async function processBundles({
-  serverCodeMap,
-  clientProgram,
-  datas,
-  template,
-  minifyPages,
-}) {
+export const populatePage = ({ template, data, dehydrated, assets }) => {
   const config = getConfig('html');
-  const bundler = await resolveBundler(config.bundler);
-
-  const serverPages = await bundler.render({
-    entries: serverCodeMap,
-    virtualImports: createVirtualImports(datas, config.virtualImports, true),
-    config,
-  });
 
   const titleSuffix = populate(config.title, {
     ...config,
     version: config.version.version,
   });
 
-  // Pre-render the configurable `<head>` markup once, since it is identical
-  // across every page. Computed here (rather than inline in the template) so
-  // template authors avoid nested template-literal escaping.
-  const head = buildHead(config.head);
+  const root = resolvePageRoot(data);
+  const title = data.title ?? data.heading.data.name;
 
-  // Render the templates with the client identifier supplied by the adapter.
-  // The adapter then owns scripts, stylesheets, preloads, and imported assets.
-  const entrypoint = bundler.getEntryId();
-
-  const pages = new Map(
-    datas.map(data => {
-      const root = resolvePageRoot(data);
-      const title = data.title ?? data.heading.data.name;
-      const fileName = `${data.path.replace(/^\/+/, '')}.html`;
-
-      return [
-        fileName,
-        populateWithEvaluation(template, {
-          title: escapeHTML(
-            title
-              ? titleSuffix
-                ? `${title} | ${titleSuffix}`
-                : title
-              : titleSuffix
-          ),
-          dehydrated: serverPages.get(data.api) ?? '',
-          entrypoint,
-          speculationRules: SPECULATION_RULES,
-          themeScript: THEME_SCRIPT,
-          preloads: buildPreloads(root),
-          root,
-          metadata: data,
-          config,
-          head,
-        }),
-      ];
-    })
-  );
-
-  await bundler.build({
-    entry: clientProgram,
-    virtualImports: createVirtualImports(datas, config.virtualImports, false),
-    pages,
-    minifyPages,
+  return populateWithEvaluation(template, {
+    title: escapeHTML(
+      title ? (titleSuffix ? `${title} | ${titleSuffix}` : title) : titleSuffix
+    ),
+    dehydrated,
+    assets: buildAssetTags(assets, root),
+    speculationRules: SPECULATION_RULES,
+    themeScript: THEME_SCRIPT,
+    preloads: buildPreloads(root),
+    root,
+    metadata: data,
     config,
+    head: buildHead(config.head),
   });
-}
+};

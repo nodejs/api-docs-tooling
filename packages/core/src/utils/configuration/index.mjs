@@ -18,6 +18,8 @@ import { enforceArray } from '#utils/array.mjs';
 import { leftHandAssign } from '#utils/generators.mjs';
 import { deepMerge } from '#utils/misc.mjs';
 
+import { DEFAULT_CHUNK_SIZE, DEFAULT_MAX_THREADS } from './constants.mjs';
+
 const configExplorer = cosmiconfig('doc-kit');
 
 /**
@@ -68,8 +70,11 @@ export const getDefaultConfig = (generators, config) =>
       // riscv64 with sv39. Running multiple generators that use wasm in
       // parallel could cause failures to allocate new wasm instance.
       // See also https://github.com/nodejs/node/pull/60591
-      threads: process.arch === 'riscv64' ? 1 : cpus().length,
-      chunkSize: 10,
+      threads:
+        process.arch === 'riscv64'
+          ? 1
+          : Math.min(cpus().length, DEFAULT_MAX_THREADS),
+      chunkSize: DEFAULT_CHUNK_SIZE,
     })
   );
 

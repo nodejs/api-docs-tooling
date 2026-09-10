@@ -6,7 +6,7 @@ import {
   populate,
 } from '@doc-kit/core/utils/configuration/templates.mjs';
 import { UNIST } from '@doc-kit/core/utils/queries/index.mjs';
-import { getRemarkRehypeWithShiki as remark } from '@doc-kit/core/utils/remark.mjs';
+import { getRemarkRehypeWithShiki as remark } from '@doc-kit/core/utils/remark-shiki.mjs';
 import { h as createElement } from 'hastscript';
 import { u as createTree } from 'unist-builder';
 import { SKIP, visit } from 'unist-util-visit';
